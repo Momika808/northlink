@@ -334,15 +334,15 @@ footer a:hover{color:var(--text)}
       <div class="sec-head reveal">
         <span class="eyebrow">Доступ</span>
         <h2>Ключ выдаёт бот</h2>
-        <p class="lead">Не человек и не переписка: доступ заводится сам, по одноразовому коду. Обычно это минута.</p>
+        <p class="lead">Не человек и не переписка: доступ заводится сам. От нажатия до работающего туннеля — около минуты.</p>
       </div>
 
       <div class="access reveal">
         <ol class="steps">
-          <li><div><b>Попросите инвайт-код</b><p>Одноразовый, вида <code>nl-k7m4qp</code>. Его выдаёт тот, кто позвал вас сюда.</p></div></li>
-          <li><div><b>Напишите боту</b><p><a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a> → <code>/start</code> → пришлите код одним сообщением.</p></div></li>
-          <li><div><b>Получите ссылку</b><p>Бот пришлёт личную ссылку на подписку и тот же адрес в виде QR — так удобнее переносить на телевизор.</p></div></li>
-          <li><div><b>Потеряли ссылку — <code>/link</code></b><p>Бот пришлёт её заново. Второй код для этого не нужен.</p></div></li>
+          <li><div><b>Откройте бота</b><p>Кнопка ниже ведёт в <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a>. Ничего устанавливать и регистрировать не нужно.</p></div></li>
+          <li><div><b>Отправьте <code>/start</code></b><p>Или нажмите «Начать» — это одно и то же.</p></div></li>
+          <li><div><b>Получите ссылку</b><p>Бот сразу пришлёт готовый адрес подписки и тот же адрес картинкой-кодом — так удобнее переносить на телевизор.</p></div></li>
+          <li><div><b>Вставьте её в приложение</b><p>Ссылка вставляется целиком, собирать её из кусков не нужно. Какое приложение брать — ниже, по вкладкам.</p></div></li>
         </ol>
         <a class="btn btn-primary" href="https://t.me/northlink_bot" rel="noopener">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.2 4.3 2.9 11.4c-.9.35-.9 1.6.02 1.9l4.6 1.44 1.75 5.3c.22.66 1.06.85 1.54.35l2.5-2.6 4.66 3.42c.62.46 1.5.12 1.66-.63l3.1-14.6c.17-.8-.6-1.47-1.36-1.17z"/></svg>
@@ -367,7 +367,7 @@ footer a:hover{color:var(--text)}
           <code id="sub-url">https://link.adminwg.dad/api/sub/<span style="opacity:.55">ваш-ключ</span></code>
           <button class="copy-btn" type="button" data-copy="https://link.adminwg.dad/api/sub/">Скопировать адрес</button>
         </div>
-        <p class="note">Ключ у каждого свой — по нему видно, чьё устройство подключилось. Ссылку выдаёт <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a> в обмен на инвайт-код; пересылать её дальше не нужно — другу быстрее выдадут свою.</p>
+        <p class="note">Ключ у каждого свой — по нему видно, чьё устройство подключилось. Ссылку выдаёт <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a>; пересылать её дальше не нужно — другу быстрее получить свою тем же способом.</p>
       </div>
 
       <div class="tabs" role="tablist" aria-label="Платформа">
@@ -517,7 +517,7 @@ footer a:hover{color:var(--text)}
       <div class="faq reveal">
         <details open>
           <summary>Как получить доступ?</summary>
-          <div class="a"><p>Попросить инвайт-код у того, кто дал ссылку на эту страницу, и отправить его боту <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a>. В ответ придёт личная ссылка на подписку.</p><p>Код одноразовый и сгорает при использовании. Если он не подошёл — скорее всего, им уже воспользовались.</p></div>
+          <div class="a"><p>Открыть <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a> и отправить <code>/start</code>. Бот заведёт доступ и пришлёт готовую ссылку на подписку — вставлять её в приложение можно сразу, целиком.</p></div>
         </details>
         <details>
           <summary>Перестало подключаться. Что делать первым?</summary>
@@ -541,11 +541,11 @@ footer a:hover{color:var(--text)}
         </details>
         <details>
           <summary>Можно дать ссылку другу?</summary>
-          <div class="a"><p>Лучше попросить для него отдельный код: бот выдаст другу свою ссылку за минуту. Общая ссылка означает, что при проблеме нельзя понять, чьё устройство её создаёт, а при утечке приходится менять доступ сразу всем.</p></div>
+          <div class="a"><p>Лучше отправить ему ссылку на бота: он получит свою за минуту. Общая ссылка означает, что при проблеме нельзя понять, чьё устройство её создаёт, а при утечке приходится менять доступ сразу всем.</p></div>
         </details>
         <details>
           <summary>Потерял ссылку</summary>
-          <div class="a"><p>Отправьте боту <code>/link</code> — он пришлёт ту же самую. Новый инвайт-код для этого не нужен, и старый доступ не пропадает.</p></div>
+          <div class="a"><p>Отправьте боту <code>/link</code> — он пришлёт ту же самую. Повторный <code>/start</code> тоже безопасен: второй ключ не создаётся, приходит уже существующий.</p></div>
         </details>
         <details>
           <summary>Что будет, когда узел заблокируют?</summary>
