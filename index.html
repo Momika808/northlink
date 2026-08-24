@@ -187,6 +187,8 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .panel .app{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)}
 .panel .app strong{font-size:1.12rem;font-weight:660;letter-spacing:-.02em}
 .panel .app span{color:var(--muted);font-size:.94rem}
+.panel .app a.get{color:var(--accent);text-decoration:none;font-size:.94rem;font-weight:600;border-bottom:1px solid color-mix(in srgb,var(--accent) 40%,transparent);white-space:nowrap}
+.panel .app a.get:hover{border-bottom-color:var(--accent)}
 ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:1.15rem}
 ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:.95rem;align-items:start}
 ol.steps li::before{
@@ -379,7 +381,7 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" data-active>
-        <div class="app"><strong>Happ</strong><span>App Store · бесплатно. Проверено на iPhone: правила обхода работают</span></div>
+        <div class="app"><strong>Happ</strong><a class="get" href="https://apps.apple.com/app/happ-proxy-utility/id6504287215" rel="noopener">App Store ↗</a><span>App Store · бесплатно. Проверено на iPhone: правила обхода работают</span></div>
         <ol class="steps">
           <li><div><b>Поставьте приложение</b><p>Найдите Happ в App Store и установите. Регистрация и аккаунт не нужны.</p></div></li>
           <li><div><b>Скопируйте ссылку из бота</b><p>Бот спросит приложение и выдаст адрес именно для Happ. Целиком, вместе с ключом в конце.</p></div></li>
@@ -391,7 +393,7 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android">
-        <div class="app"><strong>Happ</strong><span>Google Play · бесплатно. Альтернативы: v2rayNG, Hiddify, v2RayTun</span></div>
+        <div class="app"><strong>Happ</strong><a class="get" href="https://play.google.com/store/apps/details?id=com.happproxy" rel="noopener">Google Play ↗</a><span>Google Play · бесплатно. Альтернативы: v2rayNG, Hiddify, v2RayTun</span></div>
         <ol class="steps">
           <li><div><b>Поставьте приложение</b><p>Happ из Google Play. Если Play недоступен, берите v2rayNG: APK лежит в его репозитории на GitHub.</p></div></li>
           <li><div><b>Скопируйте ссылку</b><p>Целиком, вместе с ключом.</p></div></li>
@@ -402,7 +404,7 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win">
-        <div class="app"><strong>Hiddify</strong><span>Windows 10/11 · бесплатно. Альтернативы: v2rayN, Nekoray</span></div>
+        <div class="app"><strong>Hiddify</strong><a class="get" href="https://github.com/hiddify/hiddify-app/releases/latest" rel="noopener">Скачать для Windows ↗</a><span>Windows 10/11 · бесплатно. Альтернативы: v2rayN, Nekoray</span></div>
         <ol class="steps">
           <li><div><b>Скачайте Hiddify</b><p>Установщик для Windows берут на странице релизов проекта.</p></div></li>
           <li><div><b>Добавьте подписку</b><p>«Новый профиль» → «Добавить из буфера обмена» и вставьте ссылку.</p></div></li>
@@ -412,9 +414,9 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac">
-        <div class="app"><strong>Happ</strong><span>App Store · бесплатно. Альтернативы: ClashX Meta, Streisand, V2Box</span></div>
+        <div class="app"><strong>Happ</strong><a class="get" href="https://github.com/Happ-proxy/happ-desktop/releases/latest/download/Happ.macOS.universal.dmg" rel="noopener">Скачать .dmg ↗</a><span>App Store · бесплатно. Альтернативы: ClashX Meta, Streisand, V2Box</span></div>
         <ol class="steps">
-          <li><div><b>Поставьте приложение</b><p>Happ есть в Mac App Store. Работает и на Apple Silicon, и на Intel.</p></div></li>
+          <li><div><b>Поставьте приложение</b><p>Берите <code>.dmg</code> с сайта Happ: это настоящее приложение для Mac, universal — работает и на Apple Silicon, и на Intel. В App Store лежит версия для iPhone, её ставят только маки на Apple Silicon.</p></div></li>
           <li><div><b>Вставьте ссылку из бота</b><p>Ту, что бот выдал для вашего приложения: у Happ и ClashX форматы разные. Добавляется из буфера обмена, как на телефоне.</p></div></li>
           <li><div><b>Разрешите профиль</b><p>macOS попросит подтвердить установку VPN-конфигурации в системных настройках.</p></div></li>
           <li><div><b>Включите</b><p>Значок в строке меню показывает текущий узел и переключает города.</p></div></li>
@@ -422,7 +424,7 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="panel" role="tabpanel" id="p-tv" aria-labelledby="t-tv">
-        <div class="app"><strong>v2rayNG</strong><span>Android TV, приставки, Google TV · APK с GitHub</span></div>
+        <div class="app"><strong>v2rayNG</strong><a class="get" href="https://github.com/2dust/v2rayNG/releases/latest" rel="noopener">APK на GitHub ↗</a><span>Android TV, приставки, Google TV · APK с GitHub</span></div>
         <ol class="steps">
           <li><div><b>Установите APK</b><p>Через встроенный браузер или «Send files to TV» с телефона. В Google Play на телевизорах приложения обычно нет.</p></div></li>
           <li><div><b>Передайте ссылку на телевизор</b><p>Набирать пультом долго: проще отправить её себе в мессенджер и скопировать на самом телевизоре.</p></div></li>
