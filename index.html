@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Northlink — личный VPN-контур</title>
+<meta name="description" content="Личный VPN-контур: два независимых входа в Европе, VLESS + Reality на 443 порту, подписка обновляется сама. Инструкция по подключению для iOS, Android, Windows, macOS и ТВ.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#060910">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Northlink — личный VPN-контур">
+<meta property="og:description" content="Два независимых входа в Европе. Трафик неотличим от обычного HTTPS. Подписка обновляется сама.">
+<meta property="og:locale" content="ru_RU">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='15' fill='%23060910'/><path d='M20 45V19l24 26V19' stroke='%2334e5a0' stroke-width='6.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script>document.documentElement.className+=' js';try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+/* ─────────── токены ─────────── */
+:root{
+  --bg:#f5f8fc; --bg-soft:#ffffff;
+  --surface:rgba(9,18,32,.035); --surface-2:rgba(9,18,32,.06);
+  --border:rgba(9,18,32,.10); --border-strong:rgba(9,18,32,.18);
+  --text:#0a1420; --muted:#57687d;
+  --accent:#08945f; --accent-2:#0b7cb5; --accent-3:#6250e0;
+  --on-accent:#ffffff;
+  --glow-1:rgba(52,229,160,.30); --glow-2:rgba(88,199,243,.26); --glow-3:rgba(155,140,255,.24);
+  --shadow-sm:0 1px 2px rgba(10,20,32,.06);
+  --shadow:0 1px 2px rgba(10,20,32,.05), 0 18px 40px -18px rgba(10,20,32,.22);
+  --code-bg:rgba(9,18,32,.055);
+  --grid:rgba(9,18,32,.055);
+}
+[data-theme="dark"]{
+  --bg:#060910; --bg-soft:#0a0f19;
+  --surface:rgba(255,255,255,.035); --surface-2:rgba(255,255,255,.065);
+  --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.18);
+  --text:#e8eef7; --muted:#8d9bb0;
+  --accent:#34e5a0; --accent-2:#58c7f3; --accent-3:#9b8cff;
+  --on-accent:#04140d;
+  --glow-1:rgba(52,229,160,.20); --glow-2:rgba(88,199,243,.15); --glow-3:rgba(155,140,255,.16);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.5);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 28px 60px -28px rgba(0,0,0,.85);
+  --code-bg:rgba(255,255,255,.055);
+  --grid:rgba(255,255,255,.045);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  font-size:17px;line-height:1.62;letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+h1,h2,h3{line-height:1.14;letter-spacing:-.03em;margin:0;font-weight:640}
+p{margin:0}
+a{color:inherit}
+code,kbd,.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:.88em}
+
+.wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto}
+@media (max-width:640px){.wrap{width:min(1120px,100% - 1.75rem)}}
+
+.skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--accent);color:var(--on-accent);padding:.7rem 1.1rem;border-radius:0 0 10px 0;font-weight:600}
+.skip:focus{left:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* ─────────── фон: северное сияние ─────────── */
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora b{position:absolute;display:block;border-radius:50%;filter:blur(90px);opacity:.9}
+.aurora b:nth-child(1){width:58vw;height:58vw;left:-14vw;top:-22vw;background:radial-gradient(circle,var(--glow-1),transparent 68%);animation:drift1 34s ease-in-out infinite alternate}
+.aurora b:nth-child(2){width:52vw;height:52vw;right:-16vw;top:-10vw;background:radial-gradient(circle,var(--glow-2),transparent 68%);animation:drift2 42s ease-in-out infinite alternate}
+.aurora b:nth-child(3){width:46vw;height:46vw;left:26vw;top:14vw;background:radial-gradient(circle,var(--glow-3),transparent 68%);animation:drift3 50s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(9vw,7vw,0) scale(1.16)}}
+@keyframes drift2{to{transform:translate3d(-11vw,9vw,0) scale(1.1)}}
+@keyframes drift3{to{transform:translate3d(6vw,-8vw,0) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.aurora b{animation:none}}
+.grid-bg{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 55% at 50% 0%,#000 0%,transparent 72%);
+  mask-image:radial-gradient(ellipse 90% 55% at 50% 0%,#000 0%,transparent 72%);
+}
+
+/* ─────────── шапка ─────────── */
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid transparent;transition:border-color .25s,background .25s}
+.nav.stuck{border-bottom-color:var(--border);background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.nav .wrap{display:flex;align-items:center;gap:1.5rem;height:66px}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:680;letter-spacing:-.02em;text-decoration:none;font-size:1.06rem}
+.brand svg{display:block;flex:none}
+.nav-links{display:flex;gap:1.6rem;margin-left:auto;font-size:.95rem}
+.nav-links a{color:var(--muted);text-decoration:none;transition:color .18s}
+.nav-links a:hover{color:var(--text)}
+@media (max-width:780px){.nav-links{display:none}}
+.toggle{
+  margin-left:.5rem;display:grid;place-items:center;width:38px;height:38px;flex:none;
+  border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);
+  cursor:pointer;transition:color .18s,border-color .18s,background .18s
+}
+@media (max-width:780px){.toggle{margin-left:auto}}
+.toggle:hover{color:var(--text);border-color:var(--border-strong)}
+.toggle .moon{display:none}
+[data-theme="dark"] .toggle .moon{display:block}
+[data-theme="dark"] .toggle .sun{display:none}
+
+/* ─────────── общее для секций ─────────── */
+section{padding:clamp(4rem,9vw,7.5rem) 0}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-size:.775rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:.4rem .85rem
+}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
+.lead{color:var(--muted);font-size:clamp(1.02rem,1.6vw,1.14rem);max-width:62ch}
+.sec-head{margin-bottom:clamp(2.2rem,4vw,3.2rem)}
+
+/* ─────────── герой ─────────── */
+.hero{padding-top:clamp(3.5rem,8vw,6.5rem);padding-bottom:clamp(3rem,6vw,5rem)}
+.hero h1{
+  font-size:clamp(3.1rem,11vw,7rem);font-weight:700;letter-spacing:-.045em;margin:1.4rem 0 0;
+  background:linear-gradient(115deg,var(--text) 26%,var(--accent) 62%,var(--accent-2) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .tagline{margin-top:.35rem;font-size:clamp(1.05rem,2.4vw,1.4rem);font-weight:560;color:var(--muted);letter-spacing:-.01em}
+.hero .pitch{margin-top:1.6rem;font-size:clamp(1.05rem,1.9vw,1.24rem);max-width:56ch;color:var(--text);opacity:.86}
+.cta{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2.2rem}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;padding:.82rem 1.4rem;border-radius:13px;
+  font-weight:620;font-size:1rem;text-decoration:none;border:1px solid transparent;cursor:pointer;
+  transition:transform .16s ease,box-shadow .2s,background .2s,border-color .2s
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 10px 30px -12px color-mix(in srgb,var(--accent) 70%,transparent)}
+.btn-primary:hover{box-shadow:0 14px 38px -12px color-mix(in srgb,var(--accent) 80%,transparent);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--border-strong);background:var(--surface-2)}
+
+.facts{display:flex;flex-wrap:wrap;gap:0;margin-top:3.4rem;border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
+.facts div{flex:1 1 190px;padding:1.15rem 1.3rem;border-right:1px solid var(--border)}
+.facts div:last-child{border-right:0}
+@media (max-width:760px){.facts div{flex-basis:50%;border-bottom:1px solid var(--border)}.facts div:nth-child(2n){border-right:0}}
+.facts .n{font-size:1.45rem;font-weight:680;letter-spacing:-.03em;display:block}
+.facts .k{font-size:.83rem;color:var(--muted);letter-spacing:.01em}
+
+/* ─────────── карточки ─────────── */
+.cards{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.card{
+  position:relative;border:1px solid var(--border);border-radius:20px;padding:1.7rem;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--shadow-sm);
+  transition:border-color .22s,transform .22s,box-shadow .22s
+}
+.card:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow)}
+.card h3{font-size:1.16rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.card p{color:var(--muted);font-size:.97rem}
+.card .icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--border);margin-bottom:1.05rem;color:var(--accent)}
+.pill{font-size:.72rem;font-weight:640;letter-spacing:.06em;text-transform:uppercase;padding:.22rem .55rem;border-radius:7px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent)}
+.pill.muted{background:var(--surface-2);color:var(--muted);border-color:var(--border)}
+.card .meta{margin-top:1.15rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:1.4rem;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.card .meta b{display:block;color:var(--text);font-weight:620;font-size:.95rem;letter-spacing:-.01em}
+
+/* ─────────── подписка ─────────── */
+.sub-box{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:1.6rem;margin-bottom:2.2rem}
+.sub-box .label{font-size:.8rem;font-weight:620;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.copy-row{display:flex;gap:.6rem;margin-top:.8rem;align-items:stretch;flex-wrap:wrap}
+.copy-row code{
+  flex:1 1 320px;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;font-size:.95rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center
+}
+.copy-btn{flex:none;padding:.8rem 1.15rem;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .2s,color .2s}
+.copy-btn:hover{border-color:var(--border-strong)}
+.copy-btn[data-done]{color:var(--accent);border-color:var(--accent)}
+.sub-box .note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
+
+/* ─────────── вкладки ─────────── */
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.6rem;padding:.35rem;border:1px solid var(--border);border-radius:15px;background:var(--surface);width:max-content;max-width:100%}
+.tab{
+  appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;
+  padding:.6rem 1.05rem;border-radius:11px;font-size:.95rem;font-weight:600;font-family:inherit;
+  transition:background .2s,color .2s;white-space:nowrap
+}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{background:var(--surface-2);color:var(--text);box-shadow:var(--shadow-sm)}
+.js .panel:not([data-active]){display:none}
+.panel{border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,var(--surface-2),var(--surface));padding:clamp(1.4rem,3vw,2.2rem)}
+.panel .app{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)}
+.panel .app strong{font-size:1.12rem;font-weight:660;letter-spacing:-.02em}
+.panel .app span{color:var(--muted);font-size:.94rem}
+ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:1.15rem}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:.95rem;align-items:start}
+ol.steps li::before{
+  content:counter(s);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--border);font-size:.86rem;font-weight:660;color:var(--accent);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace
+}
+ol.steps li b{font-weight:640}
+ol.steps li p{color:var(--muted);font-size:.94rem;margin-top:.2rem}
+ol.steps code{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.08em .4em}
+
+/* ─────────── список «честно» ─────────── */
+.plain{display:grid;gap:0;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface)}
+.plain > div{padding:1.35rem 1.6rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:26px 1fr;gap:1rem;align-items:start}
+.plain > div:last-child{border-bottom:0}
+.plain .mark{color:var(--accent);margin-top:.28rem}
+.plain b{font-weight:640}
+.plain p{color:var(--muted);font-size:.95rem;margin-top:.15rem}
+
+/* ─────────── FAQ ─────────── */
+.faq{border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface)}
+.faq details{border-bottom:1px solid var(--border)}
+.faq details:last-child{border-bottom:0}
+.faq summary{
+  cursor:pointer;padding:1.25rem 1.6rem;font-weight:600;list-style:none;
+  display:flex;justify-content:space-between;gap:1rem;align-items:center;transition:background .18s
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{background:var(--surface-2)}
+.faq summary::after{content:"";width:9px;height:9px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .22s}
+.faq details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.faq .a{padding:0 1.6rem 1.4rem;color:var(--muted);max-width:70ch}
+.faq .a p + p{margin-top:.7rem}
+
+/* ─────────── подвал ─────────── */
+footer{border-top:1px solid var(--border);padding:2.8rem 0;color:var(--muted);font-size:.92rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;justify-content:space-between}
+footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)}
+footer a:hover{color:var(--text)}
+.reveal{opacity:0;transform:translateY(18px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#connect">Перейти к инструкции</a>
+<div class="aurora" aria-hidden="true"><b></b><b></b><b></b></div>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="currentColor" opacity=".08"/><path d="M20 45V19l24 26V19" stroke="var(--accent)" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Northlink
+    </a>
+    <nav class="nav-links">
+      <a href="#nodes">Узлы</a>
+      <a href="#connect">Подключение</a>
+      <a href="#how">Как устроено</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <button class="toggle" id="theme" type="button" aria-label="Переключить тему">
+      <svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>
+      <svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.3A8.5 8.5 0 1 1 9.7 3.5a6.8 6.8 0 0 0 10.8 10.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ══════ герой ══════ -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="dot"></span>Варшава · Стокгольм · Вена</span>
+      <h1>Northlink</h1>
+      <p class="tagline">Свой VPN, а не подписка на чужой.</p>
+      <p class="pitch">Два независимых входа в Европе. Соединение неотличимо от обычного визита на сайт по HTTPS. Ключи и база пользователей лежат на своём сервере, а не у провайдера, который завтра продаст логи.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#connect">Подключиться за три минуты
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#how">Как это устроено</a>
+      </div>
+
+      <div class="facts">
+        <div><span class="n">2</span><span class="k">независимых входа</span></div>
+        <div><span class="n">443/TCP</span><span class="k">тот же порт, что у HTTPS</span></div>
+        <div><span class="n">29 мс</span><span class="k">до Стокгольма</span></div>
+        <div><span class="n">Reality</span><span class="k">маскировка под чужой TLS</span></div>
+        <div><span class="n">14 дней</span><span class="k">глубина резервных копий</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ узлы ══════ -->
+  <section id="nodes">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Точки входа</span>
+        <h2>Три города, две роли</h2>
+        <p class="lead">Входы принимают клиентов и выпускают трафик в интернет. Ядро ими управляет и хранит ключи — клиентский трафик через него не идёт.</p>
+      </div>
+      <div class="cards">
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+          <h3>Стокгольм <span class="pill">основной</span></h3>
+          <p>Ближайший вход. Замер с домашней линии: 29 мс против 69 у Варшавы — вдвое ближе. Берут его не за это, но приятно.</p>
+          <div class="meta"><span><b>SE</b>Швеция</span><span><b>443</b>VLESS + Reality</span><span><b>1 Гбит/с</b>канал узла</span></div>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+          <h3>Варшава <span class="pill">резервный</span></h3>
+          <p>Первый вход контура. Держится не ради скорости: фильтрация бьёт по конкретным адресам, и пока жив хотя бы один вход — связь есть у всех.</p>
+          <div class="meta"><span><b>PL</b>Польша</span><span><b>443</b>VLESS + Reality</span><span><b>1 Гбит/с</b>канал узла</span></div>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></div>
+          <h3>Вена <span class="pill muted">ядро</span></h3>
+          <p>Панель, ключи и база пользователей. Наружу смотрит только веб — управляющий канал к узлам закрыт и доступен лишь с самого ядра.</p>
+          <div class="meta"><span><b>AT</b>Австрия</span><span><b>Remnawave</b>панель</span><span><b>Ночью</b>дамп базы</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ подключение ══════ -->
+  <section id="connect">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Подключение</span>
+        <h2>Одна ссылка на все устройства</h2>
+        <p class="lead">Вам выдают персональную ссылку на подписку. Она вставляется в любое приложение, которое умеет VLESS — дальше всё происходит само.</p>
+      </div>
+
+      <div class="sub-box reveal">
+        <span class="label">Ваша ссылка выглядит так</span>
+        <div class="copy-row">
+          <code id="sub-url">https://link.adminwg.dad/api/sub/<span style="opacity:.55">ваш-ключ</span></code>
+          <button class="copy-btn" type="button" data-copy="https://link.adminwg.dad/api/sub/">Скопировать адрес</button>
+        </div>
+        <p class="note">Ключ у каждого свой — по нему видно, чьё устройство подключилось. Не пересылайте ссылку дальше: попросите отдельную, это минута работы.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Платформа">
+        <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="true" type="button">iPhone / iPad</button>
+        <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" type="button">Android</button>
+        <button class="tab" role="tab" id="t-win" aria-controls="p-win" aria-selected="false" type="button">Windows</button>
+        <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" type="button">macOS</button>
+        <button class="tab" role="tab" id="t-tv" aria-controls="p-tv" aria-selected="false" type="button">Телевизор</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" data-active>
+        <div class="app"><strong>Happ</strong><span>App Store · бесплатно. Альтернативы: Streisand, v2RayTun, Shadowrocket</span></div>
+        <ol class="steps">
+          <li><div><b>Поставьте приложение</b><p>Найдите Happ в App Store и установите. Регистрация и аккаунт не нужны.</p></div></li>
+          <li><div><b>Скопируйте свою ссылку</b><p>Ту самую, что вам выдали, — целиком, вместе с ключом в конце.</p></div></li>
+          <li><div><b>Добавьте подписку</b><p>В приложении нажмите <code>+</code> и выберите добавление из буфера обмена. Список серверов подтянется сам.</p></div></li>
+          <li><div><b>Разрешите VPN-профиль</b><p>iOS один раз спросит подтверждение и код-пароль — это штатное окно системы, без него туннель не поднимется.</p></div></li>
+          <li><div><b>Выберите сервер и включите</b><p>Стокгольм по умолчанию. Если он молчит — переключитесь на Варшаву, это одно касание.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android">
+        <div class="app"><strong>Happ</strong><span>Google Play · бесплатно. Альтернативы: v2rayNG, Hiddify, v2RayTun</span></div>
+        <ol class="steps">
+          <li><div><b>Поставьте приложение</b><p>Happ из Google Play. Если Play недоступен — v2rayNG, APK лежит в его репозитории на GitHub.</p></div></li>
+          <li><div><b>Скопируйте ссылку</b><p>Целиком, вместе с ключом.</p></div></li>
+          <li><div><b>Импортируйте подписку</b><p><code>+</code> → импорт подписки из буфера обмена. Затем обновите её, чтобы список серверов заполнился.</p></div></li>
+          <li><div><b>Разрешите подключение</b><p>Android спросит разрешение на создание VPN — подтвердите.</p></div></li>
+          <li><div><b>Запустите</b><p>Выберите сервер и нажмите кнопку старта.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win">
+        <div class="app"><strong>Hiddify</strong><span>Windows 10/11 · бесплатно. Альтернативы: v2rayN, Nekoray</span></div>
+        <ol class="steps">
+          <li><div><b>Скачайте Hiddify</b><p>Установщик для Windows берут на странице релизов проекта.</p></div></li>
+          <li><div><b>Добавьте подписку</b><p>«Новый профиль» → «Добавить из буфера обмена» и вставьте ссылку.</p></div></li>
+          <li><div><b>Выберите режим</b><p>Системный прокси хватает для браузера. Режим TUN заворачивает весь трафик машины — включая приложения, которые про прокси не знают.</p></div></li>
+          <li><div><b>Подключитесь</b><p>При первом запуске Windows попросит права администратора для сетевого драйвера.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac">
+        <div class="app"><strong>Happ</strong><span>App Store · бесплатно. Альтернативы: Streisand, V2Box, Hiddify</span></div>
+        <ol class="steps">
+          <li><div><b>Поставьте приложение</b><p>Happ есть в Mac App Store и работает и на Apple Silicon, и на Intel.</p></div></li>
+          <li><div><b>Вставьте ссылку</b><p>Добавление подписки из буфера обмена — как на телефоне.</p></div></li>
+          <li><div><b>Разрешите профиль</b><p>macOS попросит подтвердить установку VPN-конфигурации в системных настройках.</p></div></li>
+          <li><div><b>Включите</b><p>Значок в строке меню показывает текущий узел и переключает города.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-tv" aria-labelledby="t-tv">
+        <div class="app"><strong>v2rayNG</strong><span>Android TV, приставки, Google TV · APK с GitHub</span></div>
+        <ol class="steps">
+          <li><div><b>Установите APK</b><p>Через встроенный браузер или «Send files to TV» с телефона. В Google Play на телевизорах приложения обычно нет.</p></div></li>
+          <li><div><b>Передайте ссылку на телевизор</b><p>Набирать пультом мучительно: проще отправить её себе в мессенджер и скопировать прямо на устройстве.</p></div></li>
+          <li><div><b>Импортируйте подписку и обновите её</b><p>Дальше — как на телефоне: выбрать сервер и запустить.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ как устроено ══════ -->
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Как устроено</span>
+        <h2>Почему это продолжает работать</h2>
+        <p class="lead">Обычный VPN узнаётся по первому же пакету и блокируется целиком. Здесь другой подход: не прятать соединение, а сделать его неотличимым от обычного.</p>
+      </div>
+      <div class="cards">
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"/><path d="M9.3 12.2l1.9 1.9 3.6-3.7"/></svg></div>
+          <h3>VLESS + Reality</h3>
+          <p>Соединение не просто шифруется — оно притворяется визитом на настоящий сторонний сайт. У наблюдателя сходится и рукопожатие, и сертификат. Порт 443, тот же, что у любого HTTPS.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h7M13 7h7M4 17h7M13 17h7"/><circle cx="11.5" cy="7" r="2"/><circle cx="11.5" cy="17" r="2"/></svg></div>
+          <h3>Два входа вместо одного</h3>
+          <p>Фильтрация бьёт по конкретным адресам, а не по контуру целиком. Один вход умер — второй продолжает работать, а мёртвый уничтожается и поднимается заново с новым адресом за минуту.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/></svg></div>
+          <h3>На входах нет секретов</h3>
+          <p>Входной узел расходный: ни базы, ни ключей пользователей на нём не лежит — только сертификат, выданный ядром. Потеря узла не уносит с собой ничего.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.2-6.9"/><path d="M21 4v5h-5"/></svg></div>
+          <h3>Подписка обновляется сама</h3>
+          <p>Приложение периодически перечитывает вашу ссылку. Сменился адрес узла — новый конфиг приезжает молча. Ничего не пересылают заново и ничего не правят руками.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6.5h11M8 12h11M8 17.5h11"/><path d="M4.2 6.5h.01M4.2 12h.01M4.2 17.5h.01"/></svg></div>
+          <h3>Контур описан кодом</h3>
+          <p>Серверы создаются OpenTofu, настраиваются Ansible, применяется всё через CI. Никаких правок «по SSH на месте», о которых через полгода никто не вспомнит.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg></div>
+          <h3>Ночные копии с проверкой</h3>
+          <p>База выгружается каждую ночь и хранится две недели. Пустой дамп считается провалом, а не успехом: копия, которую никто не проверял, — это обещание, а не копия.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ честно ══════ -->
+  <section id="trust">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Без обещаний</span>
+        <h2>Что это такое и чем оно не является</h2>
+        <p class="lead">Лучше сказать заранее, чем разбираться потом.</p>
+      </div>
+      <div class="plain reveal">
+        <div>
+          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
+          <div><b>Это не коммерческий сервис</b><p>Личный контур, которым делятся с близкими. Нет тарифов, нет SLA, нет поддержки по ночам. Есть человек, который его чинит, когда доходят руки.</p></div>
+        </div>
+        <div>
+          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
+          <div><b>Логи подключений не ведутся — но это не анонимность</b><p>Серверы арендованы на живого человека и подчиняются законам своих стран. От слежки провайдера и блокировок это защищает. От целенаправленного интереса государства — нет, и ни один VPN не защитит.</p></div>
+        </div>
+        <div>
+          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
+          <div><b>Устройств сколько угодно, людей — один</b><p>Телефон, ноутбук, планшет, телевизор по одной ссылке — пожалуйста. А вот другу нужна своя: по ключу видно, чьё устройство подключилось, и общая ссылка лишает смысла и учёт, и разбор проблем.</p></div>
+        </div>
+        <div>
+          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
+          <div><b>Торренты — мимо</b><p>Не из вредности: за раздачу через европейский адрес прилетает abuse-жалоба, и хостинг сносит узел. Один человек с торрентом оставляет без связи всех остальных.</p></div>
+        </div>
+        <div>
+          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
+          <div><b>Скорость упирается не в узел</b><p>У узлов гигабитный канал, но по одному ядру и лимит трафика в месяц. Реальный потолок обычно ставит ваш домашний провайдер и фильтрация по дороге, а не сервер.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ FAQ ══════ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Вопросы</span>
+        <h2>Что обычно спрашивают</h2>
+      </div>
+      <div class="faq reveal">
+        <details open>
+          <summary>Перестало подключаться. Что делать первым?</summary>
+          <div class="a"><p>Обновить подписку в приложении — почти всегда этого хватает. Скорее всего, вход сменил адрес, и новый конфиг уже лежит по вашей ссылке.</p><p>Если не помогло — переключитесь на второй город вручную. Если молчат оба, проблема на стороне контура: напишите, чинится это быстрее, чем ищется вслепую.</p></div>
+        </details>
+        <details>
+          <summary>Почему не WireGuard или Amnezia?</summary>
+          <div class="a"><p>WireGuard опознаётся по первому же пакету: у него характерный заголовок, который не спрятать. Как только фильтрация решает его резать, туннель умирает целиком и сразу.</p><p>Reality решает задачу иначе — соединение выглядит как обычный HTTPS к постороннему сайту, вплоть до сертификата. Отличить его от настоящего трафика без блокировки половины интернета не выходит.</p></div>
+        </details>
+        <details>
+          <summary>Что видит мой интернет-провайдер?</summary>
+          <div class="a"><p>Что вы открыли HTTPS-соединение с европейским адресом и сколько байт передали. Какие сайты вы смотрите и что на них делаете — нет: это внутри туннеля.</p></div>
+        </details>
+        <details>
+          <summary>Сколько устройств можно подключить?</summary>
+          <div class="a"><p>Сколько угодно ваших. Одна ссылка добавляется на телефон, ноутбук и телевизор одновременно и работает на всех сразу.</p></div>
+        </details>
+        <details>
+          <summary>Приложение показывает «нет подключения», хотя интернет есть</summary>
+          <div class="a"><p>Проверьте по порядку: подписка обновлена, выбран конкретный сервер (а не пустая строка), у приложения выдано разрешение на VPN в системных настройках. На мобильном интернете иногда мешает экономия трафика — её стоит отключить для этого приложения.</p></div>
+        </details>
+        <details>
+          <summary>Можно дать ссылку другу?</summary>
+          <div class="a"><p>Лучше попросить для него отдельную — это минута работы. Общая ссылка означает, что при проблеме нельзя понять, чьё устройство их создаёт, а при утечке приходится менять доступ сразу всем.</p></div>
+        </details>
+        <details>
+          <summary>Что будет, когда узел заблокируют?</summary>
+          <div class="a"><p>Ровно то, ради чего входов два: второй продолжает работать. Заблокированный уничтожается и создаётся заново с новым адресом, а ваше приложение забирает обновлённый конфиг по той же ссылке. Менять у себя ничего не нужно.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Northlink — личный контур. Серверы, настройка и правила описаны кодом: OpenTofu, Ansible, CI.</span>
+    <span class="mono" style="opacity:.7">VLESS · Reality · 443/TCP</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* тема */
+  var root=document.documentElement, btn=document.getElementById('theme');
+  btn.addEventListener('click',function(){
+    var next=root.dataset.theme==='dark'?'light':'dark';
+    root.dataset.theme=next;
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(m) m.setAttribute('content',next==='dark'?'#060910':'#f5f8fc');
+    try{localStorage.setItem('theme',next);}catch(e){}
+  });
+
+  /* граница шапки при прокрутке */
+  var nav=document.getElementById('nav');
+  var onScroll=function(){ nav.classList.toggle('stuck', window.scrollY>8); };
+  onScroll(); addEventListener('scroll',onScroll,{passive:true});
+
+  /* вкладки платформ */
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function select(tab){
+    tabs.forEach(function(t){
+      var on=t===tab, panel=document.getElementById(t.getAttribute('aria-controls'));
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.tabIndex=on?0:-1;
+      if(on) panel.setAttribute('data-active',''); else panel.removeAttribute('data-active');
+    });
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t);});
+    t.addEventListener('keydown',function(e){
+      var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+      if(!d) return;
+      e.preventDefault();
+      var n=tabs[(i+d+tabs.length)%tabs.length];
+      select(n); n.focus();
+    });
+  });
+  select(tabs[0]);
+
+  /* копирование адреса подписки */
+  document.querySelectorAll('[data-copy]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var text=b.getAttribute('data-copy');
+      var done=function(){
+        var old=b.textContent;
+        b.textContent='Скопировано'; b.setAttribute('data-done','');
+        setTimeout(function(){b.textContent=old;b.removeAttribute('data-done');},1800);
+      };
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,fallback);
+      } else fallback();
+      function fallback(){
+        var ta=document.createElement('textarea');
+        ta.value=text; ta.setAttribute('readonly','');
+        ta.style.cssText='position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        try{document.execCommand('copy');done();}catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* появление блоков */
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(el){el.classList.add('in');});
+  } else {
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var el=en.target, sibs=[].slice.call(el.parentNode.children).filter(function(n){return n.classList.contains('reveal');});
+        el.style.transitionDelay=Math.min(sibs.indexOf(el),4)*70+'ms';
+        el.classList.add('in'); io.unobserve(el);
+      });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+    els.forEach(function(el){io.observe(el);});
+  }
+})();
+</script>
+</body>
+</html>
