@@ -139,6 +139,12 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
       .then(function(j){
         var c = j.connection || {};
         meta.asn = c.asn; meta.org = c.org || c.isp;
+        // Выход через наш же хостинг означает, что человек сидит в туннеле:
+        // тогда проверка меряет туннель, а не его сеть, и все числа врут.
+        // Такой отчёт однажды пришёл и выглядел здоровым — «ядро отвечает», —
+        // хотя вопрос был ровно обратный.
+        meta.vpn = (String(c.asn) === '20473')
+                || ['70.34.242.53','70.34.211.141','159.195.111.13'].indexOf(String(j.ip)) >= 0;
         mark('meta','ok', String(c.asn ? 'AS'+c.asn : 'ok'));
         lines.push('адрес: '+String(j.ip)+'  ('+String(j.country_code||'?')+', '+String(j.city||'?')+')');
         lines.push('оператор: '+String(c.asn ? 'AS'+c.asn+' ' : '')+String(c.org||c.isp||'?'));
@@ -164,6 +170,15 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
       .then(finish);
   }
   function finish(){
+    if (meta.vpn) {
+      var w = document.getElementById('verdict');
+      w.className = 'verdict bad';
+      w.innerHTML = '<b>Выключите VPN и проверьте заново.</b> Сейчас интернет идёт через '
+        + 'сам Northlink, поэтому страница померила туннель, а не вашу сеть. '
+        + 'Смысл проверки — увидеть, что видит телефон БЕЗ VPN.';
+      w.style.display = 'block';
+      lines.push('ВНИМАНИЕ: замер сделан через включённый VPN, числа не про сеть человека');
+    }
     var keyOk = res.subapi && res.subapi.ok;
     var subDead = !keyOk, frontOk = (res.waw&&res.waw.ms<2500)||(res.sto&&res.sto.ms<2500);
     var v = document.getElementById('verdict'), txt;
@@ -189,7 +204,7 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
       if (r.aborted) return 't';
       return r.ok ? (r.status+'x'+r.ms) : 'x';
     }
-    var payload = ['d1', (meta.asn||'x'), (meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x',
+    var payload = ['d1', (meta.asn||'x'), ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn?'_vpn':''),
                    code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core)
                   ].join('-').slice(0, 64);
     document.getElementById('send').href = 'https://t.me/northlink_bot?start=' + payload;
