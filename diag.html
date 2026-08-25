@@ -8,228 +8,326 @@
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#060910">
 <style>
-:root{--bg:#060910;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.10);
-  --text:#e8eef7;--muted:#8d9bb0;--ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
+:root{--bg:#060910;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.10);--text:#e8eef7;--muted:#8d9bb0;
+  --ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{max-width:100%;overflow-x:hidden}
-body{background:var(--bg);color:var(--text);min-height:100vh;padding:24px 18px 60px;
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:22px 16px 60px;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
 .wrap{max-width:620px;margin:0 auto}
 h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:.4rem}
-.lead{color:var(--muted);font-size:.98rem;margin-bottom:1.6rem}
+.lead{color:var(--muted);font-size:.97rem;margin-bottom:1.3rem}
+
+.prog{margin-bottom:14px}
+.prog .bar{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:var(--ok);
+  transition:width .35s ease;border-radius:99px}
+.prog .txt{display:flex;justify-content:space-between;gap:10px;margin-top:7px;
+  font-size:.86rem;color:var(--muted)}
+.prog .txt b{color:var(--text);font-weight:600}
+
 .card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
-.row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--border)}
 .row:last-child{border-bottom:0}
 .row .name{flex:1;min-width:0}
-.row .name b{display:block;font-weight:600;font-size:.97rem}
-.row .name span{display:block;color:var(--muted);font-size:.85rem}
-.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.4}
-.dot.run{animation:p 1s infinite}
+.row .name b{display:block;font-weight:600;font-size:.96rem}
+.row .name span{display:block;color:var(--muted);font-size:.84rem}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.35}
+.dot.run{animation:p 1s infinite;background:var(--warn);opacity:1}
 .dot.ok{background:var(--ok);opacity:1}
 .dot.bad{background:var(--bad);opacity:1}
 .dot.warn{background:var(--warn);opacity:1}
-@keyframes p{50%{opacity:.15}}
-.val{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:var(--muted);white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis;flex:none}
-.verdict{margin-top:20px;padding:16px;border-radius:16px;border:1px solid var(--border);
-  background:var(--surface);font-size:.95rem}
+@keyframes p{50%{opacity:.2}}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.83rem;color:var(--muted);
+  white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis;flex:none}
+
+.verdict{margin-top:18px;padding:15px;border-radius:16px;border:1px solid var(--border);
+  background:var(--surface);font-size:.94rem}
 .verdict b{color:var(--ok)}
 .verdict.bad b{color:var(--bad)}
-textarea{width:100%;margin-top:16px;min-height:150px;background:#0a0f19;color:var(--text);
-  border:1px solid var(--border);border-radius:14px;padding:13px;
-  font-family:ui-monospace,Menlo,monospace;font-size:.8rem;resize:vertical}
-.btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-button,a.btn{flex:1;min-width:150px;padding:14px 18px;border-radius:13px;border:0;cursor:pointer;
-  font:inherit;font-weight:600;font-size:.97rem;text-align:center;text-decoration:none;
+
+details.log{margin-top:16px;border:1px solid var(--border);border-radius:14px;
+  background:var(--surface);overflow:hidden}
+details.log summary{padding:12px 15px;cursor:pointer;font-size:.92rem;font-weight:600;
+  list-style:none;display:flex;align-items:center;justify-content:space-between}
+details.log summary::-webkit-details-marker{display:none}
+details.log summary::after{content:"▾";color:var(--muted);font-size:.9rem}
+details.log[open] summary::after{content:"▴"}
+details.log pre{margin:0;padding:0 15px 14px;font-family:ui-monospace,Menlo,monospace;
+  font-size:.76rem;line-height:1.55;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+
+textarea{width:100%;margin-top:14px;min-height:135px;background:#0a0f19;color:var(--text);
+  border:1px solid var(--border);border-radius:14px;padding:12px;
+  font-family:ui-monospace,Menlo,monospace;font-size:.78rem;resize:vertical}
+.btns{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap}
+button,a.btn{flex:1;min-width:150px;padding:13px 16px;border-radius:13px;border:0;cursor:pointer;
+  font:inherit;font-weight:600;font-size:.95rem;text-align:center;text-decoration:none;
   background:var(--ok);color:#04150e}
 a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);color:var(--text)}
-.note{margin-top:22px;color:var(--muted);font-size:.85rem}
+a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.note{margin-top:18px;color:var(--muted);font-size:.84rem}
+.note a{color:var(--ok)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Проверка связи</h1>
-  <p class="lead">Одна страница, несколько секунд. Ничего устанавливать не нужно.
-     <b>Важно: выключите Wi-Fi и оставьте только мобильный интернет</b> — проверять надо именно ту сеть, где не работает.</p>
+  <p class="lead">Несколько секунд, ставить ничего не нужно.
+     <b>Выключите Wi-Fi и сам VPN</b> — проверять надо ту сеть, где не работает.
+     Если VPN оставить включённым, страница померит туннель, а не вашего оператора.</p>
+
+  <div class="prog">
+    <div class="bar"><i id="bar"></i></div>
+    <div class="txt"><span id="stage">Готовлюсь…</span><b id="count">0 / 6</b></div>
+  </div>
 
   <div class="card" id="list"></div>
-
   <div class="verdict" id="verdict" style="display:none"></div>
 
-  <textarea id="report" readonly placeholder="Отчёт появится после проверки"></textarea>
+  <details class="log">
+    <summary>Подробности проверки</summary>
+    <pre id="log">…</pre>
+  </details>
+
+  <textarea id="report" readonly placeholder="Отчёт появится, когда проверка закончится"></textarea>
   <div class="btns">
-    <a class="btn" id="send" href="https://t.me/northlink_bot">Отправить в бота</a>
+    <a class="btn" id="send" href="#" aria-disabled="true">Отправить в бота</a>
     <button id="copy" class="sec2">Скопировать отчёт</button>
   </div>
   <div class="btns"><a class="btn sec" id="again" href="">Проверить заново</a></div>
 
-  <p class="note" style="margin-top:20px">И ещё одно, вручную: откройте <a href="https://link.adminwg.dad/cdn-cgi/trace" style="color:var(--ok)">эту ссылку</a> и пришлите, что покажет строка <b>colo</b>. Если страница не открылась — так и напишите, это тоже ответ.</p>
-  <p class="note">Отчёт содержит: адрес, который видит интернет, вашего оператора, время отклика
-     наших серверов и модель связи. Он показан целиком выше. Кнопка «Отправить в бота» открывает чат и отправляет короткий код с этими же числами — сама страница никуда ничего не шлёт.</p>
+  <p class="note">И ещё одно, вручную: откройте
+     <a href="https://link.adminwg.dad/cdn-cgi/trace">эту ссылку</a> и пришлите, что покажет
+     строка <b>colo</b>. Не открылась — так и напишите, это тоже ответ.</p>
+  <p class="note">Отчёт показан целиком выше. Кнопка отправляет в чат с ботом короткий код
+     с теми же числами — сама страница никуда ничего не шлёт.</p>
 </div>
 
 <script>
 (function(){
   "use strict";
+
   var CHECKS = [
-    {id:'meta',  name:'Кто вы для интернета',    hint:'оператор и город по мнению сети'},
-    {id:'sub',   name:'Сервер подписки',          hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
-    {id:'subapi',name:'Путь выдачи ключа',        hint:'/api/sub/ — именно он висел у вас; ждём код ответа'},
-    {id:'waw',   name:'Вход Варшава',             hint:'70.34.242.53:443'},
-    {id:'sto',   name:'Вход Стокгольм',           hint:'70.34.211.141:443'},
-    {id:'core',  name:'Ядро Вена',                hint:'159.195.111.13:443 — знаем, что часто не доходит'}
+    {id:'meta',   name:'Кто вы для интернета', hint:'оператор и город по мнению сети'},
+    {id:'sub',    name:'Сервер подписки',      hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
+    {id:'subapi', name:'Путь выдачи ключа',    hint:'/api/sub/ — ждём код ответа'},
+    {id:'waw',    name:'Вход Варшава',         hint:'70.34.242.53:443'},
+    {id:'sto',    name:'Вход Стокгольм',       hint:'70.34.211.141:443'},
+    {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'}
   ];
-  var res = {}, list = document.getElementById('list');
+  var VPN_ASN = '20473', VPN_IPS = ['70.34.242.53','70.34.211.141','159.195.111.13'];
+
+  var list = document.getElementById('list'), logEl = document.getElementById('log');
+  var barEl = document.getElementById('bar'), countEl = document.getElementById('count');
+  var stageEl = document.getElementById('stage'), sendEl = document.getElementById('send');
+  var res = {}, meta = {}, journal = [], done = 0, t0 = 0;
+
   CHECKS.forEach(function(c){
-    var r = document.createElement('div'); r.className='row';
-    r.innerHTML = '<span class="dot run" id="d-'+c.id+'"></span>'+
+    var r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="dot" id="d-'+c.id+'"></span>'+
                   '<span class="name"><b>'+c.name+'</b><span>'+c.hint+'</span></span>'+
-                  '<span class="val" id="v-'+c.id+'">…</span>';
+                  '<span class="val" id="v-'+c.id+'">—</span>';
     list.appendChild(r);
   });
+
+  function stamp(){ return ((performance.now() - t0) / 1000).toFixed(1).padStart(5, ' '); }
+  function note(text){
+    journal.push(stamp() + '  ' + text);
+    logEl.textContent = journal.join('\n');
+  }
   function mark(id, cls, text){
-    document.getElementById('d-'+id).className = 'dot '+cls;
+    document.getElementById('d-'+id).className = 'dot ' + cls;
     document.getElementById('v-'+id).textContent = text;
   }
-  // Ответ чужого сервера прочитать нельзя, и не нужно: нам важно, ОТКРЫЛОСЬ ли
-  // соединение и за сколько. Отказ TLS прилетает быстро, блокировка — молчит до таймаута.
-  function probe(url, ms){
-    var t0 = performance.now(), ctl = new AbortController();
-    var timer = setTimeout(function(){ ctl.abort(); }, ms||9000);
-    return fetch(url, {mode:'no-cors', cache:'no-store', signal:ctl.signal})
-      .then(function(){ clearTimeout(timer); return {ok:true, ms:Math.round(performance.now()-t0)}; })
-      .catch(function(e){ clearTimeout(timer);
-        return {ok:false, ms:Math.round(performance.now()-t0), aborted:(e.name==='AbortError')}; });
+  function finished(id){
+    done++;
+    barEl.style.width = Math.round(done / CHECKS.length * 100) + '%';
+    countEl.textContent = done + ' / ' + CHECKS.length;
   }
-  // Панель шлёт на /api/sub/* заголовок cross-origin-resource-policy: same-origin,
-  // и запрос в режиме no-cors браузер блокирует ВСЕГДА — сеть тут ни при чём.
-  // Зато рядом стоит access-control-allow-origin: *, поэтому обычный CORS-запрос
+
+  // Ответ чужого сервера прочитать нельзя, и не нужно: важно, ОТКРЫЛОСЬ ли
+  // соединение и за сколько. Отказ TLS прилетает быстро, блокировка молчит
+  // до самого таймаута — по времени они и различаются.
+  function probe(url, ms){
+    var start = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, ms);
+    note('→ ' + url + ' (жду до ' + ms + ' мс)');
+    return fetch(url, {mode:'no-cors', cache:'no-store', signal:ctl.signal})
+      .then(function(){ clearTimeout(timer);
+        return {ok:true, ms:Math.round(performance.now()-start)}; })
+      .catch(function(e){ clearTimeout(timer);
+        return {ok:false, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
+  }
+
+  // На /api/sub/* панель шлёт cross-origin-resource-policy: same-origin, и
+  // запрос в режиме no-cors браузер блокирует ВСЕГДА — сеть тут ни при чём.
+  // Рядом стоит access-control-allow-origin: *, поэтому обычный CORS-запрос
   // проходит и возвращает настоящий код ответа. Это и есть доказательство связи.
   function probeCors(url, ms){
-    var t0 = performance.now(), ctl = new AbortController();
-    var timer = setTimeout(function(){ ctl.abort(); }, ms||9000);
+    var start = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, ms);
+    note('→ ' + url + ' (CORS, жду до ' + ms + ' мс)');
     return fetch(url, {mode:'cors', cache:'no-store', signal:ctl.signal})
       .then(function(r){ clearTimeout(timer);
-        return {ok:true, status:r.status, ms:Math.round(performance.now()-t0)}; })
+        return {ok:true, status:r.status, ms:Math.round(performance.now()-start)}; })
       .catch(function(e){ clearTimeout(timer);
-        return {ok:false, ms:Math.round(performance.now()-t0), aborted:(e.name==='AbortError')}; });
+        return {ok:false, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
   }
 
   function show(id, r, okFast){
-    if (r.ok){ mark(id,'ok', r.ms+' мс'); return 'дошло за '+r.ms+' мс'; }
-    if (r.aborted){ mark(id,'bad','тайм-аут'); return 'ТАЙМ-АУТ ('+r.ms+' мс)'; }
-    // быстрый отказ = соединение открылось, но TLS не наш (для проверок по IP это норма)
-    if (okFast && r.ms < 2500){ mark(id,'ok', r.ms+' мс'); return 'связь есть, '+r.ms+' мс'; }
-    mark(id,'warn', r.ms+' мс'); return 'отказ через '+r.ms+' мс';
+    if (r.ok){ mark(id,'ok', r.ms+' мс'); note('✓ ' + id + ': ответ за ' + r.ms + ' мс');
+               return 'дошло за '+r.ms+' мс'; }
+    if (r.aborted){ mark(id,'bad','тайм-аут'); note('✕ ' + id + ': ТАЙМ-АУТ через ' + r.ms + ' мс');
+                    return 'ТАЙМ-АУТ ('+r.ms+' мс)'; }
+    if (okFast && r.ms < 2500){ mark(id,'ok', r.ms+' мс');
+      note('✓ ' + id + ': соединение открылось за ' + r.ms + ' мс, сертификат чужой — так и должно быть');
+      return 'связь есть, '+r.ms+' мс'; }
+    mark(id,'warn', r.ms+' мс'); note('! ' + id + ': отказ через ' + r.ms + ' мс');
+    return 'отказ через '+r.ms+' мс';
   }
-  var lines = [], meta = {};
+
   function run(){
-    document.getElementById('verdict').style.display='none';
-    lines = ['NORTHLINK · проверка связи', new Date().toISOString()];
+    t0 = performance.now(); res = {}; meta = {}; journal = []; done = 0;
+    barEl.style.width = '0%'; countEl.textContent = '0 / ' + CHECKS.length;
+    document.getElementById('verdict').style.display = 'none';
+    document.getElementById('report').value = '';
+    sendEl.setAttribute('aria-disabled','true'); sendEl.href = '#';
+    CHECKS.forEach(function(c){ mark(c.id, 'run', '…'); });
+
     var n = navigator.connection || {};
     meta.net = n.effectiveType || '';
     var netFull = (n.effectiveType||'?') + (n.type ? '/'+n.type : '');
-    lines.push('связь по мнению браузера: '+netFull);
-    lines.push('устройство: '+navigator.userAgent.slice(0,110));
+    note('старт; связь по мнению браузера: ' + netFull);
+    note('устройство: ' + navigator.userAgent.slice(0, 100));
 
-    // Схема ответа должна быть простой и предсказуемой: cloudflare/meta отдаёт
-    // поля разного типа, и colo однажды приехал объектом — в отчёт попало
-    // «[object Object]». Здесь всё приводим к строке явно.
+    var lines = ['NORTHLINK · проверка связи', new Date().toISOString(),
+                 'связь по мнению браузера: ' + netFull,
+                 'устройство: ' + navigator.userAgent.slice(0, 110)];
+
+    stageEl.textContent = 'Спрашиваю, кто вы для интернета';
     fetch('https://ipwho.is/', {cache:'no-store', signal: AbortSignal.timeout(5000)})
       .then(function(r){ return r.json(); })
       .then(function(j){
         var c = j.connection || {};
-        meta.asn = c.asn; meta.org = c.org || c.isp;
+        meta.asn = c.asn;
         // Выход через наш же хостинг означает, что человек сидит в туннеле:
         // тогда проверка меряет туннель, а не его сеть, и все числа врут.
-        // Такой отчёт однажды пришёл и выглядел здоровым — «ядро отвечает», —
-        // хотя вопрос был ровно обратный.
-        meta.vpn = (String(c.asn) === '20473')
-                || ['70.34.242.53','70.34.211.141','159.195.111.13'].indexOf(String(j.ip)) >= 0;
-        mark('meta','ok', String(c.asn ? 'AS'+c.asn : 'ok'));
-        lines.push('адрес: '+String(j.ip)+'  ('+String(j.country_code||'?')+', '+String(j.city||'?')+')');
-        lines.push('оператор: '+String(c.asn ? 'AS'+c.asn+' ' : '')+String(c.org||c.isp||'?'));
+        meta.vpn = (String(c.asn) === VPN_ASN) || VPN_IPS.indexOf(String(j.ip)) >= 0;
+        mark('meta','ok', c.asn ? 'AS'+c.asn : 'ok');
+        note('✓ сеть: ' + j.ip + ' (' + (j.country_code||'?') + ', ' + (j.city||'?') + '), AS' + c.asn + ' ' + (c.org||c.isp||'?'));
+        lines.push('адрес: ' + j.ip + '  (' + (j.country_code||'?') + ', ' + (j.city||'?') + ')');
+        lines.push('оператор: AS' + c.asn + ' ' + (c.org || c.isp || '?'));
       })
-      .catch(function(){ mark('meta','warn','не отдал'); lines.push('оператора определить не удалось'); })
-      .then(function(){ return probe('https://link.adminwg.dad/'); })
-      .then(function(r){ res.sub=r; lines.push('сервер подписки: '+show('sub',r)); })
-      .then(function(){ return probeCors('https://link.adminwg.dad/api/sub/diagnostika'); })
-      .then(function(r){ res.subapi=r;
+      .catch(function(e){
+        mark('meta','warn','не отдал');
+        note('! сеть определить не удалось: ' + (e.name||e) + ' — сам этот сервис тоже за Cloudflare');
+        lines.push('оператора определить не удалось (сервис определения тоже за Cloudflare)');
+      })
+      .then(function(){ finished('meta'); stageEl.textContent = 'Стучусь на сервер подписки';
+                        return probe('https://link.adminwg.dad/', 9000); })
+      .then(function(r){ res.sub = r; lines.push('сервер подписки: ' + show('sub', r)); finished('sub');
+                         stageEl.textContent = 'Проверяю путь выдачи ключа';
+                         return probeCors('https://link.adminwg.dad/api/sub/diagnostika', 9000); })
+      .then(function(r){
+        res.subapi = r;
         if (r.ok){ mark('subapi','ok', r.status+' · '+r.ms+' мс');
-          lines.push('путь выдачи ключа: ответил '+r.status+' за '+r.ms+' мс (404 тут правильный, ключ выдуманный)'); }
+          note('✓ путь ключа: код ' + r.status + ' за ' + r.ms + ' мс');
+          lines.push('путь выдачи ключа: ответил ' + r.status + ' за ' + r.ms + ' мс (404 тут правильный, ключ выдуманный)'); }
         else if (r.aborted){ mark('subapi','bad','тайм-аут');
-          lines.push('путь выдачи ключа: ТАЙМ-АУТ ('+r.ms+' мс)'); }
+          note('✕ путь ключа: ТАЙМ-АУТ через ' + r.ms + ' мс');
+          lines.push('путь выдачи ключа: ТАЙМ-АУТ (' + r.ms + ' мс)'); }
         else { mark('subapi','bad','нет связи');
-          lines.push('путь выдачи ключа: не ответил ('+r.ms+' мс)'); }
-      })
-      // Три проверки по IP идут разом, а не по очереди: последовательно они
-      // складывались в полминуты ожидания, и человек снимал экран раньше, чем
-      // страница досчитывала. Именно эти строки решают, какой ремонт нужен.
-      .then(function(){
+          note('✕ путь ключа: не ответил за ' + r.ms + ' мс');
+          lines.push('путь выдачи ключа: не ответил (' + r.ms + ' мс)'); }
+        finished('subapi');
+        // Три проверки по IP идут разом: по очереди они складывались в полминуты,
+        // и человек снимал экран раньше, чем страница доходила до них. А решают
+        // именно они — отвечают ли входы, когда домен подписки уже молчит.
+        stageEl.textContent = 'Проверяю входы и ядро';
         return Promise.all([
-          probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); }),
-          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); }),
-          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); })
+          probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); finished('waw'); }),
+          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); finished('sto'); }),
+          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); })
         ]);
       })
-      .then(finish);
+      .then(function(){ finish(lines); });
   }
-  function finish(){
-    if (meta.vpn) {
-      var w = document.getElementById('verdict');
-      w.className = 'verdict bad';
-      w.innerHTML = '<b>Выключите VPN и проверьте заново.</b> Сейчас интернет идёт через '
-        + 'сам Northlink, поэтому страница померила туннель, а не вашу сеть. '
-        + 'Смысл проверки — увидеть, что видит телефон БЕЗ VPN.';
-      w.style.display = 'block';
-      lines.push('ВНИМАНИЕ: замер сделан через включённый VPN, числа не про сеть человека');
-    }
-    var keyOk = res.subapi && res.subapi.ok;
-    var subDead = !keyOk, frontOk = (res.waw&&res.waw.ms<2500)||(res.sto&&res.sto.ms<2500);
+
+  function finish(lines){
+    stageEl.textContent = 'Проверка закончена';
     var v = document.getElementById('verdict'), txt;
-    if (meta.cfDead && subDead){ txt='<b>Похоже на белый список у оператора.</b> Не открылся даже Cloudflare. В таком режиме VPN не поднимется никакими настройками.'; v.className='verdict bad'; }
-    else if (subDead && frontOk){ txt='<b>Нашли.</b> Входы VPN отвечают, а сервер подписки — нет. Значит чинить надо выдачу ключа, и это делается на нашей стороне.'; v.className='verdict'; }
-    else if (subDead){ txt='<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.'; v.className='verdict bad'; }
-    else { txt='<b>Сейчас подписка доступна:</b> сервер ответил кодом '+res.subapi.status+' за '+res.subapi.ms+' мс. Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
-    v.innerHTML = txt; v.style.display='block';
-    // Проверки теперь заканчиваются вразнобой, поэтому строки отчёта
-    // раскладываем в понятном человеку порядке, а не в порядке ответов.
+    var keyOk = res.subapi && res.subapi.ok;
+    var frontOk = (res.waw && res.waw.ms < 2500) || (res.sto && res.sto.ms < 2500);
+
+    if (meta.vpn){
+      v.className = 'verdict bad';
+      txt = '<b>Выключите VPN и проверьте заново.</b> Интернет сейчас идёт через сам Northlink, '
+          + 'поэтому страница померила туннель, а не вашу сеть.';
+      note('ВНИМАНИЕ: замер сделан через включённый VPN');
+      lines.push('ВНИМАНИЕ: замер сделан через включённый VPN, числа не про сеть человека');
+    } else if (!keyOk && frontOk){
+      v.className = 'verdict';
+      txt = '<b>Нашли.</b> Входы VPN отвечают, а сервер подписки — нет. Значит чинить надо выдачу '
+          + 'ключа, и это делается на нашей стороне.';
+    } else if (!keyOk){
+      v.className = 'verdict bad';
+      txt = '<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.';
+    } else {
+      v.className = 'verdict';
+      txt = '<b>Сейчас подписка доступна:</b> сервер ответил кодом ' + res.subapi.status
+          + ' за ' + res.subapi.ms + ' мс.';
+    }
+    v.innerHTML = txt; v.style.display = 'block';
+
+    // Проверки заканчиваются вразнобой, поэтому строки отчёта раскладываем в
+    // понятном человеку порядке, а не в порядке ответов.
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
                  'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:'];
-    lines.sort(function(a, b){
+    var head = lines.slice(0, 4), body = lines.slice(4);
+    body.sort(function(a, b){
       var ia = order.findIndex(function(p){ return a.indexOf(p) === 0; });
       var ib = order.findIndex(function(p){ return b.indexOf(p) === 0; });
-      return (ia < 0 ? -1 : ia) - (ib < 0 ? -1 : ib);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
-    lines.push('вердикт страницы: '+v.textContent.trim());
-    document.getElementById('report').value = lines.join('\n');
+    lines = head.concat(body);
+    lines.push('вердикт страницы: ' + v.textContent.trim());
 
-    // Отчёт словами в deep link не влезет: Telegram даёт 64 символа.
-    // Поэтому в бота уходит код, а бот разворачивает его обратно в текст.
-    // Быстрый отказ по IP помечаем «c»: это не поломка, а чужой сертификат.
+    // Отчёт словами в deep link не влезет: Telegram даёт 64 символа. Поэтому в
+    // бота уходит код, а бот разворачивает его обратно в текст. Быстрый отказ
+    // по IP помечаем «c»: это не поломка, а чужой сертификат.
     function code(r){
       if (!r) return 'x';
       if (r.aborted) return 't';
       if (r.ok) return String(r.ms);
-      return (r.ms < 2500) ? 'c'+r.ms : 'x';
+      return (r.ms < 2500) ? 'c' + r.ms : 'x';
     }
     function codeKey(r){
       if (!r) return 'x';
       if (r.aborted) return 't';
-      return r.ok ? (r.status+'x'+r.ms) : 'x';
+      return r.ok ? (r.status + 'x' + r.ms) : 'x';
     }
-    var payload = ['d1', (meta.asn||'x'), ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn?'_vpn':''),
+    var payload = ['d1', (meta.asn||'x'),
+                   ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn?'_vpn':''),
                    code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core)
                   ].join('-').slice(0, 64);
-    document.getElementById('send').href = 'https://t.me/northlink_bot?start=' + payload;
-    lines.push('код для бота: '+payload);
-    document.getElementById('report').value = lines.join('\n');
+    sendEl.href = 'https://t.me/northlink_bot?start=' + payload;
+    sendEl.setAttribute('aria-disabled', 'false');
+    lines.push('код для бота: ' + payload);
+    note('готово; код: ' + payload);
+
+    document.getElementById('report').value = lines.join('\n') + '\n\nПОДРОБНОСТИ\n' + journal.join('\n');
   }
+
   document.getElementById('copy').addEventListener('click', function(){
-    var t = document.getElementById('report'); t.select(); t.setSelectionRange(0, 99999);
-    var done = function(){ var b=document.getElementById('copy'); b.textContent='Скопировано — отправьте в чат'; setTimeout(function(){b.textContent='Скопировать отчёт';},2500); };
-    if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(done, done); else { document.execCommand('copy'); done(); }
+    var t = document.getElementById('report');
+    t.select(); t.setSelectionRange(0, 99999);
+    var b = document.getElementById('copy');
+    var ok = function(){ b.textContent = 'Скопировано'; setTimeout(function(){ b.textContent = 'Скопировать отчёт'; }, 2500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(ok, ok);
+    else { document.execCommand('copy'); ok(); }
   });
-  document.getElementById('again').addEventListener('click', function(e){ e.preventDefault(); CHECKS.forEach(function(c){ mark(c.id,'run','…'); }); run(); });
+  document.getElementById('again').addEventListener('click', function(e){ e.preventDefault(); run(); });
   run();
 })();
 </script>
