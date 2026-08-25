@@ -11,6 +11,7 @@
 :root{--bg:#060910;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.10);
   --text:#e8eef7;--muted:#8d9bb0;--ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{max-width:100%;overflow-x:hidden}
 body{background:var(--bg);color:var(--text);min-height:100vh;padding:24px 18px 60px;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
 .wrap{max-width:620px;margin:0 auto}
@@ -28,7 +29,7 @@ h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:.4rem}
 .dot.bad{background:var(--bad);opacity:1}
 .dot.warn{background:var(--warn);opacity:1}
 @keyframes p{50%{opacity:.15}}
-.val{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:var(--muted);white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis;flex:none}
 .verdict{margin-top:20px;padding:16px;border-radius:16px;border:1px solid var(--border);
   background:var(--surface);font-size:.95rem}
 .verdict b{color:var(--ok)}
@@ -60,6 +61,7 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
     <a class="btn sec" id="again" href="">Проверить заново</a>
   </div>
 
+  <p class="note" style="margin-top:20px">И ещё одно, вручную: откройте <a href="https://link.adminwg.dad/cdn-cgi/trace" style="color:var(--ok)">эту ссылку</a> и пришлите, что покажет строка <b>colo</b>. Если страница не открылась — так и напишите, это тоже ответ.</p>
   <p class="note">Отчёт содержит: адрес, который видит интернет, вашего оператора, время отклика
      наших серверов и модель связи. Он показан целиком выше — ничего сверх того, что вы видите,
      страница не отправляет и никуда сама не шлёт.</p>
@@ -69,7 +71,7 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
 (function(){
   "use strict";
   var CHECKS = [
-    {id:'meta',  name:'Кто вы для интернета',    hint:'оператор, город, узел Cloudflare'},
+    {id:'meta',  name:'Кто вы для интернета',    hint:'оператор и город по мнению сети'},
     {id:'sub',   name:'Сервер подписки',          hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
     {id:'subapi',name:'Путь выдачи ключа',        hint:'/api/sub/ — именно он висел у вас'},
     {id:'waw',   name:'Вход Варшава',             hint:'70.34.242.53:443'},
@@ -114,16 +116,19 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
     lines.push('связь по мнению браузера: '+meta.net);
     lines.push('устройство: '+navigator.userAgent.slice(0,110));
 
-    fetch('https://speed.cloudflare.com/meta', {cache:'no-store'})
+    // Схема ответа должна быть простой и предсказуемой: cloudflare/meta отдаёт
+    // поля разного типа, и colo однажды приехал объектом — в отчёт попало
+    // «[object Object]». Здесь всё приводим к строке явно.
+    fetch('https://ipwho.is/', {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(j){
-        meta.asn = j.asn; meta.org = j.asOrganization; meta.colo = j.colo;
-        mark('meta','ok', j.colo||'ok');
-        lines.push('адрес: '+j.clientIp+'  ('+j.country+', '+(j.city||'?')+')');
-        lines.push('оператор: AS'+j.asn+' '+j.asOrganization);
-        lines.push('узел Cloudflare: '+j.colo+(j.colo==='MOW'?'  ← ВНУТРИ РОССИИ':''));
+        var c = j.connection || {};
+        meta.asn = c.asn; meta.org = c.org || c.isp;
+        mark('meta','ok', String(c.asn ? 'AS'+c.asn : 'ok'));
+        lines.push('адрес: '+String(j.ip)+'  ('+String(j.country_code||'?')+', '+String(j.city||'?')+')');
+        lines.push('оператор: '+String(c.asn ? 'AS'+c.asn+' ' : '')+String(c.org||c.isp||'?'));
       })
-      .catch(function(){ mark('meta','bad','нет'); lines.push('Cloudflare недоступен ВООБЩЕ'); meta.cfDead=true; })
+      .catch(function(){ mark('meta','warn','не отдал'); lines.push('оператора определить не удалось'); })
       .then(function(){ return probe('https://link.adminwg.dad/'); })
       .then(function(r){ res.sub=r; lines.push('сервер подписки: '+show('sub',r)); })
       .then(function(){ return probe('https://link.adminwg.dad/api/sub/diagnostika'); })
