@@ -114,7 +114,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     {id:'subapi', name:'Путь выдачи ключа',    hint:'/api/sub/ — ждём код ответа'},
     {id:'waw',    name:'Вход Варшава',         hint:'70.34.242.53:443'},
     {id:'sto',    name:'Вход Стокгольм',       hint:'70.34.211.141:443'},
-    {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'}
+    {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'},
+    {id:'nameWaw',name:'Наше имя на фронте',    hint:'waw.adminwg.dad — имя нашей зоны, адрес Варшавы'},
+    {id:'nameSto',name:'Наше имя на фронте #2', hint:'sto.adminwg.dad — то же для Стокгольма'},
+    {id:'cf',     name:'Cloudflare вообще',     hint:'cloudflare.com — другой диапазон, чем у подписки'}
   ];
   var VPN_ASN = '20473', VPN_IPS = ['70.34.242.53','70.34.211.141','159.195.111.13'];
 
@@ -236,7 +239,16 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           probeCors('https://link.adminwg.dad/api/sub/diagnostika', 9000).then(function(r){ res.subapi = r; }),
           probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); finished('waw'); }),
           probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); finished('sto'); }),
-          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); })
+          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); }),
+          // Имя из нашей же зоны, показывающее прямо на фронт. Отвечает на
+          // главный вопрос: режут наш ДОМЕН по имени или диапазон адресов,
+          // где Cloudflare нас поселил. От ответа зависит, поможет ли перенос.
+          probe('https://waw.adminwg.dad/', 6000).then(function(r){ res.nameWaw=r; lines.push('наше имя на Варшаве: '+show('nameWaw',r,true)); finished('nameWaw'); }),
+          probe('https://sto.adminwg.dad/', 6000).then(function(r){ res.nameSto=r; lines.push('наше имя на Стокгольме: '+show('nameSto',r,true)); finished('nameSto'); }),
+          // Контроль: Cloudflare живёт на многих диапазонах, и наш оказался
+          // в 188.114.96.0/20. Если этот отвечает, а подписка нет — режут
+          // диапазон, а не Cloudflare целиком.
+          probe('https://cloudflare.com/', 6000).then(function(r){ res.cf=r; lines.push('Cloudflare (другой диапазон): '+show('cf',r,true)); finished('cf'); })
         ]);
       })
       .then(function(){
@@ -268,9 +280,14 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       note('ВНИМАНИЕ: замер сделан через включённый VPN');
       lines.push('ВНИМАНИЕ: замер сделан через включённый VPN, числа не про сеть человека');
     } else if (!keyOk && frontOk){
+      var nameOk = (res.nameWaw && res.nameWaw.ms < 2500) || (res.nameSto && res.nameSto.ms < 2500);
       v.className = 'verdict';
-      txt = '<b>Нашли.</b> Входы VPN отвечают, а сервер подписки — нет. Значит чинить надо выдачу '
-          + 'ключа, и это делается на нашей стороне.';
+      txt = nameOk
+        ? '<b>Нашли, и лечится.</b> Наше имя на адресе входа открывается, а на адресе подписки — '
+          + 'нет. Значит режут не домен, а диапазон, где нас поселил Cloudflare. Перенос подписки '
+          + 'на вход это чинит.'
+        : '<b>Нашли.</b> Входы отвечают, а сервер подписки — нет. Но и наше имя на входе не '
+          + 'открылось — похоже, дело в самом имени, и перенос сам по себе не поможет.';
     } else if (!keyOk){
       v.className = 'verdict bad';
       txt = '<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.';
@@ -284,7 +301,9 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // Проверки заканчиваются вразнобой, поэтому строки отчёта раскладываем в
     // понятном человеку порядке, а не в порядке ответов.
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
-                 'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:'];
+                 'наше имя на Варшаве:', 'наше имя на Стокгольме:',
+                 'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:',
+                 'Cloudflare (другой диапазон):'];
     var head = lines.slice(0, 4), body = lines.slice(4);
     body.sort(function(a, b){
       var ia = order.findIndex(function(p){ return a.indexOf(p) === 0; });
@@ -310,7 +329,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     }
     var payload = ['d1', (meta.asn||'x'),
                    ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn?'_vpn':''),
-                   code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core)
+                   code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core),
+                   code(res.nameWaw), code(res.cf)
                   ].join('-').slice(0, 64);
     sendEl.href = 'https://t.me/northlink_bot?start=' + payload;
     sendEl.setAttribute('aria-disabled', 'false');
