@@ -117,7 +117,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'},
     {id:'nameWaw',name:'Наше имя на фронте',    hint:'waw.adminwg.dad — имя нашей зоны, адрес Варшавы'},
     {id:'nameSto',name:'Наше имя на фронте #2', hint:'sto.adminwg.dad — то же для Стокгольма'},
-    {id:'cf',     name:'Cloudflare вообще',     hint:'cloudflare.com — другой диапазон, чем у подписки'}
+    {id:'cf',     name:'Cloudflare вообще',     hint:'cloudflare.com — другой диапазон, чем у подписки'},
+    {id:'s2',     name:'Новое имя на фронте',    hint:'s2.adminwg.dad — заведено только что, ни в одном кэше'}
   ];
   var VPN_ASN = '20473', VPN_IPS = ['70.34.242.53','70.34.211.141','159.195.111.13'];
 
@@ -248,7 +249,11 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           // Контроль: Cloudflare живёт на многих диапазонах, и наш оказался
           // в 188.114.96.0/20. Если этот отвечает, а подписка нет — режут
           // диапазон, а не Cloudflare целиком.
-          probe('https://cloudflare.com/', 6000).then(function(r){ res.cf=r; lines.push('Cloudflare (другой диапазон): '+show('cf',r,true)); finished('cf'); })
+          probe('https://cloudflare.com/', 6000).then(function(r){ res.cf=r; lines.push('Cloudflare (другой диапазон): '+show('cf',r,true)); finished('cf'); }),
+          // Имя заведено только что и показывает на тот же фронт, что и подписка.
+          // Если оно открывается, а подписка нет — дело в самом имени подписки:
+          // кэшировать s2 было негде, оно ни у кого ещё не спрашивалось.
+          probe('https://s2.adminwg.dad/', 6000).then(function(r){ res.s2=r; lines.push('новое имя на фронте: '+show('s2',r,true)); finished('s2'); })
         ]);
       })
       .then(function(){
@@ -303,7 +308,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
                  'наше имя на Варшаве:', 'наше имя на Стокгольме:',
                  'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:',
-                 'Cloudflare (другой диапазон):'];
+                 'Cloudflare (другой диапазон):', 'новое имя на фронте:'];
     var head = lines.slice(0, 4), body = lines.slice(4);
     body.sort(function(a, b){
       var ia = order.findIndex(function(p){ return a.indexOf(p) === 0; });
@@ -330,7 +335,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     var payload = ['d1', (meta.asn||'x'),
                    ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn?'_vpn':''),
                    code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core),
-                   code(res.nameWaw), code(res.cf)
+                   code(res.nameWaw), code(res.cf), code(res.s2)
                   ].join('-').slice(0, 64);
     sendEl.href = 'https://t.me/northlink_bot?start=' + payload;
     sendEl.setAttribute('aria-disabled', 'false');
