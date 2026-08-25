@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Northlink — проверка связи</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#060910">
+<style>
+:root{--bg:#060910;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.10);
+  --text:#e8eef7;--muted:#8d9bb0;--ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:24px 18px 60px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:.4rem}
+.lead{color:var(--muted);font-size:.98rem;margin-bottom:1.6rem}
+.card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.row .name{flex:1;min-width:0}
+.row .name b{display:block;font-weight:600;font-size:.97rem}
+.row .name span{display:block;color:var(--muted);font-size:.85rem}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.4}
+.dot.run{animation:p 1s infinite}
+.dot.ok{background:var(--ok);opacity:1}
+.dot.bad{background:var(--bad);opacity:1}
+.dot.warn{background:var(--warn);opacity:1}
+@keyframes p{50%{opacity:.15}}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.verdict{margin-top:20px;padding:16px;border-radius:16px;border:1px solid var(--border);
+  background:var(--surface);font-size:.95rem}
+.verdict b{color:var(--ok)}
+.verdict.bad b{color:var(--bad)}
+textarea{width:100%;margin-top:16px;min-height:150px;background:#0a0f19;color:var(--text);
+  border:1px solid var(--border);border-radius:14px;padding:13px;
+  font-family:ui-monospace,Menlo,monospace;font-size:.8rem;resize:vertical}
+.btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+button,a.btn{flex:1;min-width:150px;padding:14px 18px;border-radius:13px;border:0;cursor:pointer;
+  font:inherit;font-weight:600;font-size:.97rem;text-align:center;text-decoration:none;
+  background:var(--ok);color:#04150e}
+a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text)}
+.note{margin-top:22px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Проверка связи</h1>
+  <p class="lead">Одна страница, несколько секунд. Ничего устанавливать не нужно.
+     <b>Важно: выключите Wi-Fi и оставьте только мобильный интернет</b> — проверять надо именно ту сеть, где не работает.</p>
+
+  <div class="card" id="list"></div>
+
+  <div class="verdict" id="verdict" style="display:none"></div>
+
+  <textarea id="report" readonly placeholder="Отчёт появится после проверки"></textarea>
+  <div class="btns">
+    <button id="copy">Скопировать отчёт</button>
+    <a class="btn sec" id="again" href="">Проверить заново</a>
+  </div>
+
+  <p class="note">Отчёт содержит: адрес, который видит интернет, вашего оператора, время отклика
+     наших серверов и модель связи. Он показан целиком выше — ничего сверх того, что вы видите,
+     страница не отправляет и никуда сама не шлёт.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var CHECKS = [
+    {id:'meta',  name:'Кто вы для интернета',    hint:'оператор, город, узел Cloudflare'},
+    {id:'sub',   name:'Сервер подписки',          hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
+    {id:'subapi',name:'Путь выдачи ключа',        hint:'/api/sub/ — именно он висел у вас'},
+    {id:'waw',   name:'Вход Варшава',             hint:'70.34.242.53:443'},
+    {id:'sto',   name:'Вход Стокгольм',           hint:'70.34.211.141:443'},
+    {id:'core',  name:'Ядро Вена',                hint:'159.195.111.13:443 — знаем, что часто не доходит'}
+  ];
+  var res = {}, list = document.getElementById('list');
+  CHECKS.forEach(function(c){
+    var r = document.createElement('div'); r.className='row';
+    r.innerHTML = '<span class="dot run" id="d-'+c.id+'"></span>'+
+                  '<span class="name"><b>'+c.name+'</b><span>'+c.hint+'</span></span>'+
+                  '<span class="val" id="v-'+c.id+'">…</span>';
+    list.appendChild(r);
+  });
+  function mark(id, cls, text){
+    document.getElementById('d-'+id).className = 'dot '+cls;
+    document.getElementById('v-'+id).textContent = text;
+  }
+  // Ответ чужого сервера прочитать нельзя, и не нужно: нам важно, ОТКРЫЛОСЬ ли
+  // соединение и за сколько. Отказ TLS прилетает быстро, блокировка — молчит до таймаута.
+  function probe(url, ms){
+    var t0 = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, ms||9000);
+    return fetch(url, {mode:'no-cors', cache:'no-store', signal:ctl.signal})
+      .then(function(){ clearTimeout(timer); return {ok:true, ms:Math.round(performance.now()-t0)}; })
+      .catch(function(e){ clearTimeout(timer);
+        return {ok:false, ms:Math.round(performance.now()-t0), aborted:(e.name==='AbortError')}; });
+  }
+  function show(id, r, okFast){
+    if (r.ok){ mark(id,'ok', r.ms+' мс'); return 'дошло за '+r.ms+' мс'; }
+    if (r.aborted){ mark(id,'bad','тайм-аут'); return 'ТАЙМ-АУТ ('+r.ms+' мс)'; }
+    // быстрый отказ = соединение открылось, но TLS не наш (для проверок по IP это норма)
+    if (okFast && r.ms < 2500){ mark(id,'ok', r.ms+' мс'); return 'связь есть, '+r.ms+' мс'; }
+    mark(id,'warn', r.ms+' мс'); return 'отказ через '+r.ms+' мс';
+  }
+  var lines = [], meta = {};
+  function run(){
+    document.getElementById('verdict').style.display='none';
+    lines = ['NORTHLINK · проверка связи', new Date().toISOString()];
+    var n = navigator.connection || {};
+    meta.net = (n.effectiveType||'?') + (n.type ? '/'+n.type : '');
+    lines.push('связь по мнению браузера: '+meta.net);
+    lines.push('устройство: '+navigator.userAgent.slice(0,110));
+
+    fetch('https://speed.cloudflare.com/meta', {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        meta.asn = j.asn; meta.org = j.asOrganization; meta.colo = j.colo;
+        mark('meta','ok', j.colo||'ok');
+        lines.push('адрес: '+j.clientIp+'  ('+j.country+', '+(j.city||'?')+')');
+        lines.push('оператор: AS'+j.asn+' '+j.asOrganization);
+        lines.push('узел Cloudflare: '+j.colo+(j.colo==='MOW'?'  ← ВНУТРИ РОССИИ':''));
+      })
+      .catch(function(){ mark('meta','bad','нет'); lines.push('Cloudflare недоступен ВООБЩЕ'); meta.cfDead=true; })
+      .then(function(){ return probe('https://link.adminwg.dad/'); })
+      .then(function(r){ res.sub=r; lines.push('сервер подписки: '+show('sub',r)); })
+      .then(function(){ return probe('https://link.adminwg.dad/api/sub/diagnostika'); })
+      .then(function(r){ res.subapi=r; lines.push('путь выдачи ключа: '+show('subapi',r)); })
+      .then(function(){ return probe('https://70.34.242.53/', 7000); })
+      .then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); })
+      .then(function(){ return probe('https://70.34.211.141/', 7000); })
+      .then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); })
+      .then(function(){ return probe('https://159.195.111.13/', 7000); })
+      .then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); })
+      .then(finish);
+  }
+  function finish(){
+    var subDead = res.sub && !res.sub.ok, frontOk = (res.waw&&res.waw.ms<2500)||(res.sto&&res.sto.ms<2500);
+    var v = document.getElementById('verdict'), txt;
+    if (meta.cfDead && subDead){ txt='<b>Похоже на белый список у оператора.</b> Не открылся даже Cloudflare. В таком режиме VPN не поднимется никакими настройками.'; v.className='verdict bad'; }
+    else if (subDead && frontOk){ txt='<b>Нашли.</b> Входы VPN отвечают, а сервер подписки — нет. Значит чинить надо выдачу ключа, и это делается на нашей стороне.'; v.className='verdict'; }
+    else if (subDead){ txt='<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.'; v.className='verdict bad'; }
+    else { txt='<b>Сейчас всё отвечает.</b> Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
+    v.innerHTML = txt; v.style.display='block';
+    lines.push('вердикт страницы: '+v.textContent.trim());
+    document.getElementById('report').value = lines.join('\n');
+  }
+  document.getElementById('copy').addEventListener('click', function(){
+    var t = document.getElementById('report'); t.select(); t.setSelectionRange(0, 99999);
+    var done = function(){ var b=document.getElementById('copy'); b.textContent='Скопировано — отправьте в чат'; setTimeout(function(){b.textContent='Скопировать отчёт';},2500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(done, done); else { document.execCommand('copy'); done(); }
+  });
+  document.getElementById('again').addEventListener('click', function(e){ e.preventDefault(); CHECKS.forEach(function(c){ mark(c.id,'run','…'); }); run(); });
+  run();
+})();
+</script>
+</body>
+</html>
