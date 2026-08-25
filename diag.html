@@ -41,7 +41,7 @@ textarea{width:100%;margin-top:16px;min-height:150px;background:#0a0f19;color:va
 button,a.btn{flex:1;min-width:150px;padding:14px 18px;border-radius:13px;border:0;cursor:pointer;
   font:inherit;font-weight:600;font-size:.97rem;text-align:center;text-decoration:none;
   background:var(--ok);color:#04150e}
-a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text)}
+a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);color:var(--text)}
 .note{margin-top:22px;color:var(--muted);font-size:.85rem}
 </style>
 </head>
@@ -57,14 +57,14 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
 
   <textarea id="report" readonly placeholder="Отчёт появится после проверки"></textarea>
   <div class="btns">
-    <button id="copy">Скопировать отчёт</button>
-    <a class="btn sec" id="again" href="">Проверить заново</a>
+    <a class="btn" id="send" href="https://t.me/northlink_bot">Отправить в бота</a>
+    <button id="copy" class="sec2">Скопировать отчёт</button>
   </div>
+  <div class="btns"><a class="btn sec" id="again" href="">Проверить заново</a></div>
 
   <p class="note" style="margin-top:20px">И ещё одно, вручную: откройте <a href="https://link.adminwg.dad/cdn-cgi/trace" style="color:var(--ok)">эту ссылку</a> и пришлите, что покажет строка <b>colo</b>. Если страница не открылась — так и напишите, это тоже ответ.</p>
   <p class="note">Отчёт содержит: адрес, который видит интернет, вашего оператора, время отклика
-     наших серверов и модель связи. Он показан целиком выше — ничего сверх того, что вы видите,
-     страница не отправляет и никуда сама не шлёт.</p>
+     наших серверов и модель связи. Он показан целиком выше. Кнопка «Отправить в бота» открывает чат и отправляет короткий код с этими же числами — сама страница никуда ничего не шлёт.</p>
 </div>
 
 <script>
@@ -126,8 +126,9 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
     document.getElementById('verdict').style.display='none';
     lines = ['NORTHLINK · проверка связи', new Date().toISOString()];
     var n = navigator.connection || {};
-    meta.net = (n.effectiveType||'?') + (n.type ? '/'+n.type : '');
-    lines.push('связь по мнению браузера: '+meta.net);
+    meta.net = n.effectiveType || '';
+    var netFull = (n.effectiveType||'?') + (n.type ? '/'+n.type : '');
+    lines.push('связь по мнению браузера: '+netFull);
     lines.push('устройство: '+navigator.userAgent.slice(0,110));
 
     // Схема ответа должна быть простой и предсказуемой: cloudflare/meta отдаёт
@@ -172,6 +173,27 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
     else { txt='<b>Сейчас подписка доступна:</b> сервер ответил кодом '+res.subapi.status+' за '+res.subapi.ms+' мс. Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
     v.innerHTML = txt; v.style.display='block';
     lines.push('вердикт страницы: '+v.textContent.trim());
+    document.getElementById('report').value = lines.join('\n');
+
+    // Отчёт словами в deep link не влезет: Telegram даёт 64 символа.
+    // Поэтому в бота уходит код, а бот разворачивает его обратно в текст.
+    // Быстрый отказ по IP помечаем «c»: это не поломка, а чужой сертификат.
+    function code(r){
+      if (!r) return 'x';
+      if (r.aborted) return 't';
+      if (r.ok) return String(r.ms);
+      return (r.ms < 2500) ? 'c'+r.ms : 'x';
+    }
+    function codeKey(r){
+      if (!r) return 'x';
+      if (r.aborted) return 't';
+      return r.ok ? (r.status+'x'+r.ms) : 'x';
+    }
+    var payload = ['d1', (meta.asn||'x'), (meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x',
+                   code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core)
+                  ].join('-').slice(0, 64);
+    document.getElementById('send').href = 'https://t.me/northlink_bot?start=' + payload;
+    lines.push('код для бота: '+payload);
     document.getElementById('report').value = lines.join('\n');
   }
   document.getElementById('copy').addEventListener('click', function(){
