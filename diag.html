@@ -224,13 +224,23 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
         note('! сеть определить не удалось: ' + (e.name||e) + ' — сам этот сервис тоже за Cloudflare');
         lines.push('оператора определить не удалось (сервис определения тоже за Cloudflare)');
       })
-      .then(function(){ finished('meta'); stageEl.textContent = 'Стучусь на сервер подписки';
-                        return probe('https://link.adminwg.dad/', 9000); })
-      .then(function(r){ res.sub = r; lines.push('сервер подписки: ' + show('sub', r)); finished('sub');
-                         stageEl.textContent = 'Проверяю путь выдачи ключа';
-                         return probeCors('https://link.adminwg.dad/api/sub/diagnostika', 9000); })
-      .then(function(r){
-        res.subapi = r;
+      .then(function(){
+        finished('meta');
+        // Все пять сетевых проверок разом. По очереди худший случай — а он у
+        // нас основной, когда всё молчит до таймаута, — складывался в двадцать
+        // с лишним секунд, и человек не дожидался. Теперь это один таймаут.
+        stageEl.textContent = 'Стучусь на сервер подписки и входы';
+        return Promise.all([
+          probe('https://link.adminwg.dad/', 9000).then(function(r){
+            res.sub = r; lines.push('сервер подписки: ' + show('sub', r)); finished('sub'); }),
+          probeCors('https://link.adminwg.dad/api/sub/diagnostika', 9000).then(function(r){ res.subapi = r; }),
+          probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); finished('waw'); }),
+          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); finished('sto'); }),
+          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); })
+        ]);
+      })
+      .then(function(){
+        var r = res.subapi;
         if (r.ok){ mark('subapi','ok', r.status+' · '+r.ms+' мс');
           note('✓ путь ключа: код ' + r.status + ' за ' + r.ms + ' мс');
           lines.push('путь выдачи ключа: ответил ' + r.status + ' за ' + r.ms + ' мс (404 тут правильный, ключ выдуманный)'); }
@@ -241,15 +251,6 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           note('✕ путь ключа: не ответил за ' + r.ms + ' мс');
           lines.push('путь выдачи ключа: не ответил (' + r.ms + ' мс)'); }
         finished('subapi');
-        // Три проверки по IP идут разом: по очереди они складывались в полминуты,
-        // и человек снимал экран раньше, чем страница доходила до них. А решают
-        // именно они — отвечают ли входы, когда домен подписки уже молчит.
-        stageEl.textContent = 'Проверяю входы и ядро';
-        return Promise.all([
-          probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); finished('waw'); }),
-          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); finished('sto'); }),
-          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); })
-        ]);
       })
       .then(function(){ finish(lines); });
   }
