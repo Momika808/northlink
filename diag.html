@@ -73,7 +73,7 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
   var CHECKS = [
     {id:'meta',  name:'Кто вы для интернета',    hint:'оператор и город по мнению сети'},
     {id:'sub',   name:'Сервер подписки',          hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
-    {id:'subapi',name:'Путь выдачи ключа',        hint:'/api/sub/ — именно он висел у вас'},
+    {id:'subapi',name:'Путь выдачи ключа',        hint:'/api/sub/ — именно он висел у вас; ждём код ответа'},
     {id:'waw',   name:'Вход Варшава',             hint:'70.34.242.53:443'},
     {id:'sto',   name:'Вход Стокгольм',           hint:'70.34.211.141:443'},
     {id:'core',  name:'Ядро Вена',                hint:'159.195.111.13:443 — знаем, что часто не доходит'}
@@ -100,6 +100,20 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
       .catch(function(e){ clearTimeout(timer);
         return {ok:false, ms:Math.round(performance.now()-t0), aborted:(e.name==='AbortError')}; });
   }
+  // Панель шлёт на /api/sub/* заголовок cross-origin-resource-policy: same-origin,
+  // и запрос в режиме no-cors браузер блокирует ВСЕГДА — сеть тут ни при чём.
+  // Зато рядом стоит access-control-allow-origin: *, поэтому обычный CORS-запрос
+  // проходит и возвращает настоящий код ответа. Это и есть доказательство связи.
+  function probeCors(url, ms){
+    var t0 = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, ms||9000);
+    return fetch(url, {mode:'cors', cache:'no-store', signal:ctl.signal})
+      .then(function(r){ clearTimeout(timer);
+        return {ok:true, status:r.status, ms:Math.round(performance.now()-t0)}; })
+      .catch(function(e){ clearTimeout(timer);
+        return {ok:false, ms:Math.round(performance.now()-t0), aborted:(e.name==='AbortError')}; });
+  }
+
   function show(id, r, okFast){
     if (r.ok){ mark(id,'ok', r.ms+' мс'); return 'дошло за '+r.ms+' мс'; }
     if (r.aborted){ mark(id,'bad','тайм-аут'); return 'ТАЙМ-АУТ ('+r.ms+' мс)'; }
@@ -131,8 +145,15 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
       .catch(function(){ mark('meta','warn','не отдал'); lines.push('оператора определить не удалось'); })
       .then(function(){ return probe('https://link.adminwg.dad/'); })
       .then(function(r){ res.sub=r; lines.push('сервер подписки: '+show('sub',r)); })
-      .then(function(){ return probe('https://link.adminwg.dad/api/sub/diagnostika'); })
-      .then(function(r){ res.subapi=r; lines.push('путь выдачи ключа: '+show('subapi',r)); })
+      .then(function(){ return probeCors('https://link.adminwg.dad/api/sub/diagnostika'); })
+      .then(function(r){ res.subapi=r;
+        if (r.ok){ mark('subapi','ok', r.status+' · '+r.ms+' мс');
+          lines.push('путь выдачи ключа: ответил '+r.status+' за '+r.ms+' мс (404 тут правильный, ключ выдуманный)'); }
+        else if (r.aborted){ mark('subapi','bad','тайм-аут');
+          lines.push('путь выдачи ключа: ТАЙМ-АУТ ('+r.ms+' мс)'); }
+        else { mark('subapi','bad','нет связи');
+          lines.push('путь выдачи ключа: не ответил ('+r.ms+' мс)'); }
+      })
       .then(function(){ return probe('https://70.34.242.53/', 7000); })
       .then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); })
       .then(function(){ return probe('https://70.34.211.141/', 7000); })
@@ -142,12 +163,13 @@ a.btn.sec{background:transparent;border:1px solid var(--border);color:var(--text
       .then(finish);
   }
   function finish(){
-    var subDead = res.sub && !res.sub.ok, frontOk = (res.waw&&res.waw.ms<2500)||(res.sto&&res.sto.ms<2500);
+    var keyOk = res.subapi && res.subapi.ok;
+    var subDead = !keyOk, frontOk = (res.waw&&res.waw.ms<2500)||(res.sto&&res.sto.ms<2500);
     var v = document.getElementById('verdict'), txt;
     if (meta.cfDead && subDead){ txt='<b>Похоже на белый список у оператора.</b> Не открылся даже Cloudflare. В таком режиме VPN не поднимется никакими настройками.'; v.className='verdict bad'; }
     else if (subDead && frontOk){ txt='<b>Нашли.</b> Входы VPN отвечают, а сервер подписки — нет. Значит чинить надо выдачу ключа, и это делается на нашей стороне.'; v.className='verdict'; }
     else if (subDead){ txt='<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.'; v.className='verdict bad'; }
-    else { txt='<b>Сейчас всё отвечает.</b> Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
+    else { txt='<b>Сейчас подписка доступна:</b> сервер ответил кодом '+res.subapi.status+' за '+res.subapi.ms+' мс. Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
     v.innerHTML = txt; v.style.display='block';
     lines.push('вердикт страницы: '+v.textContent.trim());
     document.getElementById('report').value = lines.join('\n');
