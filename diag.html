@@ -134,7 +134,7 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
     // Схема ответа должна быть простой и предсказуемой: cloudflare/meta отдаёт
     // поля разного типа, и colo однажды приехал объектом — в отчёт попало
     // «[object Object]». Здесь всё приводим к строке явно.
-    fetch('https://ipwho.is/', {cache:'no-store'})
+    fetch('https://ipwho.is/', {cache:'no-store', signal: AbortSignal.timeout(5000)})
       .then(function(r){ return r.json(); })
       .then(function(j){
         var c = j.connection || {};
@@ -161,12 +161,16 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
         else { mark('subapi','bad','нет связи');
           lines.push('путь выдачи ключа: не ответил ('+r.ms+' мс)'); }
       })
-      .then(function(){ return probe('https://70.34.242.53/', 7000); })
-      .then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); })
-      .then(function(){ return probe('https://70.34.211.141/', 7000); })
-      .then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); })
-      .then(function(){ return probe('https://159.195.111.13/', 7000); })
-      .then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); })
+      // Три проверки по IP идут разом, а не по очереди: последовательно они
+      // складывались в полминуты ожидания, и человек снимал экран раньше, чем
+      // страница досчитывала. Именно эти строки решают, какой ремонт нужен.
+      .then(function(){
+        return Promise.all([
+          probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); }),
+          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); }),
+          probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); })
+        ]);
+      })
       .then(finish);
   }
   function finish(){
@@ -187,6 +191,15 @@ a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);colo
     else if (subDead){ txt='<b>Сеть режет наши адреса.</b> Не отвечает ни подписка, ни входы.'; v.className='verdict bad'; }
     else { txt='<b>Сейчас подписка доступна:</b> сервер ответил кодом '+res.subapi.status+' за '+res.subapi.ms+' мс. Значит сбой плавающий или уже прошёл — пришлите отчёт, посмотрим числа.'; v.className='verdict'; }
     v.innerHTML = txt; v.style.display='block';
+    // Проверки теперь заканчиваются вразнобой, поэтому строки отчёта
+    // раскладываем в понятном человеку порядке, а не в порядке ответов.
+    var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
+                 'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:'];
+    lines.sort(function(a, b){
+      var ia = order.findIndex(function(p){ return a.indexOf(p) === 0; });
+      var ib = order.findIndex(function(p){ return b.indexOf(p) === 0; });
+      return (ia < 0 ? -1 : ia) - (ib < 0 ? -1 : ib);
+    });
     lines.push('вердикт страницы: '+v.textContent.trim());
     document.getElementById('report').value = lines.join('\n');
 
