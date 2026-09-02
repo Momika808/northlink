@@ -320,11 +320,8 @@ footer a:hover{color:var(--text)}
       </div>
 
       <div class="facts">
-        <div><span class="n">2</span><span class="k">независимых входа</span></div>
-        <div><span class="n">443/TCP</span><span class="k">тот же порт, что у HTTPS</span></div>
-        <div><span class="n">1 Гбит/с</span><span class="k">канал каждого узла</span></div>
-        <div><span class="n">Reality</span><span class="k">протокол маскировки</span></div>
-        <div><span class="n">14 дней</span><span class="k">глубина резервных копий</span></div>
+        <div><span class="n">2 входа</span><span class="k">перестал работать один — работает второй</span></div>
+        <div><span class="n">1 ссылка</span><span class="k">телефон, ноутбук и телевизор</span></div>
       </div>
     </div>
   </section>
@@ -359,7 +356,6 @@ footer a:hover{color:var(--text)}
       </div>
     </div>
   </section>
-
 
   <!-- ══════ доступ ══════ -->
   <section id="access">
@@ -492,26 +488,14 @@ footer a:hover{color:var(--text)}
           <h3>Два входа вместо одного</h3>
           <p>Фильтрация блокирует отдельные адреса. Когда один вход перестаёт отвечать, работает второй; заблокированный уничтожается и создаётся заново с новым адресом за минуту.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/></svg></div>
-          <h3>На входах нет секретов</h3>
-          <p>Входной узел расходный: на нём лежит только сертификат, выданный ядром. Ни базы, ни ключей пользователей там нет, поэтому потеря узла ничего не уносит.</p>
-        </article>
+        
         <article class="card reveal">
           <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.2-6.9"/><path d="M21 4v5h-5"/></svg></div>
           <h3>Подписка обновляется сама</h3>
           <p>Приложение периодически перечитывает вашу ссылку. Когда адрес узла меняется, новый конфиг приезжает сам: пересылать и править ничего не нужно.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6.5h11M8 12h11M8 17.5h11"/><path d="M4.2 6.5h.01M4.2 12h.01M4.2 17.5h.01"/></svg></div>
-          <h3>Контур описан кодом</h3>
-          <p>Серверы создаёт OpenTofu, настраивает Ansible, применяется всё через CI. Правок «по SSH на месте», о которых через полгода никто не вспомнит, здесь нет.</p>
-        </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg></div>
-          <h3>Ночные копии с проверкой</h3>
-          <p>База выгружается каждую ночь и хранится две недели. Если дамп вышел пустым, задача падает с ошибкой: непроверенная копия подводит ровно тогда, когда понадобится.</p>
-        </article>
+        
+        
       </div>
     </div>
   </section>
@@ -533,18 +517,12 @@ footer a:hover{color:var(--text)}
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
           <div><b>Логи не ведутся, но это не анонимность</b><p>Серверы арендованы на живого человека и подчиняются законам своих стран. От слежки провайдера и блокировок это защищает, от целенаправленного интереса государства — нет, как и любой другой VPN.</p></div>
         </div>
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Одна ссылка на все ваши устройства</b><p>Телефон, ноутбук, планшет и телевизор работают по одной ссылке. Другу нужна отдельная: по ключу видно, чьё устройство подключилось, а с общей ссылкой в проблеме уже не разобраться.</p></div>
-        </div>
+        
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
           <div><b>Торренты через узлы не качают</b><p>За раздачу с европейского адреса хостингу прилетает жалоба, и узел сносят. Один человек с торрентом оставляет без связи всех остальных.</p></div>
         </div>
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Скорость чаще упирается не в сервер</b><p>У узлов гигабитный канал, но всего одно процессорное ядро и лимит трафика в месяц. Реальный потолок обычно задают домашний провайдер и фильтрация по дороге.</p></div>
-        </div>
+        
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
           <div><b>Белые списки не обходит</b><p>Когда доступ сужают до белого списка, оператор пропускает только перечисленные в нём сервисы — госуслуги, банки, VK, — а остальное режет. Узлы Northlink в списке не значатся, поэтому соединение до них не устанавливается, и маскировка тут не помогает: фильтр смотрит на адрес назначения, а не на вид трафика. Пройти умеют сервисы, у которых серверы стоят внутри самих белых списков; владелец контура пользуется <a href="https://t.me/capybaravpnbot?start=partner_5620916423" rel="noopener">Capybara VPN</a> — ссылка партнёрская, с покупок по ней ему идёт процент.</p></div>
@@ -576,18 +554,12 @@ footer a:hover{color:var(--text)}
           <summary>Перестало подключаться. Что делать первым?</summary>
           <div class="a"><p>Обновите подписку в приложении: почти всегда этого хватает. Скорее всего, вход сменил адрес, и новый конфиг уже лежит по вашей ссылке.</p><p>Если не помогло, переключитесь на второй город вручную. Молчат оба — проблема на стороне контура, напишите об этом.</p><p>Если молчат оба города, откройте <a href="diag.html">проверку связи</a> — она за несколько секунд померит, доходит ли ваша сеть до наших серверов, и пришлёт числа владельцу. Открывать надо на том же интернете, где не работает.</p></div>
         </details>
-        <details>
-          <summary>Почему не WireGuard или Amnezia?</summary>
-          <div class="a"><p>WireGuard опознаётся по первому же пакету: у него характерный заголовок, который не спрятать. Как только фильтрация решает его резать, туннель умирает целиком и сразу.</p><p>Reality решает задачу иначе: соединение выглядит как обычный HTTPS к постороннему сайту, вплоть до сертификата. Отличить его от настоящего трафика, не заблокировав половину интернета, не выходит.</p></div>
-        </details>
+        
         <details>
           <summary>Сайт или приложение просит выключить VPN</summary>
           <div class="a"><p>Так делают российские сервисы, когда видят иностранный адрес. Значит правила обхода до вашего приложения не доехали: у него другой формат подписки.</p><p>Отправьте боту <code>/link</code> и выберите приложение из списка — он выдаст ссылку в нужном формате. На iPhone это Happ: с ним проверено, что банки и VK идут напрямую. Shadowrocket правила из подписки не применяет.</p></div>
         </details>
-        <details>
-          <summary>Что видит мой интернет-провайдер?</summary>
-          <div class="a"><p>Что вы открыли HTTPS-соединение с европейским адресом и сколько байт передали. Какие сайты вы смотрите и что на них делаете, ему не видно: это внутри туннеля.</p></div>
-        </details>
+        
         <details>
           <summary>Сколько устройств можно подключить?</summary>
           <div class="a"><p>Сколько угодно ваших. Одна ссылка добавляется на телефон, ноутбук и телевизор одновременно и работает на всех сразу.</p></div>
@@ -616,10 +588,7 @@ footer a:hover{color:var(--text)}
           <summary>Обход белых списков</summary>
           <div class="a"><p>Нет. Это белый список: всё, чего в нём нет, оператор режет. Наши узлы в него не входят, соединение до них не доходит. Маскировка тут бессильна — фильтр смотрит на адрес назначения и видом трафика не интересуется.</p><p>Проходят только сервисы, у которых серверы стоят внутри самих белых списков — например <a href="https://t.me/capybaravpnbot?start=partner_5620916423" rel="noopener">Capybara VPN</a>, которым пользуется владелец контура (ссылка партнёрская).</p></div>
         </details>
-        <details>
-          <summary>Что будет, когда узел заблокируют?</summary>
-          <div class="a"><p>Второй продолжает работать — ради этого входов и два. Заблокированный уничтожается и создаётся заново с новым адресом, а приложение забирает обновлённый конфиг по той же ссылке. Менять у себя ничего не нужно.</p></div>
-        </details>
+        
       </div>
     </div>
   </section>
