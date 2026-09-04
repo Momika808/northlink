@@ -198,6 +198,19 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .copy-btn{flex:none;padding:.8rem 1.15rem;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .2s,color .2s}
 .copy-btn:hover{border-color:var(--border-strong)}
 .copy-btn[data-done]{color:var(--accent);border-color:var(--accent)}
+.get-row{display:flex;gap:.6rem;margin-top:1.1rem;flex-wrap:wrap}
+.get-row input{
+  flex:1 1 15rem;min-width:0;padding:.85rem 1rem;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font:inherit;font-size:1.02rem;letter-spacing:.02em}
+.get-row input:focus{outline:none;border-color:var(--accent)}
+.get-row button{flex:none}
+.get-out{margin-top:1.1rem}
+.get-out[hidden]{display:none}
+.get-err{margin-top:.9rem;color:#c0392b;font-size:.97rem}
+:root:not([data-theme=light]) .get-err{color:#ff8a7a}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .get-err{color:#ff8a7a}}
+:root[data-theme=dark] .get-err{color:#ff8a7a}
 .sub-box .note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
 
 /* ─────────── вкладки ─────────── */
@@ -380,6 +393,43 @@ footer a:hover{color:var(--text)}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.2 4.3 2.9 11.4c-.9.35-.9 1.6.02 1.9l4.6 1.44 1.75 5.3c.22.66 1.06.85 1.54.35l2.5-2.6 4.66 3.42c.62.46 1.5.12 1.66-.63l3.1-14.6c.17-.8-.6-1.47-1.36-1.17z"/></svg>
           Открыть @northlink_bot
         </a>
+        <p class="note">Телеграм не открывается? <a href="#get">Получите ключ здесь</a> — понадобится код от того, кто вас позвал.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ запасной путь ══════ -->
+  <section id="get">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Запасной путь</span>
+        <h2>Если телеграм не открывается</h2>
+        <p class="lead">Введите код — страница выдаст ссылку на подписку. Код даёт тот, кто вас позвал.</p>
+      </div>
+
+      <div class="sub-box reveal">
+        <span class="label">Код приглашения</span>
+        <div class="get-row">
+          <input id="get-code" type="text" inputmode="latin" autocapitalize="off"
+                 autocomplete="off" spellcheck="false" placeholder="nl-k7m4qp"
+                 aria-label="Код приглашения">
+          <button class="btn btn-primary" id="get-go" type="button">Получить ссылку</button>
+        </div>
+        <p class="note">Код срабатывает один раз. Ссылку после этого можно вставить в любое приложение с этой страницы.</p>
+        <p class="get-err" id="get-err" hidden></p>
+
+        <div class="get-out" id="get-out" hidden>
+          <span class="label">Ваша ссылка</span>
+          <div class="copy-row">
+            <code id="get-url"></code>
+            <button class="copy-btn" type="button" id="get-copy">Скопировать</button>
+          </div>
+          <p class="note">Сохраните её. Дальше выберите приложение во вкладках ниже и вставьте ссылку как подписку.</p>
+          <p class="note" id="get-claim-wrap" hidden>
+            <a id="get-claim" href="#" rel="noopener">Привязать ключ к телеграму</a> —
+            тогда бот пришлёт новый адрес, когда подписка переедет, и выдаст ссылку заново, если она потеряется.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -646,9 +696,9 @@ footer a:hover{color:var(--text)}
   select(tabs[0]);
 
   /* копирование адреса подписки */
-  document.querySelectorAll('[data-copy]').forEach(function(b){
+  function bindCopy(b,getText){
     b.addEventListener('click',function(){
-      var text=b.getAttribute('data-copy');
+      var text=getText?getText():b.getAttribute('data-copy');
       var done=function(){
         var old=b.textContent;
         b.textContent='Скопировано'; b.setAttribute('data-done','');
@@ -666,7 +716,53 @@ footer a:hover{color:var(--text)}
         document.body.removeChild(ta);
       }
     });
-  });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(b){bindCopy(b);});
+
+  /* выдача ключа по коду — запасной путь, когда телеграм не открывается */
+  (function(){
+    var input=document.getElementById('get-code'),
+        go=document.getElementById('get-go'),
+        out=document.getElementById('get-out'),
+        err=document.getElementById('get-err'),
+        urlBox=document.getElementById('get-url'),
+        claim=document.getElementById('get-claim'),
+        claimWrap=document.getElementById('get-claim-wrap'),
+        link='';
+    if(!input||!go) return;
+    bindCopy(document.getElementById('get-copy'),function(){return link;});
+
+    function fail(text){ err.textContent=text; err.hidden=false; out.hidden=true; }
+
+    function send(){
+      var code=input.value.trim().toLowerCase();
+      err.hidden=true;
+      if(!code){ input.focus(); return; }
+      go.disabled=true; go.textContent='Проверяю…';
+      fetch('https://cdn.adminwg.dad/api/issue',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({code:code})
+      }).then(function(r){
+        // Сервер отвечает одинаковым 404 и на неверный код, и на чужой
+        // origin: отличить их здесь нельзя и не нужно.
+        if(!r.ok) throw new Error('bad');
+        return r.json();
+      }).then(function(d){
+        link=d.url; urlBox.textContent=d.url; out.hidden=false;
+        if(d.claim){ claim.href=d.claim; claimWrap.hidden=false; }
+        else { claimWrap.hidden=true; }
+        input.value='';
+      }).catch(function(e){
+        fail(e && e.message==='bad'
+          ? 'Код не подошёл: он неверный или уже использован.'
+          : 'Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
+      }).then(function(){
+        go.disabled=false; go.textContent='Получить ссылку';
+      });
+    }
+    go.addEventListener('click',send);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter') send(); });
+  })();
 
   /* появление блоков */
   var els=[].slice.call(document.querySelectorAll('.reveal'));
