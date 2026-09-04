@@ -415,7 +415,7 @@ footer a:hover{color:var(--text)}
                  aria-label="Код приглашения">
           <button class="btn btn-primary" id="get-go" type="button">Получить ссылку</button>
         </div>
-        <p class="note">Код срабатывает один раз. Ссылку после этого можно вставить в любое приложение с этой страницы.</p>
+        <p class="note">Код срабатывает один раз. Ключ выдаётся на 7 дней; как продлить до года — написано после выдачи.</p>
         <p class="get-err" id="get-err" hidden></p>
 
         <div class="get-out" id="get-out" hidden>
@@ -426,8 +426,10 @@ footer a:hover{color:var(--text)}
           </div>
           <p class="note">Сохраните её. Дальше выберите приложение во вкладках ниже и вставьте ссылку как подписку.</p>
           <p class="note" id="get-claim-wrap" hidden>
-            <a id="get-claim" href="#" rel="noopener">Привязать ключ к телеграму</a> —
-            тогда бот пришлёт новый адрес, когда подписка переедет, и выдаст ссылку заново, если она потеряется.
+            <b>Ключ работает 7 дней.</b> Чтобы он стал годовым, откройте
+            <a id="get-claim" href="#" rel="noopener">эту ссылку в боте</a> и подпишитесь на канал.
+            Адрес подписки при этом не меняется — в приложении править нечего.
+            В канале пишем, когда меняется адрес и что делать, если перестало работать.
           </p>
         </div>
       </div>
@@ -735,6 +737,9 @@ footer a:hover{color:var(--text)}
     function fail(text){ err.textContent=text; err.hidden=false; out.hidden=true; }
 
     function send(){
+      // Второй Enter, пока летит первый запрос, показал бы «код не подошёл»
+      // поверх уже выданной ссылки: код-то к тому моменту погашен.
+      if(go.disabled) return;
       var code=input.value.trim().toLowerCase();
       err.hidden=true;
       if(!code){ input.focus(); return; }
