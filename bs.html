@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Northlink — есть ли белый список</title>
+<meta name="description" content="Проверка за полминуты: оператор сузил доступ до белого списка или сломалось что-то другое.">
+<style>
+:root{--bg:#060910;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.10);--text:#e8eef7;--muted:#8d9bb0;
+  --ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451;--accent:#34e5a0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:22px 16px 60px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:1.42rem;letter-spacing:-.02em;margin-bottom:.5rem}
+.lead{color:var(--muted);font-size:.97rem;margin-bottom:1.2rem}
+
+/* Условия проверки. Без них результат врёт, поэтому они не примечание,
+   а первое, что человек видит. */
+.pre{border:1px solid var(--border);border-radius:16px;background:var(--surface);
+  padding:14px 16px;margin-bottom:1.1rem}
+.pre b{display:block;margin-bottom:.5rem;font-size:.96rem}
+.pre ul{list-style:none;font-size:.92rem;color:var(--muted)}
+.pre li{padding-left:1.35rem;position:relative;margin-top:.42rem}
+.pre li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+
+.go{display:block;width:100%;padding:15px;border-radius:14px;border:none;
+  background:var(--accent);color:#04120c;font:inherit;font-weight:700;font-size:1.02rem;
+  cursor:pointer;margin-bottom:1.1rem}
+.go:disabled{opacity:.5;cursor:default}
+
+.prog{margin-bottom:1rem;display:none}
+.prog .bar{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.prog .txt{margin-top:.5rem;font-size:.86rem;color:var(--muted)}
+
+.group{margin-top:1rem}
+.group>h2{font-size:.8rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 .5rem .2rem;font-weight:640}
+.card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row .name{flex:1;min-width:0;font-size:.94rem}
+.row .name span{display:block;color:var(--muted);font-size:.82rem;
+  font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.35}
+.dot.run{animation:pulse 1s infinite}
+.dot.ok{background:var(--ok);opacity:1}
+.dot.bad{background:var(--bad);opacity:1}
+@keyframes pulse{50%{opacity:.25}}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--muted);flex:none}
+
+.verdict{margin-top:18px;padding:16px;border-radius:16px;border:1px solid var(--border);
+  background:var(--surface);display:none}
+.verdict h2{font-size:1.12rem;margin-bottom:.55rem}
+.verdict p{font-size:.95rem;color:var(--muted);margin-top:.5rem}
+.verdict.bs{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.verdict.bs h2{color:var(--warn)}
+.verdict.blocked{border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.verdict.blocked h2{color:var(--bad)}
+.verdict.fine{border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.verdict.fine h2{color:var(--ok)}
+
+.copy{margin-top:14px;display:flex;gap:.6rem;flex-wrap:wrap}
+.copy button{flex:1 1 12rem;padding:12px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font:inherit;font-weight:600;font-size:.92rem;cursor:pointer}
+.copy button[data-done]{color:var(--accent);border-color:var(--accent)}
+
+.save{margin-top:22px;padding:14px 16px;border-radius:14px;border:1px dashed var(--border);
+  font-size:.9rem;color:var(--muted)}
+.save b{color:var(--text)}
+.foot{margin-top:20px;font-size:.83rem;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Есть ли белый список</h1>
+<p class="lead">Проверка за полминуты. Отвечает на один вопрос: оператор сузил доступ до
+разрешённого перечня или сломалось что-то другое.</p>
+
+<div class="pre">
+  <b>Перед проверкой</b>
+  <ul>
+    <li><b>Выключите VPN.</b> Через туннель проходит всё, и проверка покажет ложное «работает».</li>
+    <li><b>Выключите Wi-Fi</b>, оставьте мобильный интернет. Ограничения касаются только его; проводной и домашний Wi-Fi не трогают.</li>
+    <li>Проверка ничего не отправляет наружу. Она лишь смотрит, до кого получается достучаться.</li>
+  </ul>
+</div>
+
+<button class="go" id="go" type="button">Проверить</button>
+
+<div class="prog" id="prog">
+  <div class="bar"><i id="bar"></i></div>
+  <div class="txt"><b id="count">0 / 0</b> проверено</div>
+</div>
+
+<div id="groups"></div>
+
+<div class="verdict" id="verdict">
+  <h2 id="vtitle"></h2>
+  <div id="vbody"></div>
+  <div class="copy" id="copyrow" style="display:none">
+    <button type="button" id="copybtn">Скопировать результат</button>
+  </div>
+</div>
+
+<div class="save">
+  <b>Сохраните этот файл заранее.</b> Под ограничениями скачать его будет неоткуда:
+  страница лежит на зарубежном адресе, а он в перечень не входит. В браузере — «Поделиться»
+  или «Сохранить как», дальше открывать с диска. Интернет для самой проверки не нужен.
+</div>
+
+<p class="foot">Northlink</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // Три группы. Вывод строится не по отдельному адресу, а по тому, какие
+  // группы отвечают: белый список без остального мира и есть ограничение.
+  var GROUPS = [
+    {key:'white', title:'Разрешено при ограничениях', items:[
+      {id:'gos',  name:'Госуслуги',  url:'https://www.gosuslugi.ru/favicon.ico'},
+      {id:'ya',   name:'Яндекс',     url:'https://ya.ru/favicon.ico'},
+      {id:'vk',   name:'VK',         url:'https://vk.com/favicon.ico'}
+    ]},
+    {key:'world', title:'Обычный интернет', items:[
+      {id:'ex',   name:'example.com',  url:'https://example.com/favicon.ico'},
+      {id:'cf',   name:'Cloudflare',   url:'https://www.cloudflare.com/favicon.ico'},
+      {id:'gh',   name:'GitHub',       url:'https://github.com/favicon.ico'}
+    ]},
+    {key:'nl', title:'Northlink', items:[
+      {id:'cdn',  name:'Адрес подписки', url:'https://cdn.adminwg.dad/favicon.ico'},
+      {id:'f1',   name:'Вход, Стокгольм', url:'https://70.34.211.141/'},
+      {id:'f2',   name:'Вход, Варшава',   url:'https://70.34.242.53/'}
+    ]}
+  ];
+
+  var ALL = GROUPS.reduce(function(a,g){ return a.concat(g.items); }, []);
+  var TIMEOUT = 6000;
+  var res = {}, done = 0;
+  var goEl = document.getElementById('go'), progEl = document.getElementById('prog'),
+      barEl = document.getElementById('bar'), countEl = document.getElementById('count'),
+      vEl = document.getElementById('verdict');
+
+  // Разметка групп рисуется из списка: добавить адрес — одна строка выше.
+  document.getElementById('groups').innerHTML = GROUPS.map(function(g){
+    return '<div class="group"><h2>' + g.title + '</h2><div class="card">' +
+      g.items.map(function(i){
+        return '<div class="row"><i class="dot" id="d-'+i.id+'"></i>' +
+               '<div class="name">'+i.name+'</div>' +
+               '<div class="val" id="v-'+i.id+'">—</div></div>';
+      }).join('') + '</div></div>';
+  }).join('');
+
+  function mark(id, state, text){
+    var d = document.getElementById('d-'+id);
+    d.className = 'dot' + (state ? ' '+state : '');
+    document.getElementById('v-'+id).textContent = text;
+  }
+
+  // Прочитать чужой ответ нельзя, и не нужно: важно, дошёл ли пакет.
+  // Отказ прилетает быстро, отброшенный пакет молчит до таймаута —
+  // по времени они и различаются.
+  function probe(url){
+    var start = Date.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, TIMEOUT);
+    return fetch(url, {mode:'no-cors', cache:'no-store', signal:ctl.signal})
+      .then(function(){ clearTimeout(timer);
+        return {reached:true, ms:Date.now()-start}; })
+      .catch(function(e){ clearTimeout(timer);
+        var ms = Date.now()-start;
+        // Быстрый отказ значит, что до сервера дошли: он ответил, просто
+        // не тем. Молчание до таймаута — пакет не дошёл.
+        return {reached: e.name !== 'AbortError' && ms < 2500, ms:ms,
+                silent: e.name === 'AbortError'};
+      });
+  }
+
+  function step(){
+    done++;
+    barEl.style.width = Math.round(done/ALL.length*100) + '%';
+    countEl.textContent = done + ' / ' + ALL.length;
+  }
+
+  function reached(key){
+    return GROUPS.filter(function(g){ return g.key===key; })[0].items
+      .filter(function(i){ return res[i.id] && res[i.id].reached; }).length;
+  }
+
+  function verdict(){
+    var w = reached('white'), world = reached('world'), nl = reached('nl');
+    var cls, title, body;
+
+    if (w === 0 && world === 0 && nl === 0){
+      cls = 'blocked'; title = 'Связи нет вообще';
+      body = '<p>Не отвечает никто, включая госуслуги. Это не фильтр, а отсутствие сети: ' +
+             'проверьте, есть ли мобильный интернет, и не кончился ли пакет трафика.</p>';
+    } else if (w >= 2 && world === 0){
+      cls = 'bs'; title = 'Да, белый список';
+      body = '<p>Разрешённые сервисы отвечают, остальной интернет молчит. Оператор сузил ' +
+             'доступ до перечня — это делают при ограничениях, обычно на несколько часов.</p>' +
+             '<p><b>Northlink здесь не поможет, и дело не в настройке.</b> Фильтр смотрит на ' +
+             'адрес назначения, а наших узлов в перечне нет: соединение до них не ' +
+             'устанавливается вовсе. Менять приложение или протокол бесполезно.</p>' +
+             '<p>Проходят только сервисы, чьи серверы стоят внутри самого перечня. Такой ' +
+             'сервис нужно ставить <b>заранее</b>: сейчас вы его не скачаете — магазин ' +
+             'приложений тоже не отвечает.</p>';
+    } else if (w >= 1 && world >= 1 && nl === 0){
+      cls = 'blocked'; title = 'Белого списка нет, но Northlink не отвечает';
+      body = '<p>Обычные сайты открываются, а наши адреса молчат. Значит ограничение ' +
+             'не общее, а именно наш вход перестал проходить у вашего оператора.</p>' +
+             '<p>Напишите владельцу контура и приложите результат кнопкой ниже — по нему ' +
+             'видно, какой из входов отвалился.</p>';
+    } else if (w >= 1 && world >= 1 && nl >= 1){
+      cls = 'fine'; title = 'Ограничений нет';
+      body = '<p>Отвечают и разрешённые сервисы, и обычный интернет, и наши адреса. ' +
+             'Фильтр ни при чём — ищите причину в приложении или на устройстве.</p>' +
+             '<p>Если VPN всё же не поднимается: выключите и включите его заново, ' +
+             'проверьте, не истекла ли подписка, возьмите ссылку в боте заново.</p>';
+    } else {
+      cls = ''; title = 'Картина неоднозначная';
+      body = '<p>Ответы вразнобой. Чаще всего так бывает, когда VPN остался включён ' +
+             'или проверка идёт по Wi-Fi. Выключите туннель, оставьте мобильный ' +
+             'интернет и проверьте ещё раз.</p>';
+    }
+
+    vEl.className = 'verdict ' + cls;
+    document.getElementById('vtitle').textContent = title;
+    document.getElementById('vbody').innerHTML = body;
+    document.getElementById('copyrow').style.display = (cls === 'blocked' || cls === 'bs') ? '' : 'none';
+    vEl.style.display = 'block';
+    vEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    window.__report = 'Проверка белого списка\n' +
+      new Date().toISOString().slice(0,16).replace('T',' ') + '\n' +
+      'Итог: ' + title + '\n' +
+      GROUPS.map(function(g){
+        return g.title + ': ' + g.items.map(function(i){
+          var r = res[i.id] || {};
+          return i.name + ' ' + (r.reached ? 'дошло ' + r.ms + ' мс'
+                                           : (r.silent ? 'молчит' : 'отказ ' + r.ms + ' мс'));
+        }).join('; ');
+      }).join('\n');
+  }
+
+  function run(){
+    res = {}; done = 0;
+    goEl.disabled = true; goEl.textContent = 'Проверяю…';
+    progEl.style.display = 'block'; vEl.style.display = 'none';
+    barEl.style.width = '0%'; countEl.textContent = '0 / ' + ALL.length;
+    ALL.forEach(function(i){ mark(i.id, 'run', '…'); });
+
+    Promise.all(ALL.map(function(i){
+      return probe(i.url).then(function(r){
+        res[i.id] = r;
+        mark(i.id, r.reached ? 'ok' : 'bad',
+             r.reached ? r.ms + ' мс' : (r.silent ? 'молчит' : 'отказ'));
+        step();
+      });
+    })).then(function(){
+      goEl.disabled = false; goEl.textContent = 'Проверить ещё раз';
+      verdict();
+    });
+  }
+
+  goEl.addEventListener('click', run);
+
+  document.getElementById('copybtn').addEventListener('click', function(){
+    var b = this, text = window.__report || '';
+    var done = function(){
+      var old = b.textContent;
+      b.textContent = 'Скопировано'; b.setAttribute('data-done','');
+      setTimeout(function(){ b.textContent = old; b.removeAttribute('data-done'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly','');
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){}
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
