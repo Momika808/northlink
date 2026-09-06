@@ -418,6 +418,11 @@ footer a:hover{color:var(--text)}
         <p class="note">Код срабатывает один раз. Ключ выдаётся на 7 дней; как продлить до года — написано после выдачи.</p>
         <p class="get-err" id="get-err" hidden></p>
 
+        <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
+          <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
+          на другом устройстве её не будет.
+          <a href="#" id="get-forget">Забыть её здесь</a>.</p>
+
         <div class="get-out" id="get-out" hidden>
           <span class="label">Ваша ссылка</span>
           <div class="copy-row">
@@ -731,8 +736,45 @@ footer a:hover{color:var(--text)}
         urlBox=document.getElementById('get-url'),
         claim=document.getElementById('get-claim'),
         claimWrap=document.getElementById('get-claim-wrap'),
+        again=document.getElementById('get-again'),
+        when=document.getElementById('get-when'),
+        forget=document.getElementById('get-forget'),
+        KEY='northlink.issued',
         link='';
     if(!input||!go) return;
+
+    // Код одноразовый, и показ был одноразовым тоже: человек закрывал
+    // страницу и терял ссылку насовсем. Помним её в браузере — не ради
+    // удобства, а потому что взять её больше неоткуда.
+    //
+    // localStorage привязан к origin, устройству и браузеру. На сервер
+    // ничего не уходит, чужой прочитать не может. Не переживёт приватный
+    // режим, очистку данных сайта и переход в другой браузер — о чём
+    // страница и предупреждает, а не делает вид, что ссылка вечная.
+    function save(d){
+      try { localStorage.setItem(KEY, JSON.stringify(
+        {url:d.url, claim:d.claim||'', at:new Date().toISOString()})); } catch(e){}
+    }
+    function load(){
+      try { var v=localStorage.getItem(KEY); return v?JSON.parse(v):null; } catch(e){ return null; }
+    }
+
+    function показать(d, старое){
+      link=d.url; urlBox.textContent=d.url; out.hidden=false;
+      if(d.claim){ claim.href=d.claim; claimWrap.hidden=false; }
+      else { claimWrap.hidden=true; }
+      if(старое && d.at){
+        when.textContent=new Date(d.at).toLocaleDateString('ru-RU',
+          {day:'numeric', month:'long'});
+        again.hidden=false;
+      } else { again.hidden=true; }
+    }
+
+    forget.addEventListener('click',function(e){
+      e.preventDefault();
+      try { localStorage.removeItem(KEY); } catch(err){}
+      out.hidden=true; again.hidden=true; link='';
+    });
     bindCopy(document.getElementById('get-copy'),function(){return link;});
 
     function fail(text){ err.textContent=text; err.hidden=false; out.hidden=true; }
@@ -754,9 +796,8 @@ footer a:hover{color:var(--text)}
         if(!r.ok) throw new Error('bad');
         return r.json();
       }).then(function(d){
-        link=d.url; urlBox.textContent=d.url; out.hidden=false;
-        if(d.claim){ claim.href=d.claim; claimWrap.hidden=false; }
-        else { claimWrap.hidden=true; }
+        save(d);
+        показать(d, false);
         input.value='';
       }).catch(function(e){
         fail(e && e.message==='bad'
@@ -768,6 +809,10 @@ footer a:hover{color:var(--text)}
     }
     go.addEventListener('click',send);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter') send(); });
+
+    // Показываем сразу при заходе: человек за этим и вернулся.
+    var прежнее=load();
+    if(прежнее && прежнее.url) показать(прежнее, true);
   })();
 
   /* появление блоков */
