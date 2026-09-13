@@ -28,9 +28,13 @@
   `https://cdn.adminwg.dad/api/chat/start` (бот northlink), в ответ приходят
   ссылка и сессия Matrix (`matrix.adminwg.dad`); дальше страница говорит с
   сервером сама — `/sync` длинным опросом, `PUT …/send`, картинки с жетоном.
-  Библиотек нет, API клиента Matrix вызывается голым `fetch`. Кнопки под
-  сообщениями бота — поле `dad.adminwg.northlink.choices` в событии,
-  «скопировать» — `…copy`. Сессия и ссылка лежат в `localStorage`
+  Библиотек нет, API клиента Matrix вызывается голым `fetch`. Кнопки — как
+  в Telegram: inline-клавиатура под сообщением бота (поле
+  `dad.adminwg.northlink.choices`: ряды кнопок, стили primary/success/danger,
+  url со стрелкой; после нажатия — спиннер, бот правит сообщение через
+  `m.replace`) и постоянная 2×2 над полем ввода (событие состояния комнаты
+  `dad.adminwg.northlink.keyboard`, сворачивается значком). Нажатие уходит
+  как `body`=подпись и поле `dad.adminwg.northlink.press`. Сессия и ссылка лежат в `localStorage`
   (`northlink.matrix`, `northlink.issued`) — только в этом браузере.
   Два адреса, куда страница ходит после действия человека, — единственные
   внешние запросы; при загрузке их по-прежнему ноль.

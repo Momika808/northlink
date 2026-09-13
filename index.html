@@ -41,6 +41,7 @@ document.documentElement.className+=' js';
   --shadow:0 1px 2px rgba(10,20,32,.05), 0 18px 40px -18px rgba(10,20,32,.22);
   --code-bg:rgba(9,18,32,.055);
   --grid:rgba(9,18,32,.055);
+  --danger:#c62f2f;
 }
 [data-theme="dark"]{
   --bg:#060910; --bg-soft:#0a0f19;
@@ -54,6 +55,7 @@ document.documentElement.className+=' js';
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 28px 60px -28px rgba(0,0,0,.85);
   --code-bg:rgba(255,255,255,.055);
   --grid:rgba(255,255,255,.045);
+  --danger:#ff7b72;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -214,24 +216,68 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .sub-box .note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
 
 /* ─────────── чат с ботом ─────────── */
-.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column}
+.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column;height:min(76vh,640px)}
 .chat[hidden]{display:none}
 .chat-head{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.95rem}
 .chat-head b{font-weight:640}
 .chat-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .chat-dot[data-on]{background:var(--accent)}
 .chat-status{margin-left:auto;font-size:.85rem;color:var(--muted)}
-.chat-status a{color:var(--muted)}
-.chat-log{height:min(58vh,440px);overflow-y:auto;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.5rem;scroll-behavior:smooth}
+.chat-log{flex:1 1 auto;min-height:160px;overflow-y:auto;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.5rem;scroll-behavior:smooth}
 .msg{max-width:86%;padding:.6rem .85rem;border-radius:14px 14px 14px 5px;background:var(--surface-2);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.96rem;line-height:1.45}
 .msg.me{align-self:flex-end;border-radius:14px 14px 5px 14px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .msg.me[data-pending]{opacity:.6}
 .msg a{color:var(--accent-2)}
 .msg img{display:block;max-width:220px;width:100%;border-radius:10px;margin-top:.15rem}
-.msg .copy-btn{display:inline-block;margin-top:.55rem;padding:.4rem .8rem;font-size:.85rem}
-.chips{display:flex;flex-wrap:wrap;gap:.4rem;max-width:86%}
-.chip{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:999px;padding:.35rem .8rem;font:inherit;font-size:.88rem;cursor:pointer;transition:border-color .2s,background .2s}
-.chip:hover{border-color:var(--accent);background:var(--surface-2)}
+/* Сообщение с кнопками: пузырь и под ним клавиатура во всю его ширину —
+   как inline-клавиатура в Telegram. Ряды, стили primary/success/danger,
+   url со стрелкой, ожидание ответа — спиннер. */
+.mw{display:flex;flex-direction:column;gap:4px;width:fit-content;max-width:86%}
+.mw .msg{align-self:stretch;max-width:none}
+.ikb{display:flex;flex-direction:column;gap:4px}
+.ikb-row{display:flex;gap:4px}
+.ikb-btn{flex:1 1 0;min-width:0;min-height:38px;padding:0 .75rem;
+  display:inline-flex;align-items:center;justify-content:center;position:relative;
+  border:0;border-radius:12px;font:inherit;font-size:.94rem;font-weight:500;line-height:1.2;
+  color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  cursor:pointer;text-decoration:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background .15s,transform .08s}
+.ikb-btn:hover{background:color-mix(in srgb,var(--text) 13%,transparent)}
+.ikb-btn:active{transform:scale(.98)}
+.ikb-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}
+.ikb-btn[aria-disabled=true]{opacity:.5;cursor:default;pointer-events:none}
+.ikb-btn[data-style=primary]{color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)}
+.ikb-btn[data-style=primary]:hover{background:color-mix(in srgb,var(--accent-2) 22%,transparent)}
+.ikb-btn[data-style=success]{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.ikb-btn[data-style=success]:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.ikb-btn[data-style=danger]{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.ikb-btn[data-style=danger]:hover{background:color-mix(in srgb,var(--danger) 22%,transparent)}
+.ikb-url{padding-right:1.4rem}
+.ikb-url::after{content:"↗";position:absolute;top:3px;right:7px;font-size:.7rem;line-height:1;opacity:.65}
+.ikb-btn[aria-busy=true]{color:transparent}
+.ikb-btn[aria-busy=true]::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px;
+  border:2px solid color-mix(in srgb,var(--text) 35%,transparent);border-top-color:var(--text);border-radius:50%;animation:ikb-spin .7s linear infinite}
+@keyframes ikb-spin{to{transform:rotate(360deg)}}
+.ikb-copy[data-done]{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+@media(pointer:coarse){.ikb-btn{min-height:44px}}
+@media(max-width:480px){.ikb-btn{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;padding-top:.35rem;padding-bottom:.35rem}}
+@media(prefers-reduced-motion:reduce){.ikb-btn{transition:none}.ikb-btn:active{transform:none}
+  .ikb-btn[aria-busy=true]::after{animation:none;border:0;content:"…";color:var(--text);width:auto;height:auto;margin:0;transform:translate(-50%,-50%)}}
+/* Постоянная клавиатура над полем ввода — как reply keyboard в Telegram. */
+.rk{display:flex;flex-direction:column;gap:6px;padding:8px;border-top:1px solid var(--border);background:var(--surface)}
+.rk[hidden]{display:none}
+.rk-row{display:flex;gap:6px}
+.rk-btn{flex:1 1 0;min-width:0;min-height:44px;padding:.45rem .6rem;border:0;border-radius:10px;
+  background:var(--bg-soft);color:var(--text);box-shadow:var(--shadow-sm);font:inherit;font-size:1rem;font-weight:500;line-height:1.25;
+  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-wrap:anywhere;transition:background .15s}
+.rk-btn:hover{background:var(--surface-2)}
+.rk-btn:active{background:color-mix(in srgb,var(--text) 10%,transparent)}
+.kb-toggle{flex:none;width:44px;min-height:44px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.kb-toggle[hidden]{display:none}
+.kb-toggle[aria-expanded=true]{color:var(--accent);border-color:var(--accent)}
+.kb-toggle svg{width:20px;height:20px}
+.chat-toast{position:sticky;bottom:0;align-self:center;background:var(--text);color:var(--bg);border-radius:10px;padding:.45rem .8rem;font-size:.85rem;pointer-events:none}
 .chat-typing{font-size:.85rem;color:var(--muted);padding:0 1rem .5rem;min-height:1.3rem}
 .chat-row{display:flex;gap:.6rem;padding:.75rem;border-top:1px solid var(--border)}
 .chat-row input{
@@ -239,6 +285,7 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
   border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:1rem}
 .chat-row input:focus{outline:none;border-color:var(--accent)}
 .chat-row button{flex:none;padding:.75rem 1.1rem}
+@media(max-width:420px){.chat-row{gap:.4rem;padding:.6rem}.chat-row .btn{padding:.75rem .9rem}.rk-btn{font-size:.92rem}}
 .chat-err{padding:.5rem 1rem .8rem;font-size:.9rem;color:#c0392b}
 .chat-err[hidden]{display:none}
 :root:not([data-theme=light]) .chat-err{color:#ff8a7a}
@@ -481,9 +528,14 @@ footer a:hover{color:var(--text)}
           <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Сообщения"></div>
           <div class="chat-typing" id="chat-typing" aria-live="polite"></div>
           <p class="chat-err" id="chat-err" hidden></p>
+          <div class="rk" id="chat-kb" role="group" aria-label="Быстрые команды" hidden></div>
           <form class="chat-row" id="chat-form">
             <input id="chat-text" type="text" autocomplete="off" placeholder="Напишите боту…"
                    aria-label="Сообщение боту" maxlength="2000">
+            <button type="button" class="kb-toggle" id="chat-kb-toggle" aria-expanded="true"
+                    aria-controls="chat-kb" aria-label="Скрыть кнопки" hidden>
+              <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="3" width="7" height="6" rx="1.5"/><rect x="2" y="11" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/></svg>
+            </button>
             <button class="btn btn-primary" type="submit" id="chat-send">Отправить</button>
           </form>
         </div>
@@ -871,9 +923,12 @@ footer a:hover{color:var(--text)}
 
     /* ── чат: клиент Matrix на голом fetch ──
        Библиотек нет по правилу страницы (ни одного внешнего запроса при
-       загрузке); нужных вызовов API клиента — пять: sync, send, typing,
-       media, и всё. Учётку и комнату завёл бот, регистрация и приглашения
-       странице не нужны. */
+       загрузке); нужных вызовов API клиента — sync, send, media, и всё.
+       Учётку и комнату завёл бот, регистрация и приглашения странице не
+       нужны. Кнопки — как в Telegram: inline-клавиатура под сообщением
+       бота (поле choices в событии) и постоянная над полем ввода (событие
+       состояния комнаты). Нажатие шлёт подпись кнопки текстом, а команду —
+       полем press; бот правит своё сообщение стандартной правкой Matrix. */
     var chat=(function(){
       var box=document.getElementById('chat'),
           log=document.getElementById('chat-log'),
@@ -883,8 +938,11 @@ footer a:hover{color:var(--text)}
           status=document.getElementById('chat-status'),
           cform=document.getElementById('chat-form'),
           ctext=document.getElementById('chat-text'),
-          csend=document.getElementById('chat-send'),
-          s=null, since=null, alive=false, seen={}, pending={}, run=0,
+          kb=document.getElementById('chat-kb'),
+          kbToggle=document.getElementById('chat-kb-toggle'),
+          NS='dad.adminwg.northlink.',
+          KB_OPEN='nl.kb.open',
+          s=null, since=null, alive=false, seen={}, pending={}, byId={}, run=0,
           blobs=[];
 
       function api(path, opts){
@@ -912,35 +970,105 @@ footer a:hover{color:var(--text)}
           return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; });
       }
       function scroll(){ log.scrollTop=log.scrollHeight; }
+      function toast(text){
+        var el=document.createElement('div'); el.className='chat-toast'; el.setAttribute('role','status');
+        el.textContent=text; log.appendChild(el); scroll();
+        setTimeout(function(){ el.remove(); },1500);
+      }
+
+      /* Кнопки под сообщением: поле choices — ряды кнопок; одиночная кнопка
+         вместо ряда (старые сообщения) — ряд целиком. Прежнее поле copy —
+         первым рядом «Скопировать ссылку». Всё через белые списки: подписи
+         только текстом, ссылки только http(s), стиль из трёх известных. */
+      function rowsOf(c){
+        try{
+          var ch=c[NS+'choices'], rows=[], total=0;
+          (Array.isArray(ch)?ch:[]).forEach(function(x){
+            var r=(Array.isArray(x)?x:[x]).filter(function(o){
+              return o&&typeof o==='object'&&typeof o.label==='string'&&o.label; }).slice(0,8);
+            if(r.length&&total<100){ rows.push(r.slice(0,100-total)); total+=r.length; }
+          });
+          var cp=c[NS+'copy'];
+          if(typeof cp==='string'&&cp&&!rows.some(function(r){return r.some(function(o){return o.copy;});}))
+            rows.unshift([{label:'Скопировать ссылку', copy:cp, style:'primary'}]);
+          return rows;
+        }catch(e){ return []; }
+      }
+
+      function keyboardFor(wrapper, rows){
+        var ikb=document.createElement('div'); ikb.className='ikb';
+        ikb.setAttribute('role','group'); ikb.setAttribute('aria-label','Кнопки к сообщению');
+        rows.forEach(function(r){
+          var row=document.createElement('div'); row.className='ikb-row';
+          r.forEach(function(o){
+            var label=o.label.length>64?o.label.slice(0,63)+'…':o.label, el;
+            if(typeof o.copy==='string'&&o.copy){
+              el=document.createElement('button'); el.type='button'; el.className='ikb-btn ikb-copy';
+              el.setAttribute('data-copy',o.copy); bindCopy(el);
+              el.addEventListener('click',function(){ toast('Скопировано'); });
+            } else if(typeof o.url==='string'&&/^https?:\/\//i.test(o.url)){
+              el=document.createElement('a'); el.className='ikb-btn ikb-url';
+              el.href=o.url; el.target='_blank'; el.rel='noopener noreferrer';
+              el.setAttribute('aria-label',o.label+', откроется в новой вкладке');
+            } else if(typeof o.text==='string'&&o.text){
+              el=document.createElement('button'); el.type='button'; el.className='ikb-btn';
+              el.setAttribute('data-text',o.text);
+              el.addEventListener('click',function(){ pressInline(wrapper, el, o); });
+            } else {
+              el=document.createElement('button'); el.type='button'; el.className='ikb-btn';
+              el.setAttribute('aria-disabled','true');
+            }
+            if(o.style==='primary'||o.style==='success'||o.style==='danger') el.setAttribute('data-style',o.style);
+            el.textContent=label; if(label!==o.label) el.title=o.label;
+            row.appendChild(el);
+          });
+          ikb.appendChild(row);
+        });
+        return ikb;
+      }
+
+      // Пока бот отвечает — спиннер на нажатой, соседи неактивны (как в TG).
+      function pressInline(wrapper, btn, o){
+        if(wrapper.querySelector('[aria-busy=true]')) return;
+        btn.setAttribute('aria-busy','true');
+        wrapper.querySelectorAll('.ikb-btn').forEach(function(b){
+          if(b!==btn){ b.setAttribute('aria-disabled','true'); b.tabIndex=-1; } });
+        send(o.label, o.label, {press:{event_id:wrapper.getAttribute('data-eid'), text:o.text}})
+          .then(function(ok){
+            // Бот не прислал правку за 8 с — кнопки снова живые, как
+            // нередактированная клавиатура в Telegram.
+            if(ok) setTimeout(function(){ if(wrapper.isConnected) release(wrapper); },8000);
+            else release(wrapper);
+          });
+      }
+      function release(wrapper){
+        wrapper.querySelectorAll('.ikb-btn').forEach(function(b){
+          b.removeAttribute('aria-busy');
+          if(b.hasAttribute('data-text')||b.hasAttribute('data-copy')||b.href){
+            b.removeAttribute('aria-disabled'); b.removeAttribute('tabindex'); }
+        });
+      }
 
       function bubble(ev){
         var c=ev.content||{}, mine=ev.sender===s.user_id, el;
+        if(!mine){
+          // Финальный текст после правок ботом: сервер кладёт последнюю
+          // правку целиком в unsigned.m.relations.m.replace.
+          var rel=ev.unsigned&&ev.unsigned['m.relations']&&ev.unsigned['m.relations']['m.replace'];
+          if(rel&&rel.content&&rel.content['m.new_content']) c=rel.content['m.new_content'];
+        }
         if(c.msgtype==='m.text'){
+          var rows=mine?[]:rowsOf(c);
           el=document.createElement('div');
           el.className='msg'+(mine?' me':'');
           el.innerHTML=rich(c.body||'');
-          if(c['dad.adminwg.northlink.copy']){
-            var b=document.createElement('button');
-            b.type='button'; b.className='copy-btn'; b.textContent='Скопировать ссылку';
-            b.setAttribute('data-copy', c['dad.adminwg.northlink.copy']);
-            bindCopy(b); el.appendChild(document.createElement('br')); el.appendChild(b);
-          }
-          log.appendChild(el);
-          var ch=c['dad.adminwg.northlink.choices'];
-          if(!mine && ch && ch.length){
-            var row=document.createElement('div'); row.className='chips';
-            ch.forEach(function(o){
-              var btn=document.createElement('button'); btn.type='button'; btn.className='chip';
-              btn.textContent=o.label||o.text||'';
-              btn.addEventListener('click',function(){
-                if(o.url) window.open(o.url,'_blank','noopener');
-                else if(o.text) send(o.text, o.label);
-              });
-              row.appendChild(btn);
-            });
-            log.appendChild(row);
-          }
-        } else if(c.msgtype==='m.image' && c.url && c.url.indexOf('mxc://')===0){
+          if(!rows.length){ log.appendChild(el); return el; }
+          var w=document.createElement('div'); w.className='mw'; w.setAttribute('data-eid',ev.event_id||'');
+          w.appendChild(el); w.appendChild(keyboardFor(w, rows)); log.appendChild(w);
+          if(ev.event_id) byId[ev.event_id]=w;
+          return w;
+        }
+        if(c.msgtype==='m.image' && c.url && c.url.indexOf('mxc://')===0){
           // Медиа Synapse отдаёт только с жетоном — обычный <img src> не
           // пройдёт. Тянем как blob и подставляем.
           el=document.createElement('div'); el.className='msg'+(mine?' me':'');
@@ -952,23 +1080,71 @@ footer a:hover{color:var(--text)}
             .then(function(r){ if(!r.ok) throw 0; return r.blob(); })
             .then(function(bl){ var u=URL.createObjectURL(bl); blobs.push(u); img.src=u; scroll(); })
             .catch(function(){ el.remove(); });
+          return el;
         }
-        return el;
+        return null;
       }
 
-      function take(ev){
+      // Правка ботом своего сообщения: новый текст, новая клавиатура (или без неё).
+      function applyEdit(ev){
+        var c=ev.content||{}, rel=c['m.relates_to']||{}, nc=c['m.new_content']||{}, w=byId[rel.event_id];
+        if(!w){ bubble({sender:ev.sender, event_id:ev.event_id, content:nc}); return; }
+        var msg=w.querySelector('.msg'), old=w.querySelector('.ikb'), hadFocus=old&&old.contains(document.activeElement);
+        msg.innerHTML=rich(nc.body||'');
+        if(old) old.remove();
+        var rows=rowsOf(nc);
+        if(rows.length) w.appendChild(keyboardFor(w, rows));
+        else if(hadFocus) ctext.focus({preventScroll:true});
+      }
+
+      function take(ev){ try{ takeInner(ev); }catch(e){ if(window.console) console.warn(e); } }
+      function takeInner(ev){
+        if(ev.type===NS+'keyboard'){ if(ev.sender===s.bot) replyKeyboard(ev.content||{}); return; }
+        if(ev.type!=='m.room.message') return;
         if(!ev.event_id || seen[ev.event_id]) return;
         seen[ev.event_id]=1;
-        var tx=ev.unsigned && ev.unsigned.transaction_id;
+        var c=ev.content||{}, tx=ev.unsigned && ev.unsigned.transaction_id;
         if(tx && pending[tx]){ pending[tx].removeAttribute('data-pending'); delete pending[tx]; return; }
+        var rel=c['m.relates_to'];
+        if(rel&&rel.rel_type==='m.replace'){ if(ev.sender===s.bot) applyEdit(ev); return; }
         bubble(ev);
+      }
+
+      /* Постоянная клавиатура — из состояния комнаты; открытость помним в браузере. */
+      function kbOpen(){ try{ return localStorage.getItem(KB_OPEN)!=='0'; }catch(e){ return true; } }
+      function setKbOpen(open){
+        kb.hidden=!open; kbToggle.setAttribute('aria-expanded',String(open));
+        kbToggle.setAttribute('aria-label',open?'Скрыть кнопки':'Показать кнопки');
+      }
+      kbToggle.addEventListener('click',function(){
+        var open=kb.hidden; setKbOpen(open);
+        try{ localStorage.setItem(KB_OPEN,open?'1':'0'); }catch(e){}
+      });
+      function replyKeyboard(content){
+        var rows=Array.isArray(content.rows)?content.rows.map(function(r){
+          return Array.isArray(r)?r.filter(function(o){return o&&typeof o.label==='string'&&o.label;}).slice(0,8):[];
+        }).filter(function(r){return r.length;}).slice(0,6):[];
+        kb.innerHTML='';
+        if(!rows.length){ kb.hidden=true; kbToggle.hidden=true; ctext.placeholder='Напишите боту…'; return; }
+        rows.forEach(function(r){
+          var row=document.createElement('div'); row.className='rk-row';
+          r.forEach(function(o){
+            var b=document.createElement('button'); b.type='button'; b.className='rk-btn'; b.textContent=o.label;
+            b.addEventListener('click',function(){
+              send(o.label, o.label, typeof o.text==='string'&&o.text?{press:{text:o.text}}:null); });
+            row.appendChild(b);
+          });
+          kb.appendChild(row);
+        });
+        ctext.placeholder=typeof content.placeholder==='string'&&content.placeholder?content.placeholder:'Напишите боту…';
+        kbToggle.hidden=false; setKbOpen(kbOpen());
       }
 
       function filter(){
         return encodeURIComponent(JSON.stringify({
           room:{rooms:[s.room_id],
-                timeline:{limit:40,types:['m.room.message']},
-                state:{types:[]}, ephemeral:{types:['m.typing']}, account_data:{types:[]}},
+                timeline:{limit:40,types:['m.room.message',NS+'keyboard']},
+                state:{types:[NS+'keyboard']}, ephemeral:{types:['m.typing']}, account_data:{types:[]}},
           presence:{types:[]}, account_data:{types:[]}}));
       }
 
@@ -984,6 +1160,7 @@ footer a:hover{color:var(--text)}
           since=d.next_batch;
           var room=d.rooms&&d.rooms.join&&d.rooms.join[s.room_id];
           if(room){
+            (room.state&&room.state.events||[]).forEach(take);
             (room.timeline&&room.timeline.events||[]).forEach(take);
             (room.ephemeral&&room.ephemeral.events||[]).forEach(function(ev){
               if(ev.type==='m.typing'){
@@ -1007,25 +1184,31 @@ footer a:hover{color:var(--text)}
         status.textContent=on?'на связи':'нет связи, пробую снова…';
       }
 
-      function send(text, shown){
-        if(!alive||!text) return;
+      // text — что уходит в body (для кнопок — подпись), extra.press — команда
+      // и сообщение бота, под которым нажали. Возвращает promise → true/false.
+      function send(text, shown, extra){
+        if(!alive||!text) return Promise.resolve(false);
         var tx='w'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
         var el=document.createElement('div'); el.className='msg me'; el.setAttribute('data-pending','');
         el.textContent=shown||text; log.appendChild(el); pending[tx]=el; scroll();
-        api('/_matrix/client/v3/rooms/'+encodeURIComponent(s.room_id)+'/send/m.room.message/'+tx,{
+        var content={msgtype:'m.text', body:text};
+        if(extra&&extra.press) content[NS+'press']=extra.press;
+        return api('/_matrix/client/v3/rooms/'+encodeURIComponent(s.room_id)+'/send/m.room.message/'+tx,{
           method:'PUT', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({msgtype:'m.text', body:text})
+          body:JSON.stringify(content)
         }).then(function(r){
           if(!r.ok) throw new Error('send '+r.status);
           return r.json();
         }).then(function(d){
           // Эхо через sync могло прийти раньше ответа — тогда уже снято.
           if(d.event_id && !seen[d.event_id]){ seen[d.event_id]=1; el.removeAttribute('data-pending'); delete pending[tx]; }
+          return true;
         }).catch(function(e){
-          if(e&&e.message==='unauth') return;
+          if(e&&e.message==='unauth') return false;
           el.remove(); delete pending[tx];
           cerr.textContent='Сообщение не ушло. Проверьте связь и отправьте ещё раз.'; cerr.hidden=false;
           setTimeout(function(){cerr.hidden=true;},4000);
+          return false;
         });
       }
 
@@ -1037,14 +1220,15 @@ footer a:hover{color:var(--text)}
 
       function start(session){
         stop();
-        s=session; alive=true; run++; since=null; seen={}; pending={};
+        s=session; alive=true; run++; since=null; seen={}; pending={}; byId={};
         log.innerHTML=''; typing.textContent=''; cerr.hidden=true;
         box.hidden=false; online(false); status.textContent='подключаюсь…';
         loop(run, 1000);
       }
       function stop(){
         alive=false; run++;
-        box.hidden=true; log.innerHTML='';
+        box.hidden=true; log.innerHTML=''; byId={};
+        kb.innerHTML=''; kb.hidden=true; kbToggle.hidden=true; ctext.placeholder='Напишите боту…';
         blobs.forEach(function(u){ try{URL.revokeObjectURL(u);}catch(e){} }); blobs=[];
       }
       return {start:start, stop:stop};
