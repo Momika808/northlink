@@ -74,18 +74,6 @@ a{color:inherit}
 code,kbd,.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:.94em}
 
 .wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto}
-/* Телефон: страница была 14,4 экрана. Отступы и межстрочный интервал
-   подбирались под десктоп, а на 375 px все clamp() заперты на минимуме —
-   текучесть включается только с 711 px. Здесь возвращаем плотность. */
-@media (max-width:640px){
-  body{line-height:1.5}
-  .card{padding:1.15rem}
-  .faq summary{padding:.85rem 1.1rem}
-  .plain > div{padding:.95rem 1.1rem}
-  .facts div{padding:.8rem .9rem}
-  .sub-box{padding:1.1rem}
-  .sec-head{margin-bottom:1.4rem}
-}
 @media (max-width:640px){.wrap{width:min(1120px,100% - 1.75rem)}}
 
 .skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--accent);color:var(--on-accent);padding:.7rem 1.1rem;border-radius:0 0 10px 0;font-weight:600}
@@ -240,7 +228,7 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
   display:inline-flex;align-items:center;justify-content:center;position:relative;
   border:0;border-radius:12px;font:inherit;font-size:.94rem;font-weight:500;line-height:1.2;
   color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
   cursor:pointer;text-decoration:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
   transition:background .15s,transform .08s}
 .ikb-btn:hover{background:color-mix(in srgb,var(--text) 13%,transparent)}
@@ -285,7 +273,23 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
   border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:1rem}
 .chat-row input:focus{outline:none;border-color:var(--accent)}
 .chat-row button{flex:none;padding:.75rem 1.1rem}
-@media(max-width:420px){.chat-row{gap:.4rem;padding:.6rem}.chat-row .btn{padding:.75rem .9rem}.rk-btn{font-size:.92rem}}
+/* Телефон: чат зажат карточкой, полю ввода не хватало места, а подписи
+   «Сайт мимо VPN» и «Другое приложение» ломались на две строки. Чат
+   расширяется за поля карточки, «Отправить» становится значком, подписи
+   клавиатуры мельче и плотнее — как у Telegram на узком экране. */
+.btn-send svg{display:none;width:20px;height:20px}
+@media(max-width:640px){.chat{margin-inline:-1.1rem;border-radius:0;border-left:0;border-right:0}}
+@media(max-width:480px){
+  .rk{padding:6px}
+  .rk-row{gap:5px}
+  .rk-btn{font-size:.85rem;padding:.45rem .3rem;letter-spacing:-.01em}
+  .chat-row{gap:.4rem;padding:.55rem}
+  .chat-row input{padding:.7rem .8rem;font-size:.95rem}
+  .kb-toggle{width:42px}
+  .btn-send{padding:.7rem .85rem}
+  .btn-send span{display:none}
+  .btn-send svg{display:block}
+}
 .chat-err{padding:.5rem 1rem .8rem;font-size:.9rem;color:#c0392b}
 .chat-err[hidden]{display:none}
 :root:not([data-theme=light]) .chat-err{color:#ff8a7a}
@@ -366,6 +370,22 @@ footer a:hover{color:var(--text)}
 .reveal{opacity:0;transform:translateY(18px)}
 .reveal.in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+
+/* Телефон: страница была 14,4 экрана. Отступы и межстрочный интервал
+   подбирались под десктоп, а на 375 px все clamp() заперты на минимуме —
+   текучесть включается только с 711 px. Здесь возвращаем плотность.
+   Блок стоит В КОНЦЕ стилей нарочно: раньше он шёл до правил .card и
+   .sub-box, и те, идя позже при той же специфичности, его перекрывали —
+   плотность на телефоне не включалась вовсе (найдено 13.09.2026). */
+@media (max-width:640px){
+  body{line-height:1.5}
+  .card{padding:1.15rem}
+  .faq summary{padding:.85rem 1.1rem}
+  .plain > div{padding:.95rem 1.1rem}
+  .facts div{padding:.8rem .9rem}
+  .sub-box{padding:1.1rem}
+  .sec-head{margin-bottom:1.4rem}
+}
 </style>
 </head>
 <body>
@@ -533,7 +553,10 @@ footer a:hover{color:var(--text)}
                     aria-controls="chat-kb" aria-label="Скрыть кнопки" hidden>
               <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="3" width="7" height="6" rx="1.5"/><rect x="2" y="11" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/></svg>
             </button>
-            <button class="btn btn-primary" type="submit" id="chat-send">Отправить</button>
+            <button class="btn btn-primary btn-send" type="submit" id="chat-send" aria-label="Отправить">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3.4 20.4 22 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg>
+              <span>Отправить</span>
+            </button>
           </form>
         </div>
       </div>
