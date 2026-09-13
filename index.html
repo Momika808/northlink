@@ -199,7 +199,11 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .hero-note{margin-top:1rem;font-size:.92rem;color:var(--muted)}
 .hero-note a{color:var(--accent)}
 
-.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column;height:min(76vh,640px)}
+/* Высота — почти весь экран: чат и есть страница. На десктопе от 560 px до
+   900, на телефоне 78 % высоты окна — под шапкой остаётся видна первая
+   строка героя. */
+.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column;height:clamp(560px,calc(100vh - 150px),900px)}
+@media (max-width:640px){.chat{height:78vh;height:78dvh}}
 .chat[hidden]{display:none}
 .chat-head{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.95rem}
 .chat-head b{font-weight:640;white-space:nowrap}
