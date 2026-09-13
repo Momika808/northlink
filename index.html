@@ -256,7 +256,7 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .chat-field.has-kb input{padding-right:2.7rem}
 /* Значок без подложки, как в Telegram: только глиф. Серый; открытая
    клавиатура — в цвете акцента; при наведении просто ярче. */
-.kb-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);opacity:.8;display:grid;place-items:center;cursor:pointer;padding:0;transition:color .15s,opacity .15s}
+.kb-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);opacity:.8;display:flex;align-items:center;justify-content:center;line-height:0;cursor:pointer;padding:0;margin:0;transition:color .15s,opacity .15s;-webkit-appearance:none;appearance:none}
 .kb-toggle[hidden]{display:none}
 .kb-toggle:hover{opacity:1;color:var(--text)}
 .kb-toggle[aria-expanded=true]{color:var(--accent);opacity:.9}
