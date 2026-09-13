@@ -134,9 +134,11 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .sec-head{margin-bottom:clamp(2.2rem,4vw,3.2rem)}
 
 /* ─────────── герой ─────────── */
-.hero{padding-top:clamp(2.25rem,8vw,6.5rem);padding-bottom:clamp(2rem,6vw,5rem)}
+.hero{padding-top:clamp(2rem,6vw,4.5rem);padding-bottom:clamp(2rem,5vw,3.5rem)}
+.hero .wrap{max-width:720px;margin-inline:auto}
+.hero .pitch{max-width:none}
 .hero h1{
-  font-size:clamp(3.1rem,11vw,7rem);font-weight:700;letter-spacing:-.045em;margin:1.4rem 0 0;
+  font-size:clamp(3rem,9vw,5.2rem);font-weight:700;letter-spacing:-.045em;margin:1.4rem 0 0;
   background:linear-gradient(115deg,var(--text) 26%,var(--accent) 62%,var(--accent-2) 92%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
@@ -154,35 +156,12 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text)}
 .btn-ghost:hover{border-color:var(--border-strong);background:var(--surface-2)}
 
-.facts{display:flex;flex-wrap:wrap;gap:0;margin-top:3.4rem;border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
-.facts div{flex:1 1 190px;padding:1.15rem 1.3rem;border-right:1px solid var(--border)}
-.facts div:last-child{border-right:0}
-@media (max-width:760px){.facts div{flex-basis:50%;border-bottom:1px solid var(--border)}.facts div:nth-child(2n){border-right:0}}
-.facts .n{font-size:1.45rem;font-weight:680;letter-spacing:-.03em;display:block}
-.facts .k{font-size:.875rem;color:var(--muted);letter-spacing:.01em}
-
-/* ─────────── карточки ─────────── */
-.cards{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
-.card{
-  position:relative;border:1px solid var(--border);border-radius:20px;padding:1.7rem;
-  background:linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--shadow-sm);
-  transition:border-color .22s,transform .22s,box-shadow .22s
-}
-.card:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow)}
-.card h3{font-size:1.16rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.card p{color:var(--muted);font-size:.97rem}
-.card .icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--border);margin-bottom:1.05rem;color:var(--accent)}
-.pill{font-size:.875rem;font-weight:640;letter-spacing:.06em;text-transform:uppercase;padding:.22rem .55rem;border-radius:7px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent)}
-.pill.muted{background:var(--surface-2);color:var(--muted);border-color:var(--border)}
-.card .meta{margin-top:1.15rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:1.4rem;flex-wrap:wrap;font-size:.875rem;color:var(--muted)}
-.card .meta b{display:block;color:var(--text);font-weight:620;font-size:.95rem;letter-spacing:-.01em}
 
 /* ─────────── подписка ─────────── */
-.sub-box{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:1.6rem;margin-bottom:2.2rem}
-.sub-box .label{font-size:.875rem;font-weight:620;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.label{display:block;font-size:.875rem;font-weight:620;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .copy-row{display:flex;gap:.6rem;margin-top:.8rem;align-items:stretch;flex-wrap:wrap}
 .copy-row code{
-  flex:1 1 320px;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
+  flex:1 1 320px;min-width:0;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
   padding:.8rem 1rem;font-size:.95rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center
 }
 .copy-btn{flex:none;padding:.8rem 1.15rem;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .2s,color .2s}
@@ -195,19 +174,30 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
   font:inherit;font-size:1.02rem;letter-spacing:.02em}
 .get-row input:focus{outline:none;border-color:var(--accent)}
 .get-row button{flex:none}
-.get-out{margin-top:1.1rem}
+.get-out{margin-top:1rem;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:1.1rem}
 .get-out[hidden]{display:none}
+#get-again{margin-top:1rem}
 .get-err{margin-top:.9rem;color:#c0392b;font-size:.97rem}
 :root:not([data-theme=light]) .get-err{color:#ff8a7a}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .get-err{color:#ff8a7a}}
 :root[data-theme=dark] .get-err{color:#ff8a7a}
-.sub-box .note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
+.note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
+.note a{color:var(--accent)}
 
 /* ─────────── чат с ботом ─────────── */
+/* До первого нажатия — тот же корпус чата с одним сообщением и кнопками:
+   человек видит, что его ждёт, и нажимает прямо там, где будет разговор. */
+.chat-intro{margin-top:1.6rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden}
+.chat-intro[hidden]{display:none}
+.chat-log-intro{height:auto;min-height:0;flex:none}
+.hero-note{margin-top:1rem;font-size:.92rem;color:var(--muted)}
+.hero-note a{color:var(--accent)}
+
 .chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column;height:min(76vh,640px)}
 .chat[hidden]{display:none}
 .chat-head{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.95rem}
-.chat-head b{font-weight:640}
+.chat-head b{font-weight:640;white-space:nowrap}
+.chat-head .chat-status{white-space:nowrap}
 .chat-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .chat-dot[data-on]{background:var(--accent)}
 .chat-status{margin-left:auto;font-size:.85rem;color:var(--muted)}
@@ -282,7 +272,7 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
    расширяется за поля карточки, «Отправить» становится значком, подписи
    клавиатуры мельче и плотнее — как у Telegram на узком экране. */
 .btn-send svg{display:none;width:20px;height:20px}
-@media(max-width:640px){.chat{margin-inline:-1.1rem;border-radius:0;border-left:0;border-right:0}}
+@media(max-width:640px){.chat,.chat-intro{margin-inline:-.875rem;border-radius:0;border-left:0;border-right:0}}
 @media(max-width:480px){
   .rk{padding:6px}
   .rk-row{gap:5px}
@@ -300,71 +290,14 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .chat-err{color:#ff8a7a}}
 :root[data-theme=dark] .chat-err{color:#ff8a7a}
 
-/* ─────────── вкладки ─────────── */
-.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.6rem;padding:.35rem;border:1px solid var(--border);border-radius:15px;background:var(--surface);width:max-content;max-width:100%}
-.tab{
-  appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;
-  padding:.6rem 1.05rem;border-radius:11px;font-size:.95rem;font-weight:600;font-family:inherit;
-  min-height:44px;display:inline-flex;align-items:center;
-  transition:background .2s,color .2s;white-space:nowrap
-}
-.tab:hover{color:var(--text)}
-.tab[aria-selected="true"]{background:var(--surface-2);color:var(--text);box-shadow:var(--shadow-sm)}
-.js .panel:not([data-active]){display:none}
-.panel{border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,var(--surface-2),var(--surface));padding:clamp(1.4rem,3vw,2.2rem)}
-.panel .app{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)}
-.panel .app strong{font-size:1.12rem;font-weight:660;letter-spacing:-.02em}
-.panel .app span{color:var(--muted);font-size:.94rem}
-.panel .app a.get{color:var(--accent);text-decoration:none;font-size:.94rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center;border-bottom:1px solid color-mix(in srgb,var(--accent) 40%,transparent);white-space:nowrap}
-.panel .app a.get:hover{border-bottom-color:var(--accent)}
-.panel .app span a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border-strong);transition:color .18s}
-.panel .app span a:hover{color:var(--text)}
-ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:1.15rem}
-ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:.95rem;align-items:start}
-ol.steps li::before{
-  content:counter(s);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
-  background:var(--surface-2);border:1px solid var(--border);font-size:.875rem;font-weight:660;color:var(--accent);
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace
-}
-ol.steps li b{font-weight:640}
-ol.steps li p{color:var(--muted);font-size:.94rem;margin-top:.2rem}
-ol.steps code{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.08em .4em}
-
-/* ─────────── доступ ─────────── */
-.access{
-  border:1px solid var(--border);border-radius:20px;
-  background:linear-gradient(180deg,var(--surface-2),var(--surface));
-  padding:clamp(1.5rem,3vw,2.4rem);display:grid;gap:1.8rem;align-items:start;
-  grid-template-columns:minmax(0,1fr) auto
-}
-.access .btn{align-self:center}
-@media (max-width:820px){.access{grid-template-columns:1fr}.access .btn{justify-self:start}}
-.access a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
-.access .btn a,.access a.btn{border-bottom:0}
-.access .btn{color:var(--on-accent)}
-
 /* ─────────── список «честно» ─────────── */
+#trust .wrap{max-width:720px;margin-inline:auto}
 .plain{display:grid;gap:0;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface)}
 .plain > div{padding:1.35rem 1.6rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:26px 1fr;gap:1rem;align-items:start}
 .plain > div:last-child{border-bottom:0}
 .plain .mark{color:var(--accent);margin-top:.28rem}
 .plain b{font-weight:640}
 .plain p{color:var(--muted);font-size:.95rem;margin-top:.15rem}
-
-/* ─────────── FAQ ─────────── */
-.faq{border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface)}
-.faq details{border-bottom:1px solid var(--border)}
-.faq details:last-child{border-bottom:0}
-.faq summary{
-  cursor:pointer;padding:1.25rem 1.6rem;font-weight:600;list-style:none;
-  display:flex;justify-content:space-between;gap:1rem;align-items:center;transition:background .18s
-}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary:hover{background:var(--surface-2)}
-.faq summary::after{content:"";width:9px;height:9px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .22s}
-.faq details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
-.faq .a{padding:0 1.6rem 1.4rem;color:var(--muted);max-width:70ch}
-.faq .a p + p{margin-top:.7rem}
 
 /* ─────────── подвал ─────────── */
 footer{border-top:1px solid var(--border);padding:2.8rem 0;color:var(--muted);font-size:.92rem}
@@ -383,17 +316,13 @@ footer a:hover{color:var(--text)}
    плотность на телефоне не включалась вовсе (найдено 13.09.2026). */
 @media (max-width:640px){
   body{line-height:1.5}
-  .card{padding:1.15rem}
-  .faq summary{padding:.85rem 1.1rem}
   .plain > div{padding:.95rem 1.1rem}
-  .facts div{padding:.8rem .9rem}
-  .sub-box{padding:1.1rem}
   .sec-head{margin-bottom:1.4rem}
 }
 </style>
 </head>
 <body>
-<a class="skip" href="#connect">Перейти к инструкции</a>
+<a class="skip" href="#get">Перейти к чату</a>
 <div class="aurora" aria-hidden="true"><b></b><b></b><b></b></div>
 <div class="grid-bg" aria-hidden="true"></div>
 
@@ -404,11 +333,7 @@ footer a:hover{color:var(--text)}
       Northlink
     </a>
     <nav class="nav-links">
-      <a href="#nodes">Узлы</a>
-      <a href="#access">Доступ</a>
-      <a href="#connect">Подключение</a>
-      <a href="#how">Как устроено</a>
-      <a href="#faq">Вопросы</a>
+      <a href="https://t.me/northlink_bot" rel="noopener">Бот в Telegram</a>
       <a href="diag.html" class="nav-check">Проверка связи</a>
     </nav>
     <button class="toggle" id="theme" type="button" aria-label="Переключить тему">
@@ -420,365 +345,105 @@ footer a:hover{color:var(--text)}
 
 <main id="top">
 
-  <!-- ══════ герой ══════ -->
-  <section class="hero">
+  <!-- ══════ первый экран: чат с ботом ══════ -->
+  <section class="hero" id="get">
     <div class="wrap">
       <span class="eyebrow"><span class="dot"></span>Варшава · Стокгольм · Вена</span>
       <h1>Northlink</h1>
       <p class="tagline">Личный VPN для своих.</p>
-      <p class="pitch">Два независимых входа в Европе. Соединение выглядит как обычный визит на сайт по HTTPS. Ключи и список людей хранятся на своём сервере.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://t.me/northlink_hq" rel="noopener">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.2 4.3 2.9 11.4c-.9.35-.9 1.6.02 1.9l4.6 1.44 1.75 5.3c.22.66 1.06.85 1.54.35l2.5-2.6 4.66 3.42c.62.46 1.5.12 1.66-.63l3.1-14.6c.17-.8-.6-1.47-1.36-1.17z"/></svg>
-          Получить доступ
-        </a>
-        <a class="btn btn-ghost" href="#connect">Уже есть ссылка</a>
-      </div>
+      <p class="pitch">Два входа в Европе, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — прямо здесь или в Telegram.</p>
 
-      <div class="facts">
-        <div><span class="n">2 входа</span><span class="k">перестал работать один — работает второй</span></div>
-        <div><span class="n">1 ссылка</span><span class="k">телефон, ноутбук и телевизор</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ узлы ══════ -->
-  <section id="nodes">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Точки входа</span>
-        <h2>Где стоят серверы</h2>
-        <p class="lead">Входные узлы принимают клиентов и выпускают трафик в интернет. Ядро управляет узлами и хранит ключи; клиентский трафик через него не проходит.</p>
-      </div>
-      <div class="cards">
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
-          <h3>Стокгольм <span class="pill">основной</span></h3>
-          <p>Основной вход. С домашней линии владельца отвечает вдвое быстрее Варшавы: 29 мс против 69.</p>
-          <div class="meta"><span><b>SE</b>Швеция</span><span><b>443</b>VLESS + Reality</span><span><b>1 Гбит/с</b>канал узла</span></div>
-        </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
-          <h3>Варшава <span class="pill">резервный</span></h3>
-          <p>Первый вход контура, теперь запасной. Фильтрация блокирует отдельные адреса, поэтому второй город нужен на случай, когда основной перестанет отвечать.</p>
-          <div class="meta"><span><b>PL</b>Польша</span><span><b>443</b>VLESS + Reality</span><span><b>1 Гбит/с</b>канал узла</span></div>
-        </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></div>
-          <h3>Вена <span class="pill muted">ядро</span></h3>
-          <p>Панель, ключи и список людей. Наружу открыт только веб; управляющий канал к узлам доступен лишь с самого ядра.</p>
-          <div class="meta"><span><b>AT</b>Австрия</span><span><b>Remnawave</b>панель</span><span><b>Ночью</b>дамп базы</span></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ доступ ══════ -->
-  <section id="access">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Доступ</span>
-        <h2>Начинается с канала</h2>
-        <p class="lead">Ключ выдаёт бот, писать никому не нужно. Занимает около минуты.</p>
-      </div>
-
-      <div class="access reveal">
-        <ol class="steps">
-          <li><div><b>Подпишитесь на канал</b><p>Кнопка ниже ведёт в <a href="https://t.me/northlink_hq" rel="noopener">@northlink_hq</a>. Там пишем, когда меняется адрес подписки и что делать, если перестало работать: иначе об этом узнаёшь по молчащему VPN.</p></div></li>
-
-          <li><div><b>Откройте бота из канала</b><p>В закреплённом сообщении кнопка «Получить доступ». Ничего устанавливать и регистрировать не нужно.</p></div></li>
-
-          <li><div><b>Отправьте <code>/start</code></b><p>Или нажмите кнопку «Начать». Бот проверит подписку и выдаст ключ.</p></div></li>
-          <li><div><b>Выберите приложение</b><p>Бот спросит, чем вы пользуетесь, и пришлёт адрес именно для него — вместе с QR-кодом. Формат у приложений разный, и от него зависит, приедут ли правила обхода.</p></div></li>
-          <li><div><b>Вставьте её в приложение</b><p>Ссылку вставляют целиком. Какое приложение выбрать, написано ниже по вкладкам.</p><p>Адрес зависит от приложения: ссылка для одного в другом не откроется. Меняете приложение — нажмите в боте «Другое приложение» и возьмите ссылку заново.</p></div></li>
-        </ol>
-        <a class="btn btn-primary" href="https://t.me/northlink_bot" rel="noopener">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.2 4.3 2.9 11.4c-.9.35-.9 1.6.02 1.9l4.6 1.44 1.75 5.3c.22.66 1.06.85 1.54.35l2.5-2.6 4.66 3.42c.62.46 1.5.12 1.66-.63l3.1-14.6c.17-.8-.6-1.47-1.36-1.17z"/></svg>
-          Открыть @northlink_bot
-        </a>
-        <p class="note">Телеграм не открывается? <a href="#get">Получите ключ здесь</a> — в чате с ботом прямо на странице.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ запасной путь: код → чат с ботом ══════ -->
-  <section id="get">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Запасной путь</span>
-        <h2>Если телеграм не открывается</h2>
-        <p class="lead">Нажмите кнопку — откроется чат с ботом. Он выдаст ссылку на подписку, поможет выбрать приложение и примет заявку, если какой-то сайт не открывается.</p>
-      </div>
-
-      <div class="sub-box reveal">
-        <div id="get-form">
-          <span class="label">Доступ без телеграма</span>
-          <div class="get-row">
-            <button class="btn btn-primary" id="get-go" type="button">Получить доступ</button>
+      <div class="chat-intro" id="get-form">
+        <div class="chat-head">
+          <span class="chat-dot" data-on aria-hidden="true"></span>
+          <b>Northlink</b> · чат с ботом
+        </div>
+        <div class="chat-log chat-log-intro">
+          <div class="mw">
+            <div class="msg">Нажмите кнопку — выдам пробный ключ на 7 дней, помогу выбрать приложение и пришлю ссылку на скачивание. Подписка на канал в Telegram делает ключ годовым.</div>
+            <div class="ikb" role="group" aria-label="Начать">
+              <div class="ikb-row"><button class="ikb-btn" data-style="success" id="get-go" type="button">Получить доступ</button></div>
+              <div class="ikb-row"><a class="ikb-btn ikb-url" href="https://t.me/northlink_bot" rel="noopener" target="_blank" aria-label="Открыть бота в Telegram, откроется в новой вкладке">Открыть бота в Telegram</a></div>
+            </div>
           </div>
-          <p class="note">Ключ пробный, на 7 дней. Чтобы он стал годовым, подпишитесь на наш канал в телеграме — кнопка будет в чате. Чат остаётся в этом браузере — на другом устройстве его не будет.</p>
           <p class="get-err" id="get-err" hidden></p>
         </div>
-
-        <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
-          <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
-          на другом устройстве её не будет.
-          <a href="#" id="get-forget">Забыть её здесь</a>.</p>
-
-        <div class="get-out" id="get-out" hidden>
-          <span class="label">Ваша ссылка</span>
-          <div class="copy-row">
-            <code id="get-url"></code>
-            <button class="copy-btn" type="button" id="get-copy">Скопировать</button>
-          </div>
-          <p class="note">Сохраните её. Дальше выберите приложение во вкладках ниже и вставьте ссылку как подписку.</p>
-          <p class="note" id="get-claim-wrap" hidden>
-            <b>Ключ работает 7 дней.</b> Чтобы он стал годовым, откройте
-            <a id="get-claim" href="#" rel="noopener">эту ссылку в боте</a> и подпишитесь на канал.
-            Адрес подписки при этом не меняется — в приложении править нечего.
-            В канале пишем, когда меняется адрес и что делать, если перестало работать.
-          </p>
-        </div>
-
-        <div class="chat" id="chat" hidden>
-          <div class="chat-head">
-            <span class="chat-dot" id="chat-dot" aria-hidden="true"></span>
-            <b>Northlink</b> · чат с ботом
-            <span class="chat-status" id="chat-status"></span>
-          </div>
-          <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Сообщения"></div>
-          <div class="chat-typing" id="chat-typing" aria-live="polite"></div>
-          <p class="chat-err" id="chat-err" hidden></p>
-          <div class="rk" id="chat-kb" role="group" aria-label="Быстрые команды" hidden></div>
-          <form class="chat-row" id="chat-form">
-            <div class="chat-field">
-              <input id="chat-text" type="text" autocomplete="off" placeholder="Напишите боту…"
-                     aria-label="Сообщение боту" maxlength="2000">
-              <!-- Значок клавиатуры внутри поля, у правого края — как в Telegram. -->
-              <button type="button" class="kb-toggle" id="chat-kb-toggle" aria-expanded="true"
-                      aria-controls="chat-kb" aria-label="Скрыть кнопки" hidden>
-                <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="3" width="7" height="6" rx="1.5"/><rect x="2" y="11" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/></svg>
-              </button>
-            </div>
-            <button class="btn btn-primary btn-send" type="submit" id="chat-send" aria-label="Отправить">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3.4 20.4 22 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg>
-              <span>Отправить</span>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ подключение ══════ -->
-  <section id="connect">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Подключение</span>
-        <h2>Одна ссылка на все устройства</h2>
-        <p class="lead">Персональная ссылка на подписку вставляется в любое приложение с поддержкой VLESS. Дальше настройка происходит сама.</p>
       </div>
 
-      <div class="sub-box reveal">
-        <span class="label">Ваша ссылка выглядит так</span>
+      <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
+        <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
+        на другом устройстве её не будет.
+        <a href="#" id="get-forget">Забыть её здесь</a>.</p>
+
+      <div class="get-out" id="get-out" hidden>
+        <span class="label">Ваша ссылка</span>
         <div class="copy-row">
-          <code id="sub-url">https://cdn.adminwg.dad/api/sub/<span style="opacity:.55">ваш-ключ</span></code>
-          <button class="copy-btn" type="button" data-copy="https://cdn.adminwg.dad/api/sub/">Скопировать адрес</button>
+          <code id="get-url"></code>
+          <button class="copy-btn" type="button" id="get-copy">Скопировать</button>
         </div>
-        <p class="note">Ключ у каждого свой. Ссылку выдаёт <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a>; другу проще получить свою тем же способом, чем пересылать вашу.</p>
-        <p class="note">Что-то не работает? Откройте <a href="diag.html">проверку связи</a> — она проверит вашу сеть и отправит отчёт в бота.</p>
-        <p class="note">Сохраните эту проверку себе заранее: она отличает белый список от поломки и работает с диска, когда сети уже нет.</p>
+        <p class="note">Вставьте её в приложение как подписку.</p>
+        <p class="note" id="get-claim-wrap" hidden>
+          <b>Ключ работает 7 дней.</b> Чтобы он стал годовым, откройте
+          <a id="get-claim" href="#" rel="noopener">эту ссылку в боте</a> и подпишитесь на канал.
+          Адрес подписки при этом не меняется — в приложении править нечего.
+        </p>
       </div>
 
-      <div class="tabs" role="tablist" aria-label="Платформа">
-        <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="true" type="button">iPhone / iPad</button>
-        <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" type="button">Android</button>
-        <button class="tab" role="tab" id="t-win" aria-controls="p-win" aria-selected="false" type="button">Windows</button>
-        <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" type="button">macOS</button>
-        <button class="tab" role="tab" id="t-tv" aria-controls="p-tv" aria-selected="false" type="button">Телевизор</button>
+      <div class="chat" id="chat" hidden>
+        <div class="chat-head">
+          <span class="chat-dot" id="chat-dot" aria-hidden="true"></span>
+          <b>Northlink</b> · чат с ботом
+          <span class="chat-status" id="chat-status"></span>
+        </div>
+        <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Сообщения"></div>
+        <div class="chat-typing" id="chat-typing" aria-live="polite"></div>
+        <p class="chat-err" id="chat-err" hidden></p>
+        <div class="rk" id="chat-kb" role="group" aria-label="Быстрые команды" hidden></div>
+        <form class="chat-row" id="chat-form">
+          <div class="chat-field">
+            <input id="chat-text" type="text" autocomplete="off" placeholder="Напишите боту…"
+                   aria-label="Сообщение боту" maxlength="2000">
+            <!-- Значок клавиатуры внутри поля, у правого края — как в Telegram. -->
+            <button type="button" class="kb-toggle" id="chat-kb-toggle" aria-expanded="true"
+                    aria-controls="chat-kb" aria-label="Скрыть кнопки" hidden>
+              <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="3" width="7" height="6" rx="1.5"/><rect x="2" y="11" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/></svg>
+            </button>
+          </div>
+          <button class="btn btn-primary btn-send" type="submit" id="chat-send" aria-label="Отправить">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3.4 20.4 22 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg>
+            <span>Отправить</span>
+          </button>
+        </form>
       </div>
 
-      <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" data-active>
-        <div class="app"><strong>Clash Mi</strong><a class="get" href="https://apps.apple.com/ru/app/clash-mi/id6744321968" rel="noopener">App Store ↗</a><span>бесплатно. Ядро mihomo — то же, что в ClashX Meta на маке. Получает полные правила обхода и сам переключается на второй сервер</span></div>
-        <div class="app"><strong>sing-box MT</strong><a class="get" href="https://apps.apple.com/ru/app/sing-box-mt/id6785326793" rel="noopener">App Store ↗</a><span>бесплатно. Официальный клиент sing-box, если Clash Mi не подошёл</span></div>
-        <ol class="steps">
-          <li><div><b>Поставьте приложение</b><p>Clash Mi из App Store. Регистрация и аккаунт не нужны.</p></div></li>
-          <li><div><b>Возьмите ссылку в боте</b><p>Бот спросит приложение — выберите Clash Mi. Адрес зависит от приложения: ссылка для Happ в Clash Mi не откроется, он ответит «Invalid Clash Yaml file». Нажмите «Скопировать ссылку», выделять пальцем не нужно.</p></div></li>
-          <li><div><b>Добавьте подписку</b><p>В приложении нажмите <code>+</code> и вставьте адрес. Серверы и правила подтянутся сами.</p></div></li>
-          <li><div><b>Разрешите VPN-профиль</b><p>iOS один раз спросит подтверждение и код-пароль. Это штатное окно системы, без него туннель не поднимется.</p></div></li>
-          <li><div><b>Включите</b><p>Сервер выбирать не нужно: группа PROXY сама уходит на Варшаву, если Стокгольм не отвечает.</p></div></li>
-          <li><div><b>Про другие приложения</b><p>Happ работает, но его убрали из российского App Store 24 июня 2026 — обновить оттуда не выйдет, а под его именем в поиске лежат чужие приложения. Shadowrocket подключится, но правила обхода не применит: берёт из подписки только список серверов, а маршруты задаёт своей настройкой — банки и VK пойдут через туннель.</p></div></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android">
-        <div class="app"><strong>FlClash</strong><a class="get" href="https://github.com/chen08209/FlClash/releases/latest" rel="noopener">APK на GitHub ↗</a><span>бесплатно. Ядро mihomo — получает полные правила обхода и сам переходит на второй сервер</span></div>
-        <div class="app"><strong>Clash Mi</strong><a class="get" href="https://github.com/KaringX/clashmi/releases/latest" rel="noopener">APK на GitHub ↗</a><span>то же ядро, если FlClash не подошёл</span></div>
-        <div class="app"><strong>Happ</strong><a class="get" href="https://play.google.com/store/apps/details?id=com.happproxy" rel="noopener">Google Play ↗</a><span>из магазина, без ручной установки APK. Правил обхода получает меньше: 4 против 106</span></div>
-        <ol class="steps">
-          <li><div><b>Поставьте приложение</b><p>Happ из Google Play. Если Play недоступен, берите v2rayNG: APK лежит в его репозитории на GitHub.</p></div></li>
-          <li><div><b>Скопируйте ссылку</b><p>Целиком, вместе с ключом.</p></div></li>
-          <li><div><b>Импортируйте подписку</b><p><code>+</code> → импорт подписки из буфера обмена. Затем обновите её, чтобы список серверов заполнился.</p></div></li>
-          <li><div><b>Разрешите подключение</b><p>Android спросит разрешение на создание VPN, подтвердите его.</p></div></li>
-          <li><div><b>Запустите</b><p>Выберите сервер и нажмите кнопку старта.</p></div></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win">
-        <div class="app"><strong>FlClash</strong><a class="get" href="https://github.com/chen08209/FlClash/releases/latest" rel="noopener">Скачать установщик ↗</a><span>Windows 10/11 · бесплатно. Ядро mihomo — полные правила обхода и переход на второй сервер</span></div>
-        <div class="app"><strong>Clash Verge Rev</strong><a class="get" href="https://github.com/clash-verge-rev/clash-verge-rev/releases/latest" rel="noopener">Скачать установщик ↗</a><span>то же ядро, интерфейс побогаче</span></div>
-        <div class="app"><strong>Hiddify</strong><a class="get" href="https://github.com/hiddify/hiddify-app/releases/latest" rel="noopener">Скачать установщик ↗</a><span>на ядре sing-box. Правил обхода получает 7 против 106. Nekoray больше не поддерживается</span></div>
-        <ol class="steps">
-          <li><div><b>Скачайте Hiddify</b><p>Установщик для Windows берут на странице релизов проекта.</p></div></li>
-          <li><div><b>Добавьте подписку</b><p>«Новый профиль» → «Добавить из буфера обмена» и вставьте ссылку.</p></div></li>
-          <li><div><b>Включите режим TUN</b><p>Системный прокси заворачивает только браузер. Telegram его не спрашивает, а голос Discord идёт по UDP, который через прокси не проходит вовсе, — оба пойдут напрямую, где их и блокируют. TUN забирает трафик всей машины, поэтому на Windows берите его.</p></div></li>
-          <li><div><b>Подключитесь</b><p>При первом запуске Windows попросит права администратора для сетевого драйвера.</p></div></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac">
-        <div class="app"><strong>ClashX Meta</strong><a class="get" href="https://github.com/MetaCubeX/ClashX.Meta/releases/latest" rel="noopener">Скачать .dmg ↗</a><span>бесплатно. Ядро mihomo — получает полные правила обхода и сам переходит на второй сервер</span></div>
-        <div class="app"><strong>FlClash</strong><a class="get" href="https://github.com/chen08209/FlClash/releases/latest" rel="noopener">Скачать .dmg ↗</a><span>то же ядро, тот же конфиг</span></div>
-        <div class="app"><strong>Happ</strong><a class="get" href="https://github.com/Happ-proxy/happ-desktop/releases/latest/download/Happ.macOS.universal.dmg" rel="noopener">Скачать .dmg ↗</a><span>universal — Apple Silicon и Intel. Правил обхода получает меньше: 4 против 106</span></div>
-        <ol class="steps">
-          <li><div><b>Поставьте приложение</b><p>Берите <code>.dmg</code> с сайта Happ: это настоящее приложение для Mac, universal — работает и на Apple Silicon, и на Intel. В App Store лежит версия для iPhone, её ставят только маки на Apple Silicon.</p></div></li>
-          <li><div><b>Вставьте ссылку из бота</b><p>Ту, что бот выдал для вашего приложения: у Happ и ClashX форматы разные. Добавляется из буфера обмена, как на телефоне.</p></div></li>
-          <li><div><b>Разрешите профиль</b><p>macOS попросит подтвердить установку VPN-конфигурации в системных настройках.</p></div></li>
-          <li><div><b>Включите</b><p>Значок в строке меню показывает текущий узел и переключает города.</p></div></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="p-tv" aria-labelledby="t-tv">
-        <div class="app"><strong>v2rayNG</strong><a class="get" href="https://github.com/2dust/v2rayNG/releases/latest" rel="noopener">APK на GitHub ↗</a><span>Android TV, приставки, Google TV · бесплатно</span></div>
-        <ol class="steps">
-          <li><div><b>Установите APK</b><p>Через встроенный браузер или «Send files to TV» с телефона. В Google Play на телевизорах приложения обычно нет.</p></div></li>
-          <li><div><b>Передайте ссылку на телевизор</b><p>Набирать пультом долго: проще отправить её себе в мессенджер и скопировать на самом телевизоре.</p></div></li>
-          <li><div><b>Импортируйте подписку и обновите её</b><p>Дальше как на телефоне: выбрать сервер и запустить.</p></div></li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ как устроено ══════ -->
-  <section id="how">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Как устроено</span>
-        <h2>Почему это продолжает работать</h2>
-        <p class="lead">Обычный VPN узнаётся по первому же пакету и блокируется целиком. Здесь соединение не прячут, а делают неотличимым от обычного HTTPS.</p>
-      </div>
-      <div class="cards">
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"/><path d="M9.3 12.2l1.9 1.9 3.6-3.7"/></svg></div>
-          <h3>VLESS + Reality</h3>
-          <p>Соединение притворяется визитом на настоящий сторонний сайт: у наблюдателя сходится и рукопожатие, и сертификат. Порт 443, как у любого HTTPS.</p>
-        </article>
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h7M13 7h7M4 17h7M13 17h7"/><circle cx="11.5" cy="7" r="2"/><circle cx="11.5" cy="17" r="2"/></svg></div>
-          <h3>Два входа вместо одного</h3>
-          <p>Фильтрация блокирует отдельные адреса. Когда один вход перестаёт отвечать, работает второй; заблокированный уничтожается и создаётся заново с новым адресом за минуту.</p>
-        </article>
-        
-        <article class="card reveal">
-          <div class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.2-6.9"/><path d="M21 4v5h-5"/></svg></div>
-          <h3>Подписка обновляется сама</h3>
-          <p>Приложение периодически перечитывает вашу ссылку. Когда адрес узла меняется, новый конфиг приезжает сам: пересылать и править ничего не нужно.</p>
-        </article>
-        
-        
-      </div>
+      <p class="note hero-note">Чат остаётся в этом браузере — на другом устройстве его не будет. Что-то не работает? <a href="diag.html">Проверка связи</a> померит вашу сеть и пришлёт отчёт.</p>
     </div>
   </section>
 
   <!-- ══════ честно ══════ -->
   <section id="trust">
     <div class="wrap">
-      <div class="sec-head reveal">
+      <div class="sec-head">
         <span class="eyebrow">Честно</span>
         <h2>О чём стоит знать заранее</h2>
-        <p class="lead">Короткий список, чтобы потом не было сюрпризов.</p>
       </div>
-      <div class="plain reveal">
+      <div class="plain">
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Это не коммерческий сервис</b><p>Личный контур, которым делятся с близкими. Тарифов, гарантий доступности и круглосуточной поддержки здесь нет: чинит его один человек, когда доходят руки.</p></div>
+          <div><b>Это не коммерческий сервис</b><p>Личный контур, которым делятся с близкими. Тарифов, гарантий и круглосуточной поддержки нет: чинит один человек, когда доходят руки.</p></div>
         </div>
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Логи не ведутся, но это не анонимность</b><p>Серверы арендованы на живого человека и подчиняются законам своих стран. От слежки провайдера и блокировок это защищает, от целенаправленного интереса государства — нет, как и любой другой VPN.</p></div>
+          <div><b>Логи не ведутся, но это не анонимность</b><p>Серверы арендованы на живого человека и подчиняются законам своих стран. От слежки провайдера и блокировок защищает, от целенаправленного интереса государства — нет, как и любой VPN.</p></div>
         </div>
-        
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Торренты через узлы не качают</b><p>За раздачу с европейского адреса хостингу прилетает жалоба, и узел сносят. Один человек с торрентом оставляет без связи всех остальных.</p></div>
+          <div><b>Торренты через узлы не качают</b><p>За раздачу с европейского адреса хостинг сносит узел. Один человек с торрентом оставляет без связи всех.</p></div>
         </div>
-        
         <div>
           <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Белые списки не обходит</b><p>Когда доступ сужают до белого списка, оператор пропускает только перечисленные в нём сервисы — госуслуги, банки, VK, — а остальное режет. Узлы Northlink в списке не значатся, поэтому соединение до них не устанавливается, и маскировка тут не помогает: фильтр смотрит на адрес назначения, а не на вид трафика. Пройти умеют сервисы, у которых серверы стоят внутри самих белых списков; владелец контура пользуется <a href="https://t.me/capybaravpnbot?start=partner_5620916423" rel="noopener">Capybara VPN</a> — ссылка партнёрская, с покупок по ней ему идёт процент.</p></div>
+          <div><b>Белые списки не обходит</b><p>Когда оператор оставляет только госуслуги, банки и VK, соединение до наших узлов не устанавливается: фильтр смотрит на адрес назначения. Что делать в этом случае — бот расскажет по кнопке «Вопросы».</p></div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════ FAQ ══════ -->
-  <section id="faq">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="eyebrow">Вопросы</span>
-        <h2>Что обычно спрашивают</h2>
-      </div>
-      <div class="faq reveal">
-        <details open>
-          <summary>Как получить доступ?</summary>
-          <div class="a"><p>Открыть <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a> и отправить <code>/start</code>. Бот заведёт доступ и пришлёт ссылку на подписку; её можно сразу вставить в приложение.</p></div>
-        </details>
-        <details>
-          <summary>VPN сам отваливается или интернет пропадает после блокировки экрана</summary>
-          <div class="a"><p>Перейдите на приложение с ядром Clash. На iPhone это <a href="https://apps.apple.com/ru/app/clash-mi/id6744321968" rel="noopener">Clash Mi</a>, на маке и в Windows — ClashX Meta или FlClash.</p>
-          <p>Причина не в вашей сети. iOS отводит VPN-приложению около 50 МБ памяти и молча выключает его при превышении. Clash Mi после этого поднимает туннель сам, а приложения без такой возможности ждут, пока человек перезапустит их руками.</p>
-          <p>Второй довод: Clash получает от нас самый полный набор правил — 106 против четырёх, отдельные переключатели для банков и госуслуг и автоматический переход на второй сервер, если первый молчит.</p>
-          <p>Ссылку возьмите заново в боте и выберите там Clash Mi: адрес зависит от приложения, и старая ссылка в новом приложении не откроется.</p></div>
-        </details>
-        <details>
-          <summary>Перестало подключаться. Что делать первым?</summary>
-          <div class="a"><p>Обновите подписку в приложении: почти всегда этого хватает. Скорее всего, вход сменил адрес, и новый конфиг уже лежит по вашей ссылке.</p><p>Если не помогло, переключитесь на второй город вручную. Молчат оба — проблема на стороне контура, напишите об этом.</p><p>Если молчат оба города, откройте <a href="diag.html">проверку связи</a> — она за несколько секунд померит, доходит ли ваша сеть до наших серверов, и пришлёт числа владельцу. Открывать надо на том же интернете, где не работает.</p></div>
-        </details>
-        
-        <details>
-          <summary>Сайт или приложение просит выключить VPN</summary>
-          <div class="a"><p>Так делают российские сервисы, когда видят иностранный адрес. Значит правила обхода до вашего приложения не доехали: у него другой формат подписки.</p><p>Отправьте боту <code>/link</code> и выберите приложение из списка — он выдаст ссылку в нужном формате. На iPhone это Happ: с ним проверено, что банки и VK идут напрямую. Shadowrocket правила из подписки не применяет.</p></div>
-        </details>
-        
-        <details>
-          <summary>Сколько устройств можно подключить?</summary>
-          <div class="a"><p>Сколько угодно ваших. Одна ссылка добавляется на телефон, ноутбук и телевизор одновременно и работает на всех сразу.</p></div>
-        </details>
-        <details>
-          <summary>Приложение показывает «нет подключения», хотя интернет есть</summary>
-          <div class="a"><p>Проверьте по порядку: подписка обновлена, выбран конкретный сервер (а не пустая строка), у приложения выдано разрешение на VPN в системных настройках. На мобильном интернете иногда мешает экономия трафика; для этого приложения её стоит отключить.</p></div>
-        </details>
-        <details>
-          <summary>Можно дать ссылку другу?</summary>
-          <div class="a"><p>Лучше отправить ему ссылку на бота, свою он получит за минуту. С общей ссылкой не понять, с чьего устройства идёт проблема, а при утечке доступ приходится менять сразу всем.</p></div>
-        </details>
-        <details>
-          <summary>Потерял ссылку</summary>
-          <div class="a"><p>Отправьте боту <code>/link</code>, он пришлёт ту же самую. Повторный <code>/start</code> тоже безопасен: второй ключ не создаётся, приходит уже существующий.</p></div>
-        </details>
-        <details>
-          <summary>Банк пишет «Это подключение не защищено»</summary>
-          <div class="a"><p>Российские банки перешли на сертификаты Минцифры, которым Apple и Google по умолчанию не доверяют. Проверено: так отдают <code>alfabank.ru</code>, <code>sberbank.ru</code>, <code>vtb.ru</code>. К VPN это отношения не имеет: тот же экран появится с выключенным туннелем.</p><p>Проще всего открывать банк в браузере, где этот корень уже встроен: Яндекс.Браузер или Atom. Доверие тогда остаётся внутри браузера.</p><p>Ставить корень в систему не советую: он сможет подтвердить подлинность любого сайта в интернете, и ограничить его списком доменов macOS не умеет. Мобильные приложения банков работают без всего этого — они везут сертификат с собой.</p></div>
-        </details>
-        <details>
-          <summary>Сайты открываются, а Telegram и Discord — нет</summary>
-          <div class="a"><p>Почти всегда это Windows с Hiddify в режиме системного прокси. Браузер такой прокси уважает, поэтому сайты открываются и проверка IP показывает европейский адрес. Telegram Desktop его игнорирует, а голос Discord идёт по UDP, который через прокси не проходит вовсе: оба уходят напрямую и упираются в блокировку.</p><p>Лечится переключением на режим TUN в настройках Hiddify — он забирает трафик всей машины. Windows один раз спросит права администратора для сетевого драйвера.</p></div>
-        </details>
-        <details>
-          <summary>Обход белых списков</summary>
-          <div class="a"><p>Нет. Это белый список: всё, чего в нём нет, оператор режет. Наши узлы в него не входят, соединение до них не доходит. Маскировка тут бессильна — фильтр смотрит на адрес назначения и видом трафика не интересуется.</p><p>Проходят только сервисы, у которых серверы стоят внутри самих белых списков — например <a href="https://t.me/capybaravpnbot?start=partner_5620916423" rel="noopener">Capybara VPN</a>, которым пользуется владелец контура (ссылка партнёрская).</p></div>
-        </details>
-        
       </div>
     </div>
   </section>
@@ -809,28 +474,6 @@ footer a:hover{color:var(--text)}
   var nav=document.getElementById('nav');
   var onScroll=function(){ nav.classList.toggle('stuck', window.scrollY>8); };
   onScroll(); addEventListener('scroll',onScroll,{passive:true});
-
-  /* вкладки платформ */
-  var tabs=[].slice.call(document.querySelectorAll('.tab'));
-  function select(tab){
-    tabs.forEach(function(t){
-      var on=t===tab, panel=document.getElementById(t.getAttribute('aria-controls'));
-      t.setAttribute('aria-selected',on?'true':'false');
-      t.tabIndex=on?0:-1;
-      if(on) panel.setAttribute('data-active',''); else panel.removeAttribute('data-active');
-    });
-  }
-  tabs.forEach(function(t,i){
-    t.addEventListener('click',function(){select(t);});
-    t.addEventListener('keydown',function(e){
-      var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
-      if(!d) return;
-      e.preventDefault();
-      var n=tabs[(i+d+tabs.length)%tabs.length];
-      select(n); n.focus();
-    });
-  });
-  select(tabs[0]);
 
   /* копирование адреса подписки */
   function bindCopy(b,getText){
@@ -914,7 +557,7 @@ footer a:hover{color:var(--text)}
       // Второе нажатие, пока летит первый запрос, завело бы второй ключ.
       if(go.disabled) return;
       err.hidden=true;
-      go.disabled=true; go.textContent='Секунду…';
+      go.disabled=true; go.setAttribute('aria-busy','true');
       fetch(API,{
         method:'POST', headers:{'Content-Type':'application/json'},
         body:'{}'
@@ -937,7 +580,7 @@ footer a:hover{color:var(--text)}
           ? 'Сейчас доступ не выдаётся. Попробуйте позже.'
           : 'Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
       }).then(function(){
-        go.disabled=false; go.textContent='Получить доступ';
+        go.disabled=false; go.removeAttribute('aria-busy');
       });
     }
     go.addEventListener('click',send);
@@ -1204,7 +847,7 @@ footer a:hover{color:var(--text)}
 
       function online(on){
         if(on) dot.setAttribute('data-on',''); else dot.removeAttribute('data-on');
-        status.textContent=on?'на связи':'нет связи, пробую снова…';
+        status.textContent=on?'на связи':'нет связи…';
       }
 
       // text — что уходит в body (для кнопок — подпись), extra.press — команда
