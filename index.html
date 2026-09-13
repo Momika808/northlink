@@ -213,6 +213,38 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 :root[data-theme=dark] .get-err{color:#ff8a7a}
 .sub-box .note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
 
+/* ─────────── чат с ботом ─────────── */
+.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column}
+.chat[hidden]{display:none}
+.chat-head{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.95rem}
+.chat-head b{font-weight:640}
+.chat-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.chat-dot[data-on]{background:var(--accent)}
+.chat-status{margin-left:auto;font-size:.85rem;color:var(--muted)}
+.chat-status a{color:var(--muted)}
+.chat-log{height:min(58vh,440px);overflow-y:auto;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.5rem;scroll-behavior:smooth}
+.msg{max-width:86%;padding:.6rem .85rem;border-radius:14px 14px 14px 5px;background:var(--surface-2);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.96rem;line-height:1.45}
+.msg.me{align-self:flex-end;border-radius:14px 14px 5px 14px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.msg.me[data-pending]{opacity:.6}
+.msg a{color:var(--accent-2)}
+.msg img{display:block;max-width:220px;width:100%;border-radius:10px;margin-top:.15rem}
+.msg .copy-btn{display:inline-block;margin-top:.55rem;padding:.4rem .8rem;font-size:.85rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;max-width:86%}
+.chip{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:999px;padding:.35rem .8rem;font:inherit;font-size:.88rem;cursor:pointer;transition:border-color .2s,background .2s}
+.chip:hover{border-color:var(--accent);background:var(--surface-2)}
+.chat-typing{font-size:.85rem;color:var(--muted);padding:0 1rem .5rem;min-height:1.3rem}
+.chat-row{display:flex;gap:.6rem;padding:.75rem;border-top:1px solid var(--border)}
+.chat-row input{
+  flex:1 1 10rem;min-width:0;padding:.75rem .95rem;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:1rem}
+.chat-row input:focus{outline:none;border-color:var(--accent)}
+.chat-row button{flex:none;padding:.75rem 1.1rem}
+.chat-err{padding:.5rem 1rem .8rem;font-size:.9rem;color:#c0392b}
+.chat-err[hidden]{display:none}
+:root:not([data-theme=light]) .chat-err{color:#ff8a7a}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .chat-err{color:#ff8a7a}}
+:root[data-theme=dark] .chat-err{color:#ff8a7a}
+
 /* ─────────── вкладки ─────────── */
 .tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.6rem;padding:.35rem;border:1px solid var(--border);border-radius:15px;background:var(--surface);width:max-content;max-width:100%}
 .tab{
@@ -398,25 +430,27 @@ footer a:hover{color:var(--text)}
     </div>
   </section>
 
-  <!-- ══════ запасной путь ══════ -->
+  <!-- ══════ запасной путь: код → чат с ботом ══════ -->
   <section id="get">
     <div class="wrap">
       <div class="sec-head reveal">
         <span class="eyebrow">Запасной путь</span>
         <h2>Если телеграм не открывается</h2>
-        <p class="lead">Введите код — страница выдаст ссылку на подписку. Код даёт тот, кто вас позвал.</p>
+        <p class="lead">Введите код — откроется чат с ботом. Он выдаст ссылку на подписку, поможет выбрать приложение и примет заявку, если какой-то сайт не открывается. Код даёт тот, кто вас позвал.</p>
       </div>
 
       <div class="sub-box reveal">
-        <span class="label">Код приглашения</span>
-        <div class="get-row">
-          <input id="get-code" type="text" inputmode="latin" autocapitalize="off"
-                 autocomplete="off" spellcheck="false" placeholder="nl-k7m4qp"
-                 aria-label="Код приглашения">
-          <button class="btn btn-primary" id="get-go" type="button">Получить ссылку</button>
+        <div id="get-form">
+          <span class="label">Код приглашения</span>
+          <div class="get-row">
+            <input id="get-code" type="text" inputmode="latin" autocapitalize="off"
+                   autocomplete="off" spellcheck="false" placeholder="nl-k7m4qp"
+                   aria-label="Код приглашения">
+            <button class="btn btn-primary" id="get-go" type="button">Открыть чат</button>
+          </div>
+          <p class="note">Код срабатывает один раз. Ключ выдаётся на год. Чат остаётся в этом браузере — на другом устройстве его не будет.</p>
+          <p class="get-err" id="get-err" hidden></p>
         </div>
-        <p class="note">Код срабатывает один раз. Ключ выдаётся на 7 дней; как продлить до года — написано после выдачи.</p>
-        <p class="get-err" id="get-err" hidden></p>
 
         <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
           <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
@@ -436,6 +470,22 @@ footer a:hover{color:var(--text)}
             Адрес подписки при этом не меняется — в приложении править нечего.
             В канале пишем, когда меняется адрес и что делать, если перестало работать.
           </p>
+        </div>
+
+        <div class="chat" id="chat" hidden>
+          <div class="chat-head">
+            <span class="chat-dot" id="chat-dot" aria-hidden="true"></span>
+            <b>Northlink</b> · чат с ботом
+            <span class="chat-status" id="chat-status"></span>
+          </div>
+          <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Сообщения"></div>
+          <div class="chat-typing" id="chat-typing" aria-live="polite"></div>
+          <p class="chat-err" id="chat-err" hidden></p>
+          <form class="chat-row" id="chat-form">
+            <input id="chat-text" type="text" autocomplete="off" placeholder="Напишите боту…"
+                   aria-label="Сообщение боту" maxlength="2000">
+            <button class="btn btn-primary" type="submit" id="chat-send">Отправить</button>
+          </form>
         </div>
       </div>
     </div>
@@ -727,10 +777,11 @@ footer a:hover{color:var(--text)}
   }
   document.querySelectorAll('[data-copy]').forEach(function(b){bindCopy(b);});
 
-  /* выдача ключа по коду — запасной путь, когда телеграм не открывается */
+  /* код → ссылка и чат с ботом. Запасной путь, когда телеграм не открывается */
   (function(){
     var input=document.getElementById('get-code'),
         go=document.getElementById('get-go'),
+        form=document.getElementById('get-form'),
         out=document.getElementById('get-out'),
         err=document.getElementById('get-err'),
         urlBox=document.getElementById('get-url'),
@@ -740,6 +791,8 @@ footer a:hover{color:var(--text)}
         when=document.getElementById('get-when'),
         forget=document.getElementById('get-forget'),
         KEY='northlink.issued',
+        MX_KEY='northlink.matrix',
+        API='https://cdn.adminwg.dad/api/chat/start',
         link='';
     if(!input||!go) return;
 
@@ -751,17 +804,16 @@ footer a:hover{color:var(--text)}
     // ничего не уходит, чужой прочитать не может. Не переживёт приватный
     // режим, очистку данных сайта и переход в другой браузер — о чём
     // страница и предупреждает, а не делает вид, что ссылка вечная.
-    function save(d){
-      try { localStorage.setItem(KEY, JSON.stringify(
-        {url:d.url, claim:d.claim||'', at:new Date().toISOString()})); } catch(e){}
-    }
-    function load(){
-      try { var v=localStorage.getItem(KEY); return v?JSON.parse(v):null; } catch(e){ return null; }
-    }
+    // Рядом, под другим ключом, лежит сессия чата: сервер, учётка, жетон.
+    function save(k,d){ try{ localStorage.setItem(k, JSON.stringify(d)); }catch(e){} }
+    function load(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+    function drop(k){ try{ localStorage.removeItem(k); }catch(e){} }
 
     function показать(d, старое){
       link=d.url; urlBox.textContent=d.url; out.hidden=false;
-      if(d.claim){ claim.href=d.claim; claimWrap.hidden=false; }
+      // Привязка через бота нужна только ключу без чата: у него неделя.
+      // С чатом ключ годовой сразу, звать в телеграм незачем.
+      if(d.claim && !load(MX_KEY)){ claim.href=d.claim; claimWrap.hidden=false; }
       else { claimWrap.hidden=true; }
       if(старое && d.at){
         when.textContent=new Date(d.at).toLocaleDateString('ru-RU',
@@ -772,8 +824,9 @@ footer a:hover{color:var(--text)}
 
     forget.addEventListener('click',function(e){
       e.preventDefault();
-      try { localStorage.removeItem(KEY); } catch(err){}
+      drop(KEY); drop(MX_KEY);
       out.hidden=true; again.hidden=true; link='';
+      chat.stop(); form.hidden=false;
     });
     bindCopy(document.getElementById('get-copy'),function(){return link;});
 
@@ -787,7 +840,7 @@ footer a:hover{color:var(--text)}
       err.hidden=true;
       if(!code){ input.focus(); return; }
       go.disabled=true; go.textContent='Проверяю…';
-      fetch('https://cdn.adminwg.dad/api/issue',{
+      fetch(API,{
         method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({code:code})
       }).then(function(r){
@@ -796,22 +849,210 @@ footer a:hover{color:var(--text)}
         if(!r.ok) throw new Error('bad');
         return r.json();
       }).then(function(d){
-        save(d);
-        показать(d, false);
+        var issued={url:d.url, claim:d.claim||'', at:new Date().toISOString()};
+        save(KEY, issued);
+        if(d.matrix && d.matrix.access_token){
+          save(MX_KEY, d.matrix);
+          form.hidden=true;
+          chat.start(d.matrix);
+        }
+        показать(issued, false);
         input.value='';
       }).catch(function(e){
         fail(e && e.message==='bad'
           ? 'Код не подошёл: он неверный или уже использован.'
           : 'Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
       }).then(function(){
-        go.disabled=false; go.textContent='Получить ссылку';
+        go.disabled=false; go.textContent='Открыть чат';
       });
     }
     go.addEventListener('click',send);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter') send(); });
 
+    /* ── чат: клиент Matrix на голом fetch ──
+       Библиотек нет по правилу страницы (ни одного внешнего запроса при
+       загрузке); нужных вызовов API клиента — пять: sync, send, typing,
+       media, и всё. Учётку и комнату завёл бот, регистрация и приглашения
+       странице не нужны. */
+    var chat=(function(){
+      var box=document.getElementById('chat'),
+          log=document.getElementById('chat-log'),
+          typing=document.getElementById('chat-typing'),
+          cerr=document.getElementById('chat-err'),
+          dot=document.getElementById('chat-dot'),
+          status=document.getElementById('chat-status'),
+          cform=document.getElementById('chat-form'),
+          ctext=document.getElementById('chat-text'),
+          csend=document.getElementById('chat-send'),
+          s=null, since=null, alive=false, seen={}, pending={}, run=0,
+          blobs=[];
+
+      function api(path, opts){
+        opts=opts||{};
+        var h=opts.headers||{};
+        h['Authorization']='Bearer '+s.access_token;
+        opts.headers=h;
+        return fetch(s.hs+path, opts).then(function(r){
+          if(r.status===401){
+            // Жетон отозван: сессии больше нет, честнее показать форму,
+            // чем бесконечно «переподключаться».
+            stop(); drop(MX_KEY); form.hidden=false;
+            cerr.textContent='Сессия чата закончилась. Возьмите новый код.'; cerr.hidden=false;
+            throw new Error('unauth');
+          }
+          return r;
+        });
+      }
+
+      function esc(x){ return String(x).replace(/[&<>"']/g,function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+      // Ссылки — кликабельными; остальное как текст.
+      function rich(text){
+        return esc(text).replace(/https?:\/\/[^\s<]+/g,function(u){
+          return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; });
+      }
+      function scroll(){ log.scrollTop=log.scrollHeight; }
+
+      function bubble(ev){
+        var c=ev.content||{}, mine=ev.sender===s.user_id, el;
+        if(c.msgtype==='m.text'){
+          el=document.createElement('div');
+          el.className='msg'+(mine?' me':'');
+          el.innerHTML=rich(c.body||'');
+          if(c['dad.adminwg.northlink.copy']){
+            var b=document.createElement('button');
+            b.type='button'; b.className='copy-btn'; b.textContent='Скопировать ссылку';
+            b.setAttribute('data-copy', c['dad.adminwg.northlink.copy']);
+            bindCopy(b); el.appendChild(document.createElement('br')); el.appendChild(b);
+          }
+          log.appendChild(el);
+          var ch=c['dad.adminwg.northlink.choices'];
+          if(!mine && ch && ch.length){
+            var row=document.createElement('div'); row.className='chips';
+            ch.forEach(function(o){
+              var btn=document.createElement('button'); btn.type='button'; btn.className='chip';
+              btn.textContent=o.label||o.text||'';
+              btn.addEventListener('click',function(){
+                if(o.url) window.open(o.url,'_blank','noopener');
+                else if(o.text) send(o.text, o.label);
+              });
+              row.appendChild(btn);
+            });
+            log.appendChild(row);
+          }
+        } else if(c.msgtype==='m.image' && c.url && c.url.indexOf('mxc://')===0){
+          // Медиа Synapse отдаёт только с жетоном — обычный <img src> не
+          // пройдёт. Тянем как blob и подставляем.
+          el=document.createElement('div'); el.className='msg'+(mine?' me':'');
+          var img=document.createElement('img'); img.alt=c.body||''; el.appendChild(img);
+          if(c.body){ var cap=document.createElement('div'); cap.textContent=c.body; el.appendChild(cap); }
+          log.appendChild(el);
+          var m=c.url.slice(6).split('/');
+          api('/_matrix/client/v1/media/download/'+encodeURIComponent(m[0])+'/'+encodeURIComponent(m[1]))
+            .then(function(r){ if(!r.ok) throw 0; return r.blob(); })
+            .then(function(bl){ var u=URL.createObjectURL(bl); blobs.push(u); img.src=u; scroll(); })
+            .catch(function(){ el.remove(); });
+        }
+        return el;
+      }
+
+      function take(ev){
+        if(!ev.event_id || seen[ev.event_id]) return;
+        seen[ev.event_id]=1;
+        var tx=ev.unsigned && ev.unsigned.transaction_id;
+        if(tx && pending[tx]){ pending[tx].removeAttribute('data-pending'); delete pending[tx]; return; }
+        bubble(ev);
+      }
+
+      function filter(){
+        return encodeURIComponent(JSON.stringify({
+          room:{rooms:[s.room_id],
+                timeline:{limit:40,types:['m.room.message']},
+                state:{types:[]}, ephemeral:{types:['m.typing']}, account_data:{types:[]}},
+          presence:{types:[]}, account_data:{types:[]}}));
+      }
+
+      function loop(my, delay){
+        if(!alive||my!==run) return;
+        var q='/_matrix/client/v3/sync?filter='+filter()+(since
+              ? '&since='+encodeURIComponent(since)+'&timeout=30000' : '&timeout=0');
+        api(q).then(function(r){
+          if(!r.ok) throw new Error('sync '+r.status);
+          return r.json();
+        }).then(function(d){
+          if(!alive||my!==run) return;
+          since=d.next_batch;
+          var room=d.rooms&&d.rooms.join&&d.rooms.join[s.room_id];
+          if(room){
+            (room.timeline&&room.timeline.events||[]).forEach(take);
+            (room.ephemeral&&room.ephemeral.events||[]).forEach(function(ev){
+              if(ev.type==='m.typing'){
+                var ids=(ev.content&&ev.content.user_ids)||[];
+                typing.textContent=ids.indexOf(s.bot)>=0?'Бот печатает…':'';
+              }
+            });
+            scroll();
+          }
+          online(true);
+          loop(my, 1000);
+        }).catch(function(e){
+          if(!alive||my!==run||(e&&e.message==='unauth')) return;
+          online(false);
+          setTimeout(function(){ loop(my, Math.min((delay||1000)*2, 30000)); }, delay||1000);
+        });
+      }
+
+      function online(on){
+        if(on) dot.setAttribute('data-on',''); else dot.removeAttribute('data-on');
+        status.textContent=on?'на связи':'нет связи, пробую снова…';
+      }
+
+      function send(text, shown){
+        if(!alive||!text) return;
+        var tx='w'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+        var el=document.createElement('div'); el.className='msg me'; el.setAttribute('data-pending','');
+        el.textContent=shown||text; log.appendChild(el); pending[tx]=el; scroll();
+        api('/_matrix/client/v3/rooms/'+encodeURIComponent(s.room_id)+'/send/m.room.message/'+tx,{
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({msgtype:'m.text', body:text})
+        }).then(function(r){
+          if(!r.ok) throw new Error('send '+r.status);
+          return r.json();
+        }).then(function(d){
+          // Эхо через sync могло прийти раньше ответа — тогда уже снято.
+          if(d.event_id && !seen[d.event_id]){ seen[d.event_id]=1; el.removeAttribute('data-pending'); delete pending[tx]; }
+        }).catch(function(e){
+          if(e&&e.message==='unauth') return;
+          el.remove(); delete pending[tx];
+          cerr.textContent='Сообщение не ушло. Проверьте связь и отправьте ещё раз.'; cerr.hidden=false;
+          setTimeout(function(){cerr.hidden=true;},4000);
+        });
+      }
+
+      cform.addEventListener('submit',function(e){
+        e.preventDefault();
+        var v=ctext.value.trim(); if(!v) return;
+        ctext.value=''; send(v);
+      });
+
+      function start(session){
+        stop();
+        s=session; alive=true; run++; since=null; seen={}; pending={};
+        log.innerHTML=''; typing.textContent=''; cerr.hidden=true;
+        box.hidden=false; online(false); status.textContent='подключаюсь…';
+        loop(run, 1000);
+      }
+      function stop(){
+        alive=false; run++;
+        box.hidden=true; log.innerHTML='';
+        blobs.forEach(function(u){ try{URL.revokeObjectURL(u);}catch(e){} }); blobs=[];
+      }
+      return {start:start, stop:stop};
+    })();
+
     // Показываем сразу при заходе: человек за этим и вернулся.
-    var прежнее=load();
+    var прежнее=load(KEY), сессия=load(MX_KEY);
+    if(сессия && сессия.access_token){ form.hidden=true; chat.start(сессия); }
     if(прежнее && прежнее.url) показать(прежнее, true);
   })();
 
