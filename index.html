@@ -8,6 +8,12 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#060910">
+<!-- CSP до первого скрипта: Pages заголовков не ставит. Скрипты встроены —
+     разрешены по хэшам, пересчёт после любой правки скриптов: python3 csp.py
+     (иначе страница молчит, консоль — «Refused to execute inline script»).
+     Стили встроены (unsafe-inline), картинки чата — blob: из media,
+     иконка — data:. В сеть страница ходит только к трём своим именам. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-ktDkT2P3mlWhn0PmdYoSa9UhZZJN184Jc2kld/iqhx4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Два независимых входа в Европе. Трафик неотличим от обычного HTTPS. Подписка обновляется сама.">
@@ -361,14 +367,17 @@ footer a:hover{color:var(--text)}
 
 <main id="top">
 
-  <!-- ══════ первый экран: чат с ботом ══════ -->
+  <!-- ══════ первый экран: вход и чат с ботом ══════ -->
   <section class="hero" id="get">
     <div class="wrap">
       <span class="eyebrow"><span class="dot"></span>Варшава · Стокгольм · Вена</span>
       <h1>Northlink</h1>
       <p class="tagline">Личный VPN для своих.</p>
-      <p class="pitch">Два входа в Европе, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — прямо здесь или в Telegram.</p>
+      <p class="pitch">Два входа в Европе, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — здесь после входа или в Telegram.</p>
 
+      <!-- Не вошёл: две кнопки. Вход — учётка Matrix на нашем сервере,
+           Telegram не нужен. Обе ведут на сервер входа auth.adminwg.dad;
+           «Зарегистрироваться» открывает там форму регистрации. -->
       <div class="chat-intro" id="get-form">
         <div class="chat-head">
           <span class="chat-dot" data-on aria-hidden="true"></span>
@@ -376,19 +385,37 @@ footer a:hover{color:var(--text)}
         </div>
         <div class="chat-log chat-log-intro">
           <div class="mw">
-            <div class="msg">Нажмите кнопку — выдам пробный ключ на 7 дней, помогу выбрать приложение и пришлю ссылку на скачивание. Подписка на канал в Telegram делает ключ годовым.</div>
-            <div class="ikb" role="group" aria-label="Начать">
-              <div class="ikb-row"><button class="ikb-btn" data-style="success" id="get-go" type="button">Получить доступ</button></div>
+            <div class="msg">Чат и ключ открываются после входа. Войдите учётной записью Matrix на нашем сервере или заведите её — имя и пароль, без Telegram. Ключ привязан к учётке: войдите с другого устройства — получите тот же.</div>
+            <div class="ikb" role="group" aria-label="Вход">
+              <div class="ikb-row"><button class="ikb-btn" data-style="success" id="get-login" type="button">Войти</button></div>
+              <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-register" type="button">Зарегистрироваться</button></div>
               <div class="ikb-row"><a class="ikb-btn ikb-url" href="https://t.me/northlink_bot" rel="noopener" target="_blank" aria-label="Открыть бота в Telegram, откроется в новой вкладке">Открыть бота в Telegram</a></div>
             </div>
           </div>
-          <p class="get-err" id="get-err" hidden></p>
         </div>
       </div>
+      <p class="get-err" id="get-err" hidden></p>
+      <p class="note" id="get-alt">Кнопка регистрации не сработала? Форма напрямую:
+        <a href="https://auth.adminwg.dad/register" rel="noopener">auth.adminwg.dad/register</a>.
+        Заведите учётку и нажмите «Войти». Если вы уже входили в этом браузере,
+        «Зарегистрироваться» откроет вход — сначала завершите сессию на
+        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad/account/</a>.</p>
 
+      <!-- После «Выйти»: жетоны отозваны, но браузерная сессия на сервере
+           входа осталась — на общем компьютере её надо завершить там. -->
+      <p class="note" id="get-bye" hidden>Вы вышли. На общем компьютере ещё
+        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">завершите сессию на auth.adminwg.dad</a>.</p>
+
+      <!-- Вошёл: имя учётки и выход. -->
+      <p class="note" id="get-who" hidden>Вы вошли как <b id="get-user"></b>.
+        <a href="#" id="get-logout">Выйти</a>.</p>
+
+      <!-- Старый чат по личной сессии (учётки @nl-…): ссылка лежит только
+           в этом браузере. Уйдёт, когда все перейдут на вход. -->
       <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
         <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
-        на другом устройстве её не будет.
+        на другом устройстве её не будет. Чтобы получить ключ по учётке
+        с паролем, сначала задайте пароль командой /login в чате.
         <a href="#" id="get-forget">Забыть её здесь</a>.</p>
 
       <div class="get-out" id="get-out" hidden>
@@ -397,7 +424,10 @@ footer a:hover{color:var(--text)}
           <code id="get-url"></code>
           <button class="copy-btn" type="button" id="get-copy">Скопировать</button>
         </div>
-        <p class="note">Вставьте её в приложение как подписку.</p>
+        <p class="note">Вставьте её в приложение как подписку.
+          <span id="get-exp-wrap" hidden>Ключ действует до <b id="get-exp"></b>. Чтобы он стал годовым, вступите в канал — кнопка в чате.</span>
+          <span id="get-exp-none" hidden>Ключ годовой: вступление в канал засчитано.</span></p>
+        <p class="note" id="get-noroom" hidden>Чат не открылся: сервер Matrix не ответил. Ключ выдан; чат появится при следующем входе.</p>
         <p class="note" id="get-claim-wrap" hidden>
           <b>Ключ работает 7 дней.</b> Чтобы он стал годовым, откройте
           <a id="get-claim" href="#" rel="noopener">эту ссылку в боте</a> и подпишитесь на канал.
@@ -432,7 +462,7 @@ footer a:hover{color:var(--text)}
         </form>
       </div>
 
-      <p class="note hero-note">Чат остаётся в этом браузере — на другом устройстве его не будет. Что-то не работает? <a href="diag.html">Проверка связи</a> померит вашу сеть и пришлёт отчёт.</p>
+      <p class="note hero-note">Что-то не работает? <a href="diag.html">Проверка связи</a> померит вашу сеть и пришлёт отчёт. Сервер входа не открывается — включите VPN, если он у вас уже есть.</p>
     </div>
   </section>
 
@@ -515,13 +545,25 @@ footer a:hover{color:var(--text)}
   }
   document.querySelectorAll('[data-copy]').forEach(function(b){bindCopy(b);});
 
-  /* кнопка → ссылка и чат с ботом. Путь для тех, у кого нет телеграма */
+  /* вход → ключ и чат с ботом. Страница — публичный OIDC-клиент сервера
+     входа (MAS): PKCE без секрета, жетон на 300 с и refresh с ротацией.
+     Библиотек нет — fetch и WebCrypto. */
   (function(){
-    var go=document.getElementById('get-go'),
-        form=document.getElementById('get-form'),
+    var form=document.getElementById('get-form'),
+        alt=document.getElementById('get-alt'),
+        bye=document.getElementById('get-bye'),
+        who=document.getElementById('get-who'),
+        userEl=document.getElementById('get-user'),
+        logoutEl=document.getElementById('get-logout'),
+        loginBtn=document.getElementById('get-login'),
+        regBtn=document.getElementById('get-register'),
         out=document.getElementById('get-out'),
         err=document.getElementById('get-err'),
         urlBox=document.getElementById('get-url'),
+        expWrap=document.getElementById('get-exp-wrap'),
+        expEl=document.getElementById('get-exp'),
+        expNone=document.getElementById('get-exp-none'),
+        noRoom=document.getElementById('get-noroom'),
         claim=document.getElementById('get-claim'),
         claimWrap=document.getElementById('get-claim-wrap'),
         again=document.getElementById('get-again'),
@@ -529,46 +571,245 @@ footer a:hover{color:var(--text)}
         forget=document.getElementById('get-forget'),
         KEY='northlink.issued',
         MX_KEY='northlink.matrix',
-        API='https://cdn.adminwg.dad/api/chat/start',
+        HS='https://matrix.adminwg.dad',
+        API_SESSION='https://cdn.adminwg.dad/api/session',
         link='';
-    if(!go) return;
+    if(!loginBtn) return;
 
-    // Код одноразовый, и показ был одноразовым тоже: человек закрывал
-    // страницу и терял ссылку насовсем. Помним её в браузере — не ради
-    // удобства, а потому что взять её больше неоткуда.
-    //
     // localStorage привязан к origin, устройству и браузеру. На сервер
-    // ничего не уходит, чужой прочитать не может. Не переживёт приватный
-    // режим, очистку данных сайта и переход в другой браузер — о чём
-    // страница и предупреждает, а не делает вид, что ссылка вечная.
-    // Рядом, под другим ключом, лежит сессия чата: сервер, учётка, жетон.
+    // ничего не уходит, чужой прочитать не может. Под northlink.oidc —
+    // жетоны входа, под northlink.issued — кэш ссылки (источник правды —
+    // ответ сервера при каждом входе), под northlink.matrix — личная
+    // сессия старого чата у тех, кто получил её до появления входа.
     function save(k,d){ try{ localStorage.setItem(k, JSON.stringify(d)); }catch(e){} }
     function load(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
     function drop(k){ try{ localStorage.removeItem(k); }catch(e){} }
+    // sessionStorage — на время редиректа на сервер входа и обратно: та же
+    // вкладка, в другие не утекает.
+    function ssave(k,d){ try{ sessionStorage.setItem(k, JSON.stringify(d)); }catch(e){} }
+    function sload(k){ try{ var v=sessionStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+    function sdrop(k){ try{ sessionStorage.removeItem(k); }catch(e){} }
 
+    /* ── OIDC: PKCE, обмен кода, обновление, отзыв ── */
+    var oidc=(function(){
+      var ISSUER='https://auth.adminwg.dad',
+          CLIENT_ID='01M2MYTNBN9SXN2469ZEYBJAXQ',
+          REDIRECT='https://momika808.github.io/northlink/',
+          O_KEY='northlink.oidc',        // localStorage: жетоны
+          DEV_KEY='northlink.device',    // localStorage: device_id — одно устройство навсегда
+          RELOGIN_KEY='northlink.relogin', // localStorage: после «Выйти» вход с prompt=login
+          FLOW_KEY='northlink.oidc.flow',  // sessionStorage: state, verifier, nonce
+          DISC_KEY='northlink.oidc.disc',  // sessionStorage: кэш discovery
+          LOCK='northlink.oidc',
+          EARLY=60000,                   // обновлять за 60 с до истечения
+          timer=null, discP=null;
+
+      function b64url(bytes){
+        var s=''; for(var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]);
+        return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      }
+      function random(n){ var b=new Uint8Array(n); crypto.getRandomValues(b); return b; }
+      // device_id — только буквы, цифры и дефис, не короче 10 знаков.
+      function deviceId(){
+        var d=null; try{ d=localStorage.getItem(DEV_KEY); }catch(e){}
+        if(!d || !/^[A-Za-z0-9-]{10,}$/.test(d)){
+          var A='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', b=random(16); d='';
+          for(var i=0;i<b.length;i++) d+=A[b[i]%A.length];
+          try{ localStorage.setItem(DEV_KEY, d); }catch(e){}
+        }
+        return d;
+      }
+      function sha256(text){
+        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+          .then(function(h){ return b64url(new Uint8Array(h)); });
+      }
+      function form(o){
+        return Object.keys(o).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(o[k]); }).join('&');
+      }
+      // Discovery: адреса берём с сервера, не из констант. Кэш — на вкладку.
+      // Запрашиваем не при загрузке, а когда нужен: страница без входа не
+      // делает ни одного внешнего запроса. Ответ сверяем (OpenID Discovery
+      // §4.3): issuer наш и все три адреса на нём — подменённый JSON увёл бы
+      // человека со state и challenge на чужую форму входа, а редирект CSP
+      // не ограничивает. Кэш проверяем той же меркой.
+      function sane(d){
+        return !!d && d.issuer===ISSUER &&
+          [d.authorization_endpoint, d.token_endpoint, d.revocation_endpoint].every(function(u){
+            return typeof u==='string' && u.indexOf(ISSUER+'/')===0; });
+      }
+      function discovery(){
+        var c=sload(DISC_KEY);
+        if(sane(c)) return Promise.resolve(c);
+        if(discP) return discP;
+        discP=fetch(ISSUER+'/.well-known/openid-configuration').then(function(r){
+          if(!r.ok) throw 0; return r.json();
+        }).then(function(d){
+          if(!sane(d)) throw 0;
+          var c={issuer:d.issuer, authorization_endpoint:d.authorization_endpoint, token_endpoint:d.token_endpoint, revocation_endpoint:d.revocation_endpoint};
+          ssave(DISC_KEY, c); return c;
+        }).catch(function(){ discP=null; throw new Error('discovery'); });
+        return discP;
+      }
+      function post(url, body){
+        return fetch(url,{method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:form(body)})
+          .then(function(r){
+            return r.json().catch(function(){ return {}; }).then(function(j){
+              if(r.ok) return j;
+              var e=new Error(j && j.error || 'http_'+r.status); e.text=j && j.error_description || ''; throw e;
+            });
+          });
+      }
+      function get(){ var s=load(O_KEY); return s && s.access_token && s.refresh_token ? s : null; }
+      function has(){ return !!get(); }
+      function forget(){ drop(O_KEY); if(timer){ clearTimeout(timer); timer=null; } }
+      // Замок на обновление: две вкладки с одним localStorage без него
+      // выбивают друг друга (refresh одноразовый).
+      function locked(fn){
+        if(navigator.locks && navigator.locks.request) return navigator.locks.request(LOCK, fn);
+        return fn();
+      }
+
+      // Шаги 1–2: state, verifier, challenge, nonce — и редирект. nonce не
+      // сверяется: id_token странице не нужен (личность даёт whoami), поле
+      // шлём как стандартное. prompt=login после «Выйти» MAS 1.24 не
+      // учитывает (при живой cookie — сразу согласие); шлём на будущее.
+      function login(prompt){
+        var relogin=false; try{ relogin=localStorage.getItem(RELOGIN_KEY)==='1'; }catch(e){}
+        if(!prompt && relogin) prompt='login';
+        return discovery().then(function(d){
+          var verifier=b64url(random(48)), state=b64url(random(24)), nonce=b64url(random(24));
+          return sha256(verifier).then(function(challenge){
+            ssave(FLOW_KEY,{state:state, verifier:verifier, nonce:nonce});
+            var q={response_type:'code', client_id:CLIENT_ID, redirect_uri:REDIRECT,
+                   scope:'openid urn:matrix:client:api:* urn:matrix:client:device:'+deviceId(),
+                   state:state, nonce:nonce, code_challenge:challenge, code_challenge_method:'S256',
+                   response_mode:'fragment'};
+            if(prompt) q.prompt=prompt;
+            location.assign(d.authorization_endpoint+'?'+form(q));
+          });
+        });
+      }
+
+      // Шаг 4: разбор #code=…&state=… после возврата. null — это не возврат
+      // (обычный якорь вроде #get). Ошибку отдаём словами.
+      function callback(){
+        var h=location.hash; if(!h || h.length<2) return null;
+        var p=new URLSearchParams(h.slice(1));
+        if(!p.has('code') && !p.has('error')) return null;
+        history.replaceState(null, '', location.pathname+location.search);
+        var flow=sload(FLOW_KEY); sdrop(FLOW_KEY);
+        if(p.get('error')){
+          var e=new Error(p.get('error')); e.text=p.get('error_description')||''; return Promise.reject(e);
+        }
+        if(!flow || !flow.state || p.get('state')!==flow.state) return Promise.reject(new Error('state'));
+        return discovery().then(function(d){
+          return post(d.token_endpoint,{grant_type:'authorization_code', code:p.get('code'),
+            redirect_uri:REDIRECT, client_id:CLIENT_ID, code_verifier:flow.verifier});
+        }).then(function(j){
+          if(!j.access_token || !j.refresh_token) throw new Error('token');
+          var s={access_token:j.access_token, refresh_token:j.refresh_token,
+                 expires_at:Date.now()+(j.expires_in||300)*1000, device_id:deviceId(), hs:HS};
+          save(O_KEY, s); try{ localStorage.removeItem(RELOGIN_KEY); }catch(e){}
+          arm(); return s;
+        });
+      }
+
+      // Шаг 9: обновление. Под замком перечитываем хранилище: другая вкладка
+      // могла уже обновить — тогда берём её жетон. На invalid_grant тоже
+      // сначала перечитываем: стираем сессию, только если refresh там тот же.
+      // stale — жетон, на который сервер ответил 401: если в хранилище уже
+      // другой (обновила соседняя вкладка), берём его; иначе обновляем сейчас.
+      function refresh(stale){
+        return locked(function(){
+          var cur=get(); if(!cur) return Promise.reject(new Error('unauth'));
+          if(stale ? cur.access_token!==stale : cur.expires_at-Date.now()>EARLY){ arm(); return Promise.resolve(cur.access_token); }
+          return discovery().then(function(d){
+            return post(d.token_endpoint,{grant_type:'refresh_token', refresh_token:cur.refresh_token, client_id:CLIENT_ID});
+          }).then(function(j){
+            if(!j.access_token) throw new Error('token');
+            var next={access_token:j.access_token, refresh_token:j.refresh_token||cur.refresh_token,
+                      expires_at:Date.now()+(j.expires_in||300)*1000, device_id:cur.device_id, hs:cur.hs, user_id:cur.user_id};
+            save(O_KEY, next); arm(); return next.access_token;
+          }).catch(function(e){
+            if(e && e.message==='invalid_grant'){
+              var now=get();
+              if(now && now.refresh_token!==cur.refresh_token){ arm(); return now.access_token; }
+              forget(); throw new Error('unauth');
+            }
+            // Сеть или сервер входа: сессия жива, попробуем позже.
+            arm(15000); throw new Error('net');
+          });
+        });
+      }
+      // Таймер: за 60 с до истечения. После сна вкладки таймер может опоздать —
+      // тогда обновит token() перед первым запросом.
+      function arm(inMs){
+        if(timer) clearTimeout(timer);
+        var s=get(); if(!s) return;
+        var wait=inMs!=null?inMs:Math.max(1000, s.expires_at-EARLY-Date.now());
+        timer=setTimeout(function(){ timer=null; refresh().catch(function(){}); }, wait);
+      }
+      // Жетон для запроса: свежий — как есть, истекающий — после обновления.
+      function token(){
+        var s=get(); if(!s) return Promise.reject(new Error('unauth'));
+        if(s.expires_at-Date.now()>5000) return Promise.resolve(s.access_token);
+        return refresh();
+      }
+      // Принудительно: после 401 на жетон stale — свежий жетон или 'unauth'.
+      function force(stale){ return refresh(stale); }
+      function setUser(user_id){
+        return locked(function(){ var s=get(); if(s){ s.user_id=user_id; save(O_KEY, s); } });
+      }
+      // «Выйти»: отозвать оба жетона, стереть хранилище. Браузерная сессия
+      // сервера входа остаётся: следующий вход спросит только согласие,
+      // пока она жива (prompt=login MAS 1.24 не учитывает) — на общем
+      // компьютере её завершают в /account/, ссылка под кнопками.
+      function logout(){
+        var cur=get(); forget();
+        try{ localStorage.setItem(RELOGIN_KEY,'1'); }catch(e){}
+        if(!cur) return Promise.resolve();
+        return discovery().then(function(d){
+          function revoke(t, hint){ return post(d.revocation_endpoint,{token:t, token_type_hint:hint, client_id:CLIENT_ID}).catch(function(){}); }
+          return Promise.all([revoke(cur.refresh_token,'refresh_token'), revoke(cur.access_token,'access_token')]);
+        }).catch(function(){});
+      }
+      return {has:has, get:get, login:login, callback:callback, token:token, force:force, logout:logout, forget:forget, arm:arm, setUser:setUser};
+    })();
+
+    /* ── показ состояний ── */
+    function hide(el){ el.hidden=true; }
+    function showLoggedOut(){
+      form.hidden=false; alt.hidden=false; hide(who); hide(out); hide(again); hide(noRoom); link='';
+      chat.stop();
+    }
+    function showLoggedIn(user_id){
+      form.hidden=true; alt.hidden=true; hide(bye); hide(again);
+      userEl.textContent=user_id||'…'; who.hidden=false;
+    }
+    function whenText(x){
+      var t=null;
+      if(typeof x==='number') t=x<1e12?x*1000:x;
+      else if(typeof x==='string' && x) t=Date.parse(x);
+      if(t==null || isNaN(t)) return '';
+      return new Date(t).toLocaleDateString('ru-RU',{day:'numeric', month:'long', year:'numeric'});
+    }
     function показать(d, старое){
       link=d.url; urlBox.textContent=d.url; out.hidden=false;
-      // Привязка через бота нужна только ключу без чата: у него неделя.
-      // С чатом ключ годовой сразу, звать в телеграм незачем.
-      if(d.claim && !load(MX_KEY)){ claim.href=d.claim; claimWrap.hidden=false; }
+      // Срок — из ответа сервера: строка даты — ключ на неделю, null —
+      // годовой; в старом кэше поля нет — молчим.
+      var w=whenText(d.expires_at);
+      if(w){ expEl.textContent=w; expWrap.hidden=false; } else { expWrap.hidden=true; }
+      expNone.hidden=!(d.expires_at===null);
+      // Привязка через бота нужна только старому ключу без чата: у него неделя.
+      if(d.claim && !load(MX_KEY) && !oidc.has()){ claim.href=d.claim; claimWrap.hidden=false; }
       else { claimWrap.hidden=true; }
       if(старое && d.at){
-        when.textContent=new Date(d.at).toLocaleDateString('ru-RU',
-          {day:'numeric', month:'long'});
+        when.textContent=new Date(d.at).toLocaleDateString('ru-RU',{day:'numeric', month:'long'});
         again.hidden=false;
       } else { again.hidden=true; }
     }
-
-    forget.addEventListener('click',function(e){
-      e.preventDefault();
-      drop(KEY); drop(MX_KEY);
-      out.hidden=true; again.hidden=true; link='';
-      chat.stop(); form.hidden=false;
-    });
-    bindCopy(document.getElementById('get-copy'),function(){return link;});
-
     function fail(text, bot){
-      err.textContent=text; err.hidden=false; out.hidden=true;
+      err.textContent=text; err.hidden=false;
       // Ссылку собираем узлами, а не innerHTML: текст может прийти с сервера.
       if(bot){
         var a=document.createElement('a');
@@ -578,62 +819,106 @@ footer a:hover{color:var(--text)}
         err.appendChild(a);
       }
     }
-
-    function send(){
-      // Второе нажатие, пока летит первый запрос, завело бы второй ключ.
-      if(go.disabled) return;
-      err.hidden=true;
-      go.disabled=true; go.setAttribute('aria-busy','true');
-      fetch(API,{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:'{}'
-      }).then(function(r){
-        // 403 trial_closed — пробный вход закрыт: сервер сам говорит,
-        // что показать, и зовёт в бота. Тело читаем отдельно: без JSON
-        // это обычный отказ.
-        if(r.status===403){
-          return r.json().catch(function(){ return {}; }).then(function(d){
-            var e=new Error(d && d.error==='trial_closed' ? 'closed' : 'bad');
-            e.text=d && d.message || '';
-            throw e;
-          });
-        }
-        // 404 — сервер не выдаёт: предел ключей, чужой origin или закрытый
-        // режим; отличить их здесь нельзя и не нужно.
-        if(!r.ok) throw new Error('bad');
-        return r.json();
-      }).then(function(d){
-        var issued={url:d.url, claim:d.claim||'', at:new Date().toISOString()};
-        save(KEY, issued);
-        if(d.matrix && d.matrix.access_token){
-          save(MX_KEY, d.matrix);
-          form.hidden=true;
-          chat.start(d.matrix);
-        }
-        показать(issued, false);
-      }).catch(function(e){
-        if(e && e.message==='closed'){
-          fail(e.text || 'Пробный доступ с сайта закрыт.', true);
-          return;
-        }
-        // 404 сейчас значит одно: пробный доступ с сайта закрыт до
-        // появления входа (К1а); ключ выдаёт бот.
-        if(e && e.message==='bad'){ fail('Сейчас доступ с сайта не выдаётся.', true); return; }
-        fail('Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
-      }).then(function(){
-        go.disabled=false; go.removeAttribute('aria-busy');
+    function busy(on){
+      [loginBtn, regBtn].forEach(function(b){
+        b.disabled=on; if(on) b.setAttribute('aria-busy','true'); else b.removeAttribute('aria-busy');
       });
     }
-    go.addEventListener('click',send);
+    function loginErrorText(e){
+      var m=e && e.message || '';
+      if(m==='discovery') return 'Сервер входа недоступен. Попробуйте с VPN или позже.';
+      if(m==='access_denied') return 'Вход отменён.';
+      if(m==='state') return 'Ответ сервера входа не совпал с запросом этой вкладки. Нажмите «Войти» ещё раз.';
+      if(m==='invalid_grant') return 'Код входа устарел. Нажмите «Войти» ещё раз.';
+      if(e && e.text) return 'Сервер входа ответил: '+e.text;
+      return 'Вход не удался ('+(m||'ошибка')+'). Попробуйте ещё раз.';
+    }
+
+    loginBtn.addEventListener('click',function(){
+      if(loginBtn.disabled) return; err.hidden=true; hide(bye); busy(true);
+      oidc.login(null).catch(function(e){ busy(false); fail(loginErrorText(e)); });
+    });
+    regBtn.addEventListener('click',function(){
+      if(regBtn.disabled) return; err.hidden=true; hide(bye); busy(true);
+      oidc.login('create').catch(function(e){ busy(false); fail(loginErrorText(e)); });
+    });
+    logoutEl.addEventListener('click',function(e){
+      e.preventDefault();
+      chat.stop(); drop(KEY); hide(out); hide(who); link='';
+      oidc.logout().then(function(){ showLoggedOut(); bye.hidden=false; });
+    });
+    forget.addEventListener('click',function(e){
+      e.preventDefault();
+      drop(KEY); drop(MX_KEY);
+      showLoggedOut();
+    });
+    // «Назад» из формы входа через bfcache: страница возвращается с
+    // кнопками, которые мы выключили перед редиректом, — включаем.
+    window.addEventListener('pageshow',function(e){ if(e.persisted) busy(false); });
+    // «Выйти» в другой вкладке: хранилище жетонов стёрто — показываем вход
+    // сразу, а не по следующему запросу (до 30 с long-poll).
+    window.addEventListener('storage',function(e){
+      if(e.key==='northlink.oidc' && e.newValue==null && !oidc.has()){ drop(KEY); showLoggedOut(); }
+    });
+    bindCopy(document.getElementById('get-copy'),function(){return link;});
+
+    // Шаги 5–6: кто вошёл и ключ. Ссылку и срок берём из ответа сервера,
+    // localStorage — только кэш на время, пока ответ не пришёл.
+    function bearer(){ return oidc.token().then(function(t){ return {'Authorization':'Bearer '+t}; }); }
+    function openSession(){
+      var s=oidc.get(); if(!s) return Promise.resolve(false);
+      showLoggedIn(s.user_id); err.hidden=true;
+      var cached=load(KEY); if(cached && cached.url) показать(cached, false);
+      var user_id=s.user_id;
+      return bearer().then(function(h){
+        return fetch(HS+'/_matrix/client/v3/account/whoami',{headers:h});
+      }).then(function(r){
+        if(r.status===401) throw new Error('unauth');
+        if(!r.ok) throw new Error('whoami');
+        return r.json();
+      }).then(function(w){
+        user_id=w.user_id; userEl.textContent=user_id;
+        return oidc.setUser(user_id);
+      }).then(bearer).then(function(h){
+        return fetch(API_SESSION,{method:'POST', headers:h});
+      }).then(function(r){
+        if(r.status===401) throw new Error('unauth');
+        return r.json().catch(function(){ return {}; }).then(function(d){
+          if(r.ok) return d;
+          var e=new Error('http_'+r.status); e.text=d && d.message || ''; throw e;
+        });
+      }).then(function(d){
+        if(!d.url) throw new Error('bad');
+        var issued={url:d.url, expires_at:d.expires_at||null, at:new Date().toISOString()};
+        save(KEY, issued); показать(issued, false);
+        // room_id пустой — Matrix отказал боту; ключ есть, чат — в другой раз.
+        if(d.room_id){ hide(noRoom); chat.start({hs:HS, user_id:user_id, room_id:d.room_id, bot:d.bot, token:oidc.token, join:true}); }
+        else { chat.stop(); noRoom.hidden=false; }
+        return true;
+      }).catch(function(e){
+        var m=e && e.message || '';
+        if(m==='unauth'){ oidc.forget(); drop(KEY); showLoggedOut(); fail('Сессия закончилась. Войдите снова.'); return false; }
+        if(m==='net'){ fail('Сервер входа недоступен, жетон не обновить. Попробуйте с VPN или позже.'); return false; }
+        if(m==='discovery'){ fail('Сервер входа недоступен. Попробуйте с VPN или позже.'); return false; }
+        if(m==='http_403'){ fail(e.text || 'Сервер отказал: этой учётке ключ не выдаётся.'); return false; }
+        if(m==='http_429'){ fail('Слишком много запросов к серверу. Подождите минуту и обновите страницу.'); return false; }
+        if(m==='http_404'){ fail(e.text || 'Ключ сейчас не выдаётся. Попробуйте позже.'); return false; }
+        if(m==='http_503'){ fail(e.text || 'Сервер занят. Попробуйте через минуту.'); return false; }
+        if(m.indexOf('http_')===0){ fail(e.text || 'Сервер ответил ошибкой '+m.slice(5)+'. Попробуйте позже.'); return false; }
+        fail('Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
+        return false;
+      });
+    }
 
     /* ── чат: клиент Matrix на голом fetch ──
        Библиотек нет по правилу страницы (ни одного внешнего запроса при
-       загрузке); нужных вызовов API клиента — sync, send, media, и всё.
-       Учётку и комнату завёл бот, регистрация и приглашения странице не
-       нужны. Кнопки — как в Telegram: inline-клавиатура под сообщением
-       бота (поле choices в событии) и постоянная над полем ввода (событие
-       состояния комнаты). Нажатие шлёт подпись кнопки текстом, а команду —
-       полем press; бот правит своё сообщение стандартной правкой Matrix. */
+       загрузке); нужных вызовов API клиента — join, sync, send, media, и
+       всё. Жетон даёт session.token() — OAuth-жетон входа (с обновлением)
+       или личная сессия старого чата. Кнопки — как в Telegram:
+       inline-клавиатура под сообщением бота (поле choices в событии) и
+       постоянная над полем ввода (событие состояния комнаты). Нажатие шлёт
+       подпись кнопки текстом, а команду — полем press; бот правит своё
+       сообщение стандартной правкой Matrix. */
     var chat=(function(){
       var box=document.getElementById('chat'),
           log=document.getElementById('chat-log'),
@@ -650,20 +935,32 @@ footer a:hover{color:var(--text)}
           s=null, since=null, alive=false, seen={}, pending={}, byId={}, run=0,
           blobs=[];
 
-      function api(path, opts){
+      function api(path, opts, retried){
         opts=opts||{};
-        var h=opts.headers||{};
-        h['Authorization']='Bearer '+s.access_token;
-        opts.headers=h;
-        return fetch(s.hs+path, opts).then(function(r){
-          if(r.status===401){
-            // Жетон отозван: сессии больше нет, честнее показать форму,
+        var my=run, used='';
+        return s.token().then(function(tok){
+          used=tok;
+          var h=opts.headers||{};
+          h['Authorization']='Bearer '+tok;
+          opts.headers=h;
+          return fetch(s.hs+path, opts);
+        }).then(function(r){
+          if(r.status!==401) return r;
+          // Один повтор со свежим жетоном: MAS при обновлении отзывает
+          // прежний access, и без navigator.locks соседняя вкладка могла
+          // обновить пару раньше нас. Второй 401 подряд — сессия закончилась.
+          if(s.join && !retried && my===run) return oidc.force(used).then(function(){ return api(path, opts, true); });
+          throw new Error('unauth');
+        }).catch(function(e){
+          if(e && e.message==='unauth' && my===run){
+            // Жетон отозван или сессия закончилась: честнее показать вход,
             // чем бесконечно «переподключаться».
-            stop(); drop(MX_KEY); form.hidden=false;
-            cerr.textContent='Сессия чата закончилась. Возьмите новый код.'; cerr.hidden=false;
-            throw new Error('unauth');
+            var oauth=!!s.join;
+            if(oauth){ oidc.forget(); drop(KEY); } else { drop(MX_KEY); }
+            showLoggedOut();
+            fail(oauth?'Сессия закончилась. Войдите снова.':'Сессия чата закончилась. Войдите заново.');
           }
-          return r;
+          throw e;
         });
       }
 
@@ -930,7 +1227,17 @@ footer a:hover{color:var(--text)}
         s=session; alive=true; run++; since=null; seen={}; pending={}; byId={};
         log.innerHTML=''; typing.textContent=''; cerr.hidden=true;
         box.hidden=false; online(false); status.textContent='подключаюсь…';
-        loop(run, 1000);
+        var my=run;
+        // Шаг 8: комнату бот только приглашает — принимаем своим жетоном,
+        // потом sync. Повторный join уже принятой комнаты — тоже 200.
+        // Ошибка join, кроме отзыва жетона, sync не мешает.
+        var ready=session.join
+          ? api('/_matrix/client/v3/join/'+encodeURIComponent(s.room_id),
+                {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
+              .then(function(r){ if(!r.ok && window.console) console.warn('join', r.status); })
+          : Promise.resolve();
+        ready.then(function(){ if(alive&&my===run) loop(my, 1000); },
+                   function(e){ if(alive&&my===run&&!(e&&e.message==='unauth')) loop(my, 1000); });
       }
       function stop(){
         alive=false; run++;
@@ -941,10 +1248,27 @@ footer a:hover{color:var(--text)}
       return {start:start, stop:stop};
     })();
 
-    // Показываем сразу при заходе: человек за этим и вернулся.
-    var прежнее=load(KEY), сессия=load(MX_KEY);
-    if(сессия && сессия.access_token){ form.hidden=true; chat.start(сессия); }
-    if(прежнее && прежнее.url) показать(прежнее, true);
+    // Загрузка: возврат с сервера входа → обмен кода и ключ; сессия входа
+    // есть → ключ и чат; старая личная сессия (@nl-…) → старый чат;
+    // иначе «не вошёл». Без hash и без хранилища внешних запросов нет.
+    var cb=oidc.callback();
+    if(cb){
+      busy(true); form.hidden=true; alt.hidden=true;
+      cb.then(function(){ busy(false); return openSession(); },
+              function(e){ busy(false); showLoggedOut(); fail(loginErrorText(e)); });
+    } else if(oidc.has()){
+      openSession();
+    } else {
+      var прежнее=load(KEY), сессия=load(MX_KEY);
+      if(сессия && сессия.access_token && сессия.hs && сессия.room_id){
+        form.hidden=true; alt.hidden=true;
+        chat.start({hs:сессия.hs, user_id:сессия.user_id, room_id:сессия.room_id, bot:сессия.bot,
+                    token:function(){ return Promise.resolve(сессия.access_token); }});
+        if(прежнее && прежнее.url) показать(прежнее, true);
+      } else {
+        showLoggedOut();
+      }
+    }
   })();
 
   /* появление блоков */

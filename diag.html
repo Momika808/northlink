@@ -191,8 +191,9 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   }
 
   // Сервер входа и Matrix отдают JSON с access-control-allow-origin: *.
-  // Ответ без JSON (страница-заглушка, 502 от прокси) — не связь, а подмена:
-  // ok только когда тело разобралось.
+  // Ответ с ACAO, но не JSON (MAS/Synapse отдали ошибку) — код eКОД; ответ
+  // без ACAO (страница-заглушка Traefik, 502) браузер до скрипта не доносит —
+  // показываем «нет связи». ok только когда тело разобралось.
   function probeJson(url, ms){
     var start = performance.now(), ctl = new AbortController();
     var timer = setTimeout(function(){ ctl.abort(); }, ms);
