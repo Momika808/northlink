@@ -122,6 +122,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     {id:'nameSto',name:'Наше имя на фронте #2', hint:'sto.adminwg.dad — то же для Стокгольма'},
     {id:'cf',     name:'Cloudflare вообще',     hint:'cloudflare.com — другой диапазон, чем у подписки'},
     {id:'s2',     name:'Запасное имя подписки',  hint:'cdn.adminwg.dad — то же содержимое, другое имя'},
+    {id:'mas',    name:'Вход (MAS)',             hint:'auth.adminwg.dad — сервер входа, ждём JSON'},
+    {id:'mx',     name:'Matrix',                 hint:'matrix.adminwg.dad — сервер чата, ждём JSON'},
     // Контроль на белый список. Эти три разрешены даже при ограничениях, и
     // без них «наши адреса молчат» неотличимо от «молчит весь зарубежный
     // интернет». Диагнозы разные, и ответ человеку тоже разный.
@@ -186,6 +188,36 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
         return {ok:true, status:r.status, ms:Math.round(performance.now()-start)}; })
       .catch(function(e){ clearTimeout(timer);
         return {ok:false, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
+  }
+
+  // Сервер входа и Matrix отдают JSON с access-control-allow-origin: *.
+  // Ответ без JSON (страница-заглушка, 502 от прокси) — не связь, а подмена:
+  // ok только когда тело разобралось.
+  function probeJson(url, ms){
+    var start = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, ms);
+    note('→ ' + url + ' (JSON, жду до ' + ms + ' мс)');
+    return fetch(url, {mode:'cors', cache:'no-store', signal:ctl.signal})
+      .then(function(r){
+        return r.json().then(
+          function(){ clearTimeout(timer);
+            return {ok:true, status:r.status, ms:Math.round(performance.now()-start)}; },
+          function(){ clearTimeout(timer);
+            return {ok:false, status:r.status, ms:Math.round(performance.now()-start)}; });
+      })
+      .catch(function(e){ clearTimeout(timer);
+        return {ok:false, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
+  }
+
+  function showJson(id, human, r){
+    if (r.ok){ mark(id,'ok', r.status+' · '+r.ms+' мс'); note('✓ ' + id + ': JSON за ' + r.ms + ' мс');
+               return human + ': ответил ' + r.status + ' за ' + r.ms + ' мс'; }
+    if (r.aborted){ mark(id,'bad','тайм-аут'); note('✕ ' + id + ': ТАЙМ-АУТ через ' + r.ms + ' мс');
+                    return human + ': ТАЙМ-АУТ (' + r.ms + ' мс)'; }
+    if (r.status){ mark(id,'warn', r.status+' без JSON'); note('! ' + id + ': код ' + r.status + ', а JSON нет');
+                   return human + ': ответил ' + r.status + ' без JSON (' + r.ms + ' мс)'; }
+    mark(id,'bad','нет связи'); note('✕ ' + id + ': не ответил за ' + r.ms + ' мс');
+    return human + ': не ответил (' + r.ms + ' мс)';
   }
 
   function show(id, r, okFast){
@@ -281,7 +313,13 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
             else { mark('s2','bad','нет связи');
               lines.push('запасное имя подписки: не ответил ('+r.ms+' мс)'); }
             finished('s2');
-          })
+          }),
+          // Вход и чат. После К0 оба имени ведут на фронты, как подписка:
+          // если подписка отвечает, а эти нет — дело в маршруте на фронтах.
+          probeJson('https://auth.adminwg.dad/.well-known/openid-configuration', 9000).then(function(r){
+            res.mas = r; lines.push(showJson('mas', 'вход (MAS)', r)); finished('mas'); }),
+          probeJson('https://matrix.adminwg.dad/_matrix/client/versions', 9000).then(function(r){
+            res.mx = r; lines.push(showJson('mx', 'Matrix', r)); finished('mx'); })
         ]);
       })
       .then(function(){
@@ -420,7 +458,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
                  'наше имя на Варшаве:', 'наше имя на Стокгольме:',
                  'вход Варшава:', 'вход Стокгольм:', 'ядро Вена:',
-                 'запасное имя подписки:', 'Cloudflare (другой диапазон):'];
+                 'запасное имя подписки:', 'Cloudflare (другой диапазон):',
+                 'вход (MAS):', 'Matrix:'];
     var head = lines.slice(0, 4), body = lines.slice(4);
     body.sort(function(a, b){
       var ia = order.findIndex(function(p){ return a.indexOf(p) === 0; });
@@ -448,11 +487,26 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       if (r.aborted) return 't';
       return r.ok ? (r.status + 'x' + r.ms) : 'x';
     }
+    // Вход и Matrix: JSON — миллисекунды, ответ без JSON — «e» и код,
+    // тайм-аут «t», нет связи «x».
+    function codeJson(r){
+      if (!r) return 'x';
+      if (r.aborted) return 't';
+      if (r.ok) return String(r.ms);
+      return r.status ? 'e' + r.status : 'x';
+    }
     var payload = ['d1', (meta.asn||'x'),
                    ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'')||'x') + (meta.vpn ? '_vpn' : (foreign ? '_tun' : (tunnelUnknown ? '_unk' : ''))),
                    code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core),
                    code(res.nameWaw), code(res.cf), code(res.s2)
                   ].join('-').slice(0, 64);
+    // Новые поля идут хвостом и только целиком: обрезанное «27» бот прочёл бы
+    // как «27 мс». Не влезло — поля нет, старый код остаётся прежним.
+    var extra = [codeJson(res.mas), codeJson(res.mx)];
+    for (var i = 0; i < extra.length; i++){
+      if ((payload + '-' + extra[i]).length > 64) break;
+      payload += '-' + extra[i];
+    }
     sendEl.href = 'https://t.me/northlink_bot?start=' + payload;
     sendEl.setAttribute('aria-disabled', 'false');
     lines.push('код для бота: ' + payload);

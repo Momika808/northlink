@@ -567,7 +567,17 @@ footer a:hover{color:var(--text)}
     });
     bindCopy(document.getElementById('get-copy'),function(){return link;});
 
-    function fail(text){ err.textContent=text; err.hidden=false; out.hidden=true; }
+    function fail(text, bot){
+      err.textContent=text; err.hidden=false; out.hidden=true;
+      // Ссылку собираем узлами, а не innerHTML: текст может прийти с сервера.
+      if(bot){
+        var a=document.createElement('a');
+        a.href='https://t.me/northlink_bot'; a.rel='noopener'; a.target='_blank';
+        a.textContent='Открыть бота в Telegram';
+        err.appendChild(document.createTextNode(' Ключ выдаёт бот: '));
+        err.appendChild(a);
+      }
+    }
 
     function send(){
       // Второе нажатие, пока летит первый запрос, завело бы второй ключ.
@@ -578,6 +588,16 @@ footer a:hover{color:var(--text)}
         method:'POST', headers:{'Content-Type':'application/json'},
         body:'{}'
       }).then(function(r){
+        // 403 trial_closed — пробный вход закрыт: сервер сам говорит,
+        // что показать, и зовёт в бота. Тело читаем отдельно: без JSON
+        // это обычный отказ.
+        if(r.status===403){
+          return r.json().catch(function(){ return {}; }).then(function(d){
+            var e=new Error(d && d.error==='trial_closed' ? 'closed' : 'bad');
+            e.text=d && d.message || '';
+            throw e;
+          });
+        }
         // 404 — сервер не выдаёт: предел ключей, чужой origin или закрытый
         // режим; отличить их здесь нельзя и не нужно.
         if(!r.ok) throw new Error('bad');
@@ -592,9 +612,14 @@ footer a:hover{color:var(--text)}
         }
         показать(issued, false);
       }).catch(function(e){
-        fail(e && e.message==='bad'
-          ? 'Сейчас доступ не выдаётся. Попробуйте позже.'
-          : 'Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
+        if(e && e.message==='closed'){
+          fail(e.text || 'Пробный доступ с сайта закрыт.', true);
+          return;
+        }
+        // 404 сейчас значит одно: пробный доступ с сайта закрыт до
+        // появления входа (К1а); ключ выдаёт бот.
+        if(e && e.message==='bad'){ fail('Сейчас доступ с сайта не выдаётся.', true); return; }
+        fail('Не получилось связаться с сервером. Проверьте связь и попробуйте ещё раз.');
       }).then(function(){
         go.disabled=false; go.removeAttribute('aria-busy');
       });
