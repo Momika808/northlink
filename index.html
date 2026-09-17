@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-rvkWFrjOhzivTPyhhEzthe6TS+4gxqMuQ1Jrqdfy0RA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-fOWkUPlM5ciZiBn+1xiVanHARtHtp6WGcMqjGwlQooo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Два независимых входа в Европе. Трафик неотличим от обычного HTTPS. Подписка обновляется сама.">
@@ -375,9 +375,15 @@ footer a:hover{color:var(--text)}
       <p class="tagline">Личный VPN для своих.</p>
       <p class="pitch">Два входа в Европе, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — здесь после входа или в Telegram.</p>
 
-      <!-- Не вошёл: две кнопки. Вход — учётка Matrix на нашем сервере,
-           Telegram не нужен. Обе ведут на сервер входа auth.adminwg.dad;
-           «Зарегистрироваться» открывает там форму регистрации. -->
+      <!-- Не вошёл: три кнопки. Вход — учётка Matrix на нашем сервере,
+           Telegram не нужен. Все ведут на сервер входа auth.adminwg.dad;
+           «Зарегистрироваться» открывает там форму регистрации.
+           «Войти через Telegram» — тот же поток OIDC: Telegram подключён к
+           MAS как upstream-провайдер, кнопка «Telegram» — на странице входа
+           MAS. Прямого старта через провайдера с сохранением downstream
+           grant у MAS нет: /upstream/authorize/<id> ждёт id гранта, который
+           MAS выдаёт только после /authorize. Потому — обычный authorize и
+           подсказка под кнопкой. -->
       <div class="chat-intro" id="get-form">
         <div class="chat-head">
           <span class="chat-dot" data-on aria-hidden="true"></span>
@@ -385,17 +391,22 @@ footer a:hover{color:var(--text)}
         </div>
         <div class="chat-log chat-log-intro">
           <div class="mw">
-            <div class="msg">Чат и ключ открываются после входа. Войдите учётной записью Matrix на нашем сервере или заведите её — имя и пароль, без Telegram. Ключ привязан к учётке: войдите с другого устройства — получите тот же.</div>
+            <div class="msg">Чат и ключ открываются после входа. Войдите учётной записью Matrix на нашем сервере или заведите её — имя и пароль, без Telegram. Вход через Telegram — учётка заведётся сама, ключ тот же, что в боте. Ключ привязан к учётке: войдите с другого устройства — получите тот же.</div>
             <div class="ikb" role="group" aria-label="Вход">
               <div class="ikb-row"><button class="ikb-btn" data-style="success" id="get-login" type="button">Войти</button></div>
               <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-register" type="button">Зарегистрироваться</button></div>
+              <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-tg" type="button">Войти через Telegram</button></div>
               <div class="ikb-row"><a class="ikb-btn ikb-url" href="https://t.me/northlink_bot" rel="noopener" target="_blank" aria-label="Открыть бота в Telegram, откроется в новой вкладке">Открыть бота в Telegram</a></div>
             </div>
           </div>
         </div>
       </div>
       <p class="get-err" id="get-err" hidden></p>
-      <p class="note" id="get-alt">Кнопка регистрации не сработала? Форма напрямую:
+      <p class="note" id="get-alt">Вход через Telegram: на странице входа нажмите «Telegram».
+        Если вы уже входили на auth.adminwg.dad, сначала завершите сессию там
+        (<a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">/account/</a> → Sessions),
+        иначе откроется вход текущей учёткой.
+        Кнопка регистрации не сработала? Форма напрямую:
         <a href="https://auth.adminwg.dad/register" rel="noopener">auth.adminwg.dad/register</a>.
         Заведите учётку и нажмите «Войти». Если вы уже входили в этом браузере,
         «Зарегистрироваться» откроет вход — сначала завершите сессию на
@@ -557,6 +568,7 @@ footer a:hover{color:var(--text)}
         logoutEl=document.getElementById('get-logout'),
         loginBtn=document.getElementById('get-login'),
         regBtn=document.getElementById('get-register'),
+        tgBtn=document.getElementById('get-tg'),
         out=document.getElementById('get-out'),
         err=document.getElementById('get-err'),
         urlBox=document.getElementById('get-url'),
@@ -821,8 +833,24 @@ footer a:hover{color:var(--text)}
         err.appendChild(a);
       }
     }
+    // 403 subscribe: годовой ключ — после подписки на канал. Адрес канала
+    // приходит от сервера (channel: «@имя» или ссылка t.me); чужой адрес не
+    // вставляем — только t.me, иначе канал по умолчанию.
+    function failSubscribe(text, channel){
+      var url='https://t.me/northlink_hq', name='';
+      if(typeof channel==='string'){
+        if(/^@[A-Za-z0-9_]{5,}$/.test(channel)){ url='https://t.me/'+channel.slice(1); name=channel; }
+        else if(/^https:\/\/t\.me\/[A-Za-z0-9_+\/-]+$/.test(channel)){ url=channel; name='@'+channel.slice(13).replace(/\/.*$/,''); }
+      }
+      fail(text || 'Ключ выдаётся подписчикам канала. Подпишитесь и войдите ещё раз.');
+      var a=document.createElement('a');
+      a.href=url; a.rel='noopener'; a.target='_blank';
+      a.textContent=name || 'Открыть канал';
+      err.appendChild(document.createTextNode(' Канал: '));
+      err.appendChild(a);
+    }
     function busy(on){
-      [loginBtn, regBtn].forEach(function(b){
+      [loginBtn, regBtn, tgBtn].forEach(function(b){
         b.disabled=on; if(on) b.setAttribute('aria-busy','true'); else b.removeAttribute('aria-busy');
       });
     }
@@ -843,6 +871,12 @@ footer a:hover{color:var(--text)}
     regBtn.addEventListener('click',function(){
       if(regBtn.disabled) return; err.hidden=true; hide(bye); busy(true);
       oidc.login('create').catch(function(e){ busy(false); fail(loginErrorText(e)); });
+    });
+    // Тот же authorize, что «Войти»: провайдера человек выбирает на
+    // странице входа MAS (подсказка — в get-alt).
+    tgBtn.addEventListener('click',function(){
+      if(tgBtn.disabled) return; err.hidden=true; hide(bye); busy(true);
+      oidc.login(null).catch(function(e){ busy(false); fail(loginErrorText(e)); });
     });
     logoutEl.addEventListener('click',function(e){
       e.preventDefault();
@@ -887,7 +921,7 @@ footer a:hover{color:var(--text)}
         if(r.status===401) throw new Error('unauth');
         return r.json().catch(function(){ return {}; }).then(function(d){
           if(r.ok) return d;
-          var e=new Error('http_'+r.status); e.text=d && d.message || ''; throw e;
+          var e=new Error('http_'+r.status); e.text=d && d.message || ''; e.data=d||{}; throw e;
         });
       }).then(function(d){
         if(!d.url) throw new Error('bad');
@@ -902,7 +936,13 @@ footer a:hover{color:var(--text)}
         if(m==='unauth'){ oidc.forget(); drop(KEY); showLoggedOut(); fail('Сессия закончилась. Войдите снова.'); return false; }
         if(m==='net'){ fail('Сервер входа недоступен, жетон не обновить. Попробуйте с VPN или позже.'); return false; }
         if(m==='discovery'){ fail('Сервер входа недоступен. Попробуйте с VPN или позже.'); return false; }
+        // 403 subscribe — вход через Telegram без подписки на канал: ссылка
+        // на канал. Остальные 403 (key_revoked, trial_closed) — текст сервера.
+        if(m==='http_403' && e.data && e.data.error==='subscribe'){ failSubscribe(e.text, e.data.channel); return false; }
         if(m==='http_403'){ fail(e.text || 'Сервер отказал: этой учётке ключ не выдаётся.'); return false; }
+        // 409 two_keys — у Telegram-личности и учётки Matrix уже разные ключи,
+        // бот их не сводит сам: текст сервера, разбор — через бота.
+        if(m==='http_409'){ fail(e.text || 'У этой учётки и вашего Telegram уже разные ключи. Напишите боту — разберёмся.', true); return false; }
         if(m==='http_429'){ fail('Слишком много запросов к серверу. Подождите минуту и обновите страницу.'); return false; }
         if(m==='http_404'){ fail(e.text || 'Ключ сейчас не выдаётся. Попробуйте позже.'); return false; }
         if(m==='http_503'){ fail(e.text || 'Сервер занят. Попробуйте через минуту.'); return false; }
