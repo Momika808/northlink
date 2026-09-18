@@ -351,6 +351,8 @@ footer a:hover{color:var(--text)}
    плотность на телефоне не включалась вовсе (найдено 13.09.2026). */
 @media (max-width:640px){
   body{line-height:1.5}
+  /* три города в одну строку: 31 символ против 26 прежних (18.09.2026) */
+  .hero .eyebrow{font-size:.78rem;letter-spacing:.06em;padding:.35rem .7rem}
   .plain > div{padding:.95rem 1.1rem}
   .sec-head{margin-bottom:1.4rem}
 }
@@ -383,10 +385,10 @@ footer a:hover{color:var(--text)}
   <!-- ══════ первый экран: вход и чат с ботом ══════ -->
   <section class="hero" id="get">
     <div class="wrap">
-      <span class="eyebrow"><span class="dot"></span>Варшава · Стокгольм · Вена</span>
+      <span class="eyebrow"><span class="dot"></span>Стокгольм · Варшава · Амстердам</span>
       <h1>Northlink</h1>
       <p class="tagline">Личный VPN для своих.</p>
-      <p class="pitch">Два входа в Европе, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — здесь после входа или в Telegram.</p>
+      <p class="pitch">Три входа в Европе и вход через Россию, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — здесь после входа или в Telegram.</p>
 
       <!-- Не вошёл: три кнопки. Вход — учётка Matrix на нашем сервере,
            Telegram не нужен. Все ведут на сервер входа auth.adminwg.dad;
@@ -539,7 +541,7 @@ footer a:hover{color:var(--text)}
 <footer>
   <div class="wrap">
     <span>Northlink — личный контур. Серверы, настройка и правила описаны кодом: OpenTofu, Ansible, CI.</span>
-    <span class="mono">Стокгольм · Варшава · Вена</span>
+    <span class="mono">Стокгольм · Варшава · Амстердам</span>
   </div>
 </footer>
 
