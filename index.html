@@ -321,6 +321,19 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .plain b{font-weight:640}
 .plain p{color:var(--muted);font-size:.95rem;margin-top:.15rem}
 
+/* ─────────── не подключается ─────────── */
+/* Карточка в герое, под чатом. Для человека, у которого туннель не работает
+   прямо сейчас: сайт из российских сетей открывается (7 из 7 замеренных
+   18.09.2026), Telegram — нет, так что это единственный канал до него.
+   Стиль — та же карточка, что у списка «честно». */
+.help{margin-top:1.6rem;text-align:left}
+.help .plain > div{align-items:start}
+.help h2{font-size:1.08rem;margin:0;max-width:none}
+.help p{color:var(--muted);font-size:.95rem;margin-top:.3rem}
+.help ol{margin:.55rem 0 0 1.15rem;padding:0;color:var(--muted);font-size:.95rem;display:grid;gap:.4rem}
+.help li::marker{color:var(--accent);font-weight:640}
+.help b{font-weight:640;color:var(--text)}
+
 /* ─────────── подвал ─────────── */
 footer{border-top:1px solid var(--border);padding:2.8rem 0;color:var(--muted);font-size:.92rem}
 footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;justify-content:space-between}
@@ -473,7 +486,24 @@ footer a:hover{color:var(--text)}
         </form>
       </div>
 
-      <p class="note hero-note">Что-то не работает? <a href="diag.html">Проверка связи</a> померит вашу сеть и пришлёт отчёт. Сервер входа не открывается — включите VPN, если он у вас уже есть.</p>
+      <!-- не подключается: шаги для человека на сломанной сети -->
+      <div class="help" id="help">
+        <div class="plain">
+          <div>
+            <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9.5a14 14 0 0 1 19 0M6 13.2a9 9 0 0 1 12 0M9.5 16.8a4 4 0 0 1 5 0"/><path d="M12 20.5h.01"/><path d="M3 3l18 18"/></svg></span>
+            <div>
+              <h2>Не подключается?</h2>
+              <p>В некоторых сетях оператор обрывает соединение с узлами в Европе. В этих сетях вход через Россию работает.</p>
+              <ol>
+                <li><b>Обновите подписку (профиль)</b> в приложении. Без этого узлов «Россия → …» в списке нет.</li>
+                <li><b>Выберите «Россия → Стокгольм»</b> или «Россия → Варшава». Приложения с Clash в названии выбирают узел сами.</li>
+                <li><b>Не помогло</b> — нажмите «Не работает» в чате с ботом на том же интернете. Бот измерит связь и передаст результат владельцу.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note hero-note">Без входа: <a href="diag.html">проверка связи</a> померит вашу сеть и покажет отчёт. Сервер входа не открывается — включите VPN, если он у вас уже есть.</p>
     </div>
   </section>
 
