@@ -123,6 +123,12 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // путь, а не только TCP до Москвы. Отвечает там, где зарубежный хостинг
     // режут, а Россию нет; молчит под белым списком — и это разные советы.
     {id:'ru',     name:'Вход через Россию',    hint:'ru.adminwg.dad — наш сервер в Москве, дальше по нашей цепочке до ядра'},
+    // Поток, а не рукопожатие: 12.09 своё имя на Vultr проходило рукопожатие
+    // и вставало на 11–21 КБ. Два мегабайта тем же путём отвечают, душат ли
+    // поток, — до того, как на этот путь сажать людей. Меряется только если
+    // вход ответил: на молчащем входе это лишние 15 секунд ожидания.
+    {id:'ruFlow', name:'Поток через Россию',    hint:'2 МБ с ядра тем же путём — душат ли после первых килобайт'},
+    {id:'ownFlow',name:'Поток напрямую, своё имя', hint:'2 МБ через sto.adminwg.dad — тот же вопрос про прямой вход'},
     {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'},
     {id:'nameWaw',name:'Наше имя на фронте',    hint:'waw.adminwg.dad — имя нашей зоны, адрес Варшавы'},
     {id:'nameSto',name:'Наше имя на фронте #2', hint:'sto.adminwg.dad — то же для Стокгольма'},
@@ -214,6 +220,42 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       })
       .catch(function(e){ clearTimeout(timer);
         return {ok:false, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
+  }
+
+  // Поток: читаем тело до конца и считаем байты. Тайм-аут с ненулевым
+  // счётчиком — это «встало на N КБ», главная подпись удушения.
+  function probeFlow(url, ms){
+    var start = performance.now(), ctl = new AbortController(), got = 0;
+    var timer = setTimeout(function(){ ctl.abort(); }, ms);
+    note('→ ' + url + ' (поток, жду до ' + ms + ' мс)');
+    return fetch(url, {mode:'cors', cache:'no-store', signal:ctl.signal})
+      .then(function(r){
+        if (!r.ok || !r.body){ clearTimeout(timer);
+          return {ok:false, status:r.status, bytes:0, ms:Math.round(performance.now()-start)}; }
+        var reader = r.body.getReader();
+        function pump(){ return reader.read().then(function(x){ if (x.done) return; got += x.value.length; return pump(); }); }
+        return pump().then(function(){ clearTimeout(timer);
+          return {ok:true, bytes:got, ms:Math.round(performance.now()-start)}; });
+      })
+      .catch(function(e){ clearTimeout(timer);
+        return {ok:false, bytes:got, ms:Math.round(performance.now()-start), aborted:(e.name==='AbortError')}; });
+  }
+  function mbit(r){ return r.ms ? (r.bytes * 8 / r.ms / 1000).toFixed(1) : '?'; }
+  function showFlow(id, human, r, want){
+    if (!r){ mark(id,'warn','не проверялось'); return human + ': не проверялось — вход не ответил'; }
+    var kb = Math.round(r.bytes / 1024);
+    if (r.ok && r.bytes >= want){ mark(id,'ok', mbit(r)+' Мбит/с');
+      note('✓ ' + id + ': ' + kb + ' КБ за ' + r.ms + ' мс, ' + mbit(r) + ' Мбит/с');
+      return human + ': ' + kb + ' КБ за ' + (r.ms/1000).toFixed(1) + ' с (' + mbit(r) + ' Мбит/с)'; }
+    if (r.aborted && r.bytes > 0){
+      var choked = r.bytes < 131072;
+      mark(id, choked ? 'bad' : 'warn', 'встало на ' + kb + ' КБ');
+      note('✕ ' + id + ': за ' + r.ms + ' мс пришло только ' + kb + ' КБ — поток ' + (choked ? 'задушен' : 'очень медленный'));
+      return human + ': встало на ' + kb + ' КБ за ' + (r.ms/1000).toFixed(0) + ' с — ' + (choked ? 'поток задушен после первых килобайт' : 'очень медленно'); }
+    if (r.aborted){ mark(id,'bad','тайм-аут'); note('✕ ' + id + ': ни байта за ' + r.ms + ' мс');
+      return human + ': ТАЙМ-АУТ, ни байта (' + r.ms + ' мс)'; }
+    mark(id,'bad','нет связи'); note('✕ ' + id + ': не открылся (' + (r.status||'без ответа') + ')');
+    return human + ': не открылся (' + (r.status||'без ответа') + ')';
   }
 
   function showJson(id, human, r){
@@ -346,6 +388,24 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           lines.push('путь выдачи ключа: не ответил (' + r.ms + ' мс)'); }
         finished('subapi');
       })
+      .then(function(){
+        // Поток — после остальных проб и по очереди, чтобы не делить канал.
+        stageEl.textContent = 'Меряю поток через Россию';
+        var FLOW = 2 * 1024 * 1024;
+        var ruP = (res.ru && res.ru.ok)
+          ? probeFlow('https://ru.adminwg.dad/probe/data?size=2&unit=MB', 15000)
+          : Promise.resolve(null);
+        return ruP.then(function(r){
+          res.ruFlow = r; lines.push(showFlow('ruFlow', 'поток через Россию', r, FLOW)); finished('ruFlow');
+          stageEl.textContent = 'Меряю поток напрямую';
+          var ownP = reached(res.nameSto)
+            ? probeFlow('https://sto.adminwg.dad/probe/data?size=2&unit=MB', 15000)
+            : Promise.resolve(null);
+          return ownP.then(function(r2){
+            res.ownFlow = r2; lines.push(showFlow('ownFlow', 'поток напрямую (своё имя)', r2, FLOW)); finished('ownFlow');
+          });
+        });
+      })
       .then(function(){ finish(lines); });
   }
 
@@ -430,9 +490,14 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       // хостинг режут, российский адрес проходит (три сети в сентябре 2026).
       // Ветка стоит раньше «запасного имени»: с 20.09 подписка отдаётся и
       // через Россию, и её ответ отсюда — не «режут имя», а тот же путь.
+      var f = res.ruFlow;
+      var flowTxt = !f ? ''
+        : (f.ok && f.bytes >= 2 * 1024 * 1024) ? ' Поток через Россию живой: 2 МБ за ' + (f.ms/1000).toFixed(1) + ' с, ' + mbit(f) + ' Мбит/с.'
+        : (f.bytes > 0 && f.bytes < 131072) ? ' <b>Но поток через Россию встаёт на ' + Math.round(f.bytes/1024) + ' КБ</b> — узлы «Россия → …» здесь тоже застрянут. Пришлите этот отчёт владельцу.'
+        : ' Поток через Россию медленный: ' + Math.round(f.bytes/1024) + ' КБ за ' + (f.ms/1000).toFixed(0) + ' с.';
       v.className = 'verdict';
       txt = '<b>Прямые входы молчат, а вход через Россию отвечает</b> — за ' + res.ru.ms
-          + ' мс. Значит режут зарубежные адреса, а не вас, и путь через Россию открыт.<br><br>'
+          + ' мс. Значит режут зарубежные адреса, а не вас, и путь через Россию открыт.' + flowTxt + '<br><br>'
           + '<b>Обновите подписку (профиль) в приложении.</b> Потом выберите узел '
           + '«Россия → Стокгольм» или «Россия → Варшава». Приложениям с Clash в названии '
           + 'хватит обновить подписку: узел они выбирают сами. Подписка с 20.09 отдаётся и '
@@ -498,7 +563,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // понятном человеку порядке, а не в порядке ответов.
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
                  'наше имя на Варшаве:', 'наше имя на Стокгольме:',
-                 'вход Варшава:', 'вход Стокгольм:', 'вход через Россию:', 'ядро Вена:',
+                 'вход Варшава:', 'вход Стокгольм:', 'вход через Россию:', 'поток через Россию:',
+                 'поток напрямую (своё имя):', 'ядро Вена:',
                  'запасное имя подписки:', 'Cloudflare (другой диапазон):',
                  'вход (MAS):', 'Matrix:'];
     var head = lines.slice(0, 4), body = lines.slice(4);
