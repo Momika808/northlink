@@ -64,6 +64,7 @@ textarea{width:100%;margin-top:14px;min-height:135px;background:#0a0f19;color:va
 button,a.btn{flex:1;min-width:150px;padding:13px 16px;border-radius:13px;border:0;cursor:pointer;
   font:inherit;font-weight:600;font-size:.95rem;text-align:center;text-decoration:none;
   background:var(--ok);color:#04150e}
+button[disabled]{opacity:.4;cursor:default}
 a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);color:var(--text)}
 a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .note{margin-top:18px;color:var(--muted);font-size:.84rem}
@@ -95,16 +96,21 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 
   <textarea id="report" readonly placeholder="Отчёт появится, когда проверка закончится"></textarea>
   <div class="btns">
-    <a class="btn" id="send" href="#" aria-disabled="true">Отправить в бота</a>
-    <button id="copy" class="sec2">Скопировать отчёт</button>
+    <button id="post" disabled>Отправить владельцу</button>
+    <a class="btn sec" id="send" href="#" aria-disabled="true">Отправить в бота</a>
   </div>
-  <div class="btns"><a class="btn sec" id="again" href="">Проверить заново</a></div>
+  <div class="btns">
+    <button id="copy" class="sec2">Скопировать отчёт</button>
+    <a class="btn sec" id="again" href="">Проверить заново</a>
+  </div>
+  <p class="note" id="post-status" hidden></p>
 
   <p class="note">И ещё одно, вручную: откройте
      <a href="https://link.adminwg.dad/cdn-cgi/trace">эту ссылку</a> и пришлите, что покажет
      строка <b>colo</b>. Не открылась — так и напишите, это тоже ответ.</p>
-  <p class="note">Отчёт показан целиком выше. Кнопка отправляет в чат с ботом короткий код
-     с теми же числами — сама страница никуда ничего не шлёт.</p>
+  <p class="note">Отчёт показан целиком выше. «Отправить владельцу» шлёт его на наш сервер
+     через Россию — Telegram не нужен. «Отправить в бота» открывает чат с ботом и передаёт
+     короткий код с теми же числами. Пока вы не нажали ни одну, страница никуда ничего не шлёт.</p>
 </div>
 
 <script>
@@ -148,6 +154,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   var list = document.getElementById('list'), logEl = document.getElementById('log');
   var barEl = document.getElementById('bar'), countEl = document.getElementById('count');
   var stageEl = document.getElementById('stage'), sendEl = document.getElementById('send');
+  var postEl = document.getElementById('post'), postStatus = document.getElementById('post-status');
+  var lastCode = '';
   var res = {}, meta = {}, journal = [], done = 0, t0 = 0;
 
   CHECKS.forEach(function(c){
@@ -287,6 +295,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     document.getElementById('verdict').style.display = 'none';
     document.getElementById('report').value = '';
     sendEl.setAttribute('aria-disabled','true'); sendEl.href = '#';
+    postEl.disabled = true; postEl.textContent = 'Отправить владельцу';
+    postStatus.hidden = true; postStatus.textContent = '';
     CHECKS.forEach(function(c){ mark(c.id, 'run', '…'); });
 
     var n = navigator.connection || {};
@@ -623,11 +633,41 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     }
     sendEl.href = 'https://t.me/northlink_bot?start=' + payload;
     sendEl.setAttribute('aria-disabled', 'false');
+    lastCode = payload; postEl.disabled = false;
     lines.push('код для бота: ' + payload);
     note('готово; код: ' + payload);
 
     document.getElementById('report').value = lines.join('\n') + '\n\nПОДРОБНОСТИ\n' + journal.join('\n');
   }
+
+  // Отчёт владельцу без Telegram: тот же код и тот же текст — на наш сервер.
+  // Сначала имя ретранслятора (в DNS только его адрес — проходит там, где
+  // зарубежный хостинг режут), потом cdn через фронты. Сервер отвечает
+  // только своему origin, поэтому чужая страница этим путём не пошлёт.
+  function postReport(url, ms){
+    var ctl = new AbortController(), timer = setTimeout(function(){ ctl.abort(); }, ms);
+    return fetch(url, {method:'POST', mode:'cors', cache:'no-store', signal:ctl.signal,
+                       headers:{'Content-Type':'application/json'},
+                       body: JSON.stringify({code:lastCode, report:document.getElementById('report').value})})
+      .then(function(r){ clearTimeout(timer); return r.status; })
+      .catch(function(){ clearTimeout(timer); return 0; });
+  }
+  postEl.addEventListener('click', function(){
+    if (!lastCode) return;
+    postEl.disabled = true; postEl.textContent = 'Отправляю…';
+    postStatus.hidden = false; postStatus.textContent = 'Отправляю отчёт владельцу…';
+    postReport('https://ru.adminwg.dad/api/diag', 10000).then(function(st){
+      if (st === 200) return st;
+      return postReport('https://cdn.adminwg.dad/api/diag', 10000);
+    }).then(function(st){
+      if (st === 200){ postEl.textContent = 'Отправлено'; postStatus.textContent = 'Отчёт у владельца. Ответ придёт в бота или на сайте, в чате.'; note('отчёт отправлен владельцу с сайта'); return; }
+      postEl.disabled = false; postEl.textContent = 'Отправить владельцу';
+      postStatus.textContent = (st === 429)
+        ? 'Сервер занят, попробуйте через минуту.'
+        : 'Не дошло: наш сервер из этой сети не отвечает. Нажмите «Скопировать отчёт» и пришлите текст любым способом.';
+      note('отправка владельцу не удалась: код ' + st);
+    });
+  });
 
   document.getElementById('copy').addEventListener('click', function(){
     var t = document.getElementById('report');
