@@ -122,7 +122,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     {id:'sub',    name:'Сервер подписки',      hint:'link.adminwg.dad — отсюда клиент берёт ключ'},
     {id:'subapi', name:'Путь выдачи ключа',    hint:'/api/sub/ — ждём код ответа'},
     {id:'waw',    name:'Вход Варшава',         hint:'70.34.242.53:443'},
-    {id:'sto',    name:'Вход Стокгольм',       hint:'70.34.211.141:443'},
+    {id:'fra',    name:'Вход Франкфурт',       hint:'108.61.179.83:443'},
     // Российский вход: наш сервер в Москве, оттуда на фронт и ядро. Имя
     // ru.adminwg.dad на фронте разводится на ядро, как подписка, поэтому
     // здесь ждём настоящий ответ с нашим сертификатом — это доказывает весь
@@ -134,10 +134,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // поток, — до того, как на этот путь сажать людей. Меряется только если
     // вход ответил: на молчащем входе это лишние 15 секунд ожидания.
     {id:'ruFlow', name:'Поток через Россию',    hint:'2 МБ с ядра тем же путём — душат ли после первых килобайт'},
-    {id:'ownFlow',name:'Поток напрямую, своё имя', hint:'2 МБ через sto.adminwg.dad — тот же вопрос про прямой вход'},
+    {id:'ownFlow',name:'Поток напрямую, своё имя', hint:'2 МБ через fra.adminwg.dad — тот же вопрос про прямой вход'},
     {id:'core',   name:'Ядро Вена',            hint:'159.195.111.13:443 — из России часто не доходит'},
     {id:'nameWaw',name:'Наше имя на фронте',    hint:'waw.adminwg.dad — имя нашей зоны, адрес Варшавы'},
-    {id:'nameSto',name:'Наше имя на фронте #2', hint:'sto.adminwg.dad — то же для Стокгольма'},
+    {id:'nameFra',name:'Наше имя на фронте #2', hint:'fra.adminwg.dad — то же для Франкфурта'},
     {id:'cf',     name:'Cloudflare вообще',     hint:'cloudflare.com — другой диапазон, чем у подписки'},
     {id:'s2',     name:'Запасное имя подписки',  hint:'cdn.adminwg.dad — то же содержимое, другое имя'},
     {id:'mas',    name:'Вход (MAS)',             hint:'auth.adminwg.dad — сервер входа, ждём JSON'},
@@ -149,7 +149,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     {id:'ya',     name:'Яндекс',                hint:'то же, второй контроль'},
     {id:'vk',     name:'VK',                    hint:'то же, третий контроль'}
   ];
-  var VPN_ASN = '20473', VPN_IPS = ['70.34.242.53','70.34.211.141','159.195.111.13'];
+  var VPN_ASN = '20473', VPN_IPS = ['70.34.242.53','108.61.179.83','159.195.111.13'];
 
   var list = document.getElementById('list'), logEl = document.getElementById('log');
   var barEl = document.getElementById('bar'), countEl = document.getElementById('count');
@@ -343,7 +343,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
             res.sub = r; lines.push('сервер подписки: ' + show('sub', r)); finished('sub'); }),
           probeCors('https://link.adminwg.dad/api/sub/diagnostika', 9000).then(function(r){ res.subapi = r; }),
           probe('https://70.34.242.53/', 6000).then(function(r){ res.waw=r; lines.push('вход Варшава: '+show('waw',r,true)); finished('waw'); }),
-          probe('https://70.34.211.141/', 6000).then(function(r){ res.sto=r; lines.push('вход Стокгольм: '+show('sto',r,true)); finished('sto'); }),
+          probe('https://108.61.179.83/', 6000).then(function(r){ res.fra=r; lines.push('вход Франкфурт: '+show('fra',r,true)); finished('fra'); }),
           probe('https://159.195.111.13/', 6000).then(function(r){ res.core=r; lines.push('ядро Вена: '+show('core',r,true)); finished('core'); }),
           // Без okFast: сертификат здесь наш, ответ должен быть настоящим.
           // Быстрый отказ — сервер в Москве принял, а дальше цепочка оборвалась,
@@ -353,7 +353,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           // главный вопрос: режут наш ДОМЕН по имени или диапазон адресов,
           // где Cloudflare нас поселил. От ответа зависит, поможет ли перенос.
           probe('https://waw.adminwg.dad/', 6000).then(function(r){ res.nameWaw=r; lines.push('наше имя на Варшаве: '+show('nameWaw',r,true)); finished('nameWaw'); }),
-          probe('https://sto.adminwg.dad/', 6000).then(function(r){ res.nameSto=r; lines.push('наше имя на Стокгольме: '+show('nameSto',r,true)); finished('nameSto'); }),
+          probe('https://fra.adminwg.dad/', 6000).then(function(r){ res.nameFra=r; lines.push('наше имя на Франкфурте: '+show('nameFra',r,true)); finished('nameFra'); }),
           // Контроль: Cloudflare живёт на многих диапазонах, и наш оказался
           // в 188.114.96.0/20. Если этот отвечает, а подписка нет — режут
           // диапазон, а не Cloudflare целиком.
@@ -412,8 +412,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
         return ruP.then(function(r){
           res.ruFlow = r; lines.push(showFlow('ruFlow', 'поток через Россию', r, FLOW)); finished('ruFlow');
           stageEl.textContent = 'Меряю поток напрямую';
-          var ownP = reached(res.nameSto)
-            ? probeFlow('https://sto.adminwg.dad/probe/data?size=2&unit=MB', 15000)
+          var ownP = reached(res.nameFra)
+            ? probeFlow('https://fra.adminwg.dad/probe/data?size=2&unit=MB', 15000)
             : Promise.resolve(null);
           return ownP.then(function(r2){
             res.ownFlow = r2; lines.push(showFlow('ownFlow', 'поток напрямую (своё имя)', r2, FLOW)); finished('ownFlow');
@@ -435,7 +435,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // Имена нашей же зоны, показывающие на те же фронты. Если они проходят,
     // а оба имени подписки молчат — режут не зону и не адреса, а именно эти
     // два имени, и лечится это третьим именем.
-    var zoneOk = reached(res.nameWaw) || reached(res.nameSto);
+    var zoneOk = reached(res.nameWaw) || reached(res.nameFra);
     var world = reached(res.cf);
     lines.push('контроль белого списка: разрешённых ответило ' + white + ' из 3, зарубежный контроль ' + (world ? 'ответил' : 'молчит'));
     var spareOk = res.s2 && res.s2.ok;
@@ -451,9 +451,9 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // касается, они ходят по именам, — но вердикт по ним врал: писал «не
     // отвечает ни подписка, ни входы» при подписке, ответившей за 498 мс.
     var frontOk = (res.nameWaw && res.nameWaw.ms < 2500)
-               || (res.nameSto && res.nameSto.ms < 2500)
+               || (res.nameFra && res.nameFra.ms < 2500)
                || (res.waw && res.waw.ms < 2500)
-               || (res.sto && res.sto.ms < 2500);
+               || (res.fra && res.fra.ms < 2500);
 
     // Ядро в Вене из российских сетей не отвечает никогда: netcup под
     // блокировкой, замер 25.08.2026 на двух операторах дал тайм-аут. Значит
@@ -513,7 +513,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       txt = '<b>Прямые входы молчат, а вход через Россию отвечает</b> — за ' + res.ru.ms
           + ' мс. Значит режут зарубежные адреса, а не вас, и путь через Россию открыт.' + flowTxt + '<br><br>'
           + '<b>Обновите подписку (профиль) в приложении.</b> Потом выберите узел '
-          + '«Россия → Стокгольм» или «Россия → Варшава». Приложениям с Clash в названии '
+          + '«Россия → Франкфурт» или «Россия → Варшава». Приложениям с Clash в названии '
           + 'хватит обновить подписку: узел они выбирают сами. Подписка с 20.09 отдаётся и '
           + 'через Россию; не обновилась — нажмите в боте «Моя ссылка» и добавьте её заново.';
       note('ВЕРДИКТ: зарубежное режут, вход через Россию отвечает за ' + res.ru.ms + ' мс');
@@ -540,7 +540,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     } else if (!keyOk && !spareOk && zoneOk){
       // Раньше этот случай попадал в ветку ниже и получал вердикт «дело не в
       // имени» — неверный. Данные для правильного ответа у страницы были:
-      // waw и sto той же зоны на тех же адресах отвечают. Замер с Теле2
+      // waw и fra той же зоны на тех же адресах отвечают. Замер с Теле2
       // 06.09.2026 показал ровно это: имена подписки в тайм-аут, waw 268 мс.
       v.className = 'verdict bad';
       txt = '<b>Режут имя подписки.</b> Другие наши имена на тех же адресах отвечают, '
@@ -576,8 +576,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     // Проверки заканчиваются вразнобой, поэтому строки отчёта раскладываем в
     // понятном человеку порядке, а не в порядке ответов.
     var order = ['адрес:', 'оператор:', 'сервер подписки:', 'путь выдачи ключа:',
-                 'наше имя на Варшаве:', 'наше имя на Стокгольме:',
-                 'вход Варшава:', 'вход Стокгольм:', 'вход через Россию:', 'поток через Россию:',
+                 'наше имя на Варшаве:', 'наше имя на Франкфурте:',
+                 'вход Варшава:', 'вход Франкфурт:', 'вход через Россию:', 'поток через Россию:',
                  'поток напрямую (своё имя):', 'ядро Вена:',
                  'запасное имя подписки:', 'Cloudflare (другой диапазон):',
                  'вход (MAS):', 'Matrix:'];
@@ -616,10 +616,12 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       if (r.ok) return String(r.ms);
       return r.status ? 'e' + r.status : 'x';
     }
+    // Шестое поле — второй вход по адресу: до 22.09.2026 Стокгольм, теперь
+    // Франкфурт. Бот читает поля по позиции, поэтому место поля прежнее.
     var payload = ['d1', (meta.asn||'x'),
                    // «slow-2g» → «s2g»: шесть символов сети отнимали место у хвоста.
                    ((meta.net||'x').replace(/[^A-Za-z0-9]/g,'').replace('slow2g','s2g')||'x') + (meta.vpn ? '_vpn' : (foreign ? '_tun' : (tunnelUnknown ? '_unk' : ''))),
-                   code(res.sub), codeKey(res.subapi), code(res.waw), code(res.sto), code(res.core),
+                   code(res.sub), codeKey(res.subapi), code(res.waw), code(res.fra), code(res.core),
                    code(res.nameWaw), code(res.cf), code(res.s2)
                   ].join('-').slice(0, 64);
     // Новые поля идут хвостом и только целиком: обрезанное «27» бот прочёл бы
