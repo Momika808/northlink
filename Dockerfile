@@ -7,5 +7,7 @@ FROM nginx:1.27-alpine
 COPY nginx-global.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY index.html diag.html favicon.ico favicon-32.png apple-touch-icon.png /usr/share/nginx/html/
+# Сломанный конфиг должен ронять сборку, а не под: nginx -t при сборке.
+RUN nginx -t
 USER 65532
 EXPOSE 8080

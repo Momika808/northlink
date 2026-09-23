@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-xKC6XPT1VUSWiVzYsv3BpqDVQnDHsR0syALxQ6aXcFM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-YAUsQGyENcjeOOW0dafkhgcjy9l8SRd/0Dr5ZGeIGfQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Три входа в Европе и вход через Россию. Соединение выглядит как обычный HTTPS. Подписка обновляется сама.">
@@ -426,8 +426,8 @@ footer a:hover{color:var(--text)}
         Заведите учётку и нажмите «Войти». Если вы уже входили в этом браузере,
         «Зарегистрироваться» откроет вход — сначала завершите сессию на
         <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad/account/</a>.</p>
-      <p class="note" id="get-ru">Страница или вход не открываются без VPN? Та же страница через наш
-        сервер в Москве: <a href="https://ru.adminwg.dad/">ru.adminwg.dad</a>.</p>
+      <p class="note" id="get-ru">Без VPN страница не открывается или вход зависает? Та же страница
+        через наш сервер в Москве: <a href="https://ru.adminwg.dad/">https://ru.adminwg.dad</a>.</p>
 
       <!-- После «Выйти»: жетоны отозваны, но браузерная сессия на сервере
            входа осталась — на общем компьютере её надо завершить там. -->
@@ -627,7 +627,7 @@ footer a:hover{color:var(--text)}
         ON_RU=location.origin===RU,
         HS=ON_RU ? RU : 'https://matrix.adminwg.dad',
         API_SESSION=(ON_RU ? RU : 'https://cdn.adminwg.dad')+'/api/session',
-        TRY_RU=ON_RU ? '' : ' Или откройте страницу через Москву: ru.adminwg.dad.',
+        TRY_RU=ON_RU ? '' : ' Или откройте страницу через Москву: https://ru.adminwg.dad/',
         link='';
     if(!loginBtn) return;
     if(ON_RU){ var ruNote=document.getElementById('get-ru'); if(ruNote) ruNote.hidden=true; }
