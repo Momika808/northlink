@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-fOWkUPlM5ciZiBn+1xiVanHARtHtp6WGcMqjGwlQooo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-79ECCfcg1ZEn0bHlczL8Uto2JPcmQWqg4kHSWgpqW9o='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Три входа в Европе и вход через Россию. Соединение выглядит как обычный HTTPS. Подписка обновляется сама.">
@@ -1077,11 +1077,17 @@ footer a:hover{color:var(--text)}
         rows.forEach(function(r){
           var row=document.createElement('div'); row.className='ikb-row';
           r.forEach(function(o){
-            var label=o.label.length>64?o.label.slice(0,63)+'…':o.label, el;
+            var label=o.label.length>64?o.label.slice(0,63)+'…':o.label, el, alias;
             if(typeof o.copy==='string'&&o.copy){
               el=document.createElement('button'); el.type='button'; el.className='ikb-btn ikb-copy';
               el.setAttribute('data-copy',o.copy); bindCopy(el);
               el.addEventListener('click',function(){ toast('Скопировано'); });
+            } else if(typeof o.url==='string'&&(alias=ownRoomAlias(o.url))){
+              // Ссылка на канал своего сервера: вступаем здесь, а не уводим
+              // на matrix.to ставить Element.
+              el=document.createElement('button'); el.type='button'; el.className='ikb-btn';
+              el.setAttribute('data-text','/channel');
+              el.addEventListener('click',function(){ joinInline(wrapper, el, alias); });
             } else if(typeof o.url==='string'&&/^https?:\/\//i.test(o.url)){
               el=document.createElement('a'); el.className='ikb-btn ikb-url';
               el.href=o.url; el.target='_blank'; el.rel='noopener noreferrer';
@@ -1115,6 +1121,42 @@ footer a:hover{color:var(--text)}
             // нередактированная клавиатура в Telegram.
             if(ok) setTimeout(function(){ if(wrapper.isConnected) release(wrapper); },8000);
             else release(wrapper);
+          });
+      }
+      // https://matrix.to/#/#имя:сервер → «#имя:сервер», если сервер тот же,
+      // что у учётки человека; иначе пусто — такая ссылка открывается как
+      // обычная. Чужие комнаты страница не вступает.
+      function ownRoomAlias(url){
+        var m=/^https:\/\/matrix\.to\/#\/(#[^\s\/?#:]+:([^\s\/?#]+))$/.exec(url);
+        if(!m||!s||typeof s.user_id!=='string') return '';
+        return m[2]===s.user_id.slice(s.user_id.indexOf(':')+1)?m[1]:'';
+      }
+
+      // Бот за учётку MAS в канал не вступает (не вправе) и даёт ссылку на
+      // него. Вступаем жетоном человека — канал публичный, приглашение не
+      // нужно, — и сразу шлём боту «/channel»: он увидит человека в канале и
+      // продлит ключ. Без этого ссылка уводила на matrix.to ставить Element,
+      // а следующее нажатие «Вступить в канал» снова не находило человека.
+      function joinInline(wrapper, btn, alias){
+        if(wrapper.querySelector('[aria-busy=true]')) return;
+        btn.setAttribute('aria-busy','true');
+        wrapper.querySelectorAll('.ikb-btn').forEach(function(b){
+          if(b!==btn){ b.setAttribute('aria-disabled','true'); b.tabIndex=-1; } });
+        api('/_matrix/client/v3/join/'+encodeURIComponent(alias),
+            {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
+          .then(function(r){
+            if(!r.ok) throw new Error('join '+r.status);
+            return send('Вступить в канал', 'Вступить в канал',
+                        {press:{event_id:wrapper.getAttribute('data-eid'), text:'/channel'}});
+          })
+          .then(function(ok){
+            if(ok) setTimeout(function(){ if(wrapper.isConnected) release(wrapper); },8000);
+            else release(wrapper);
+          }, function(e){
+            release(wrapper);
+            if(e&&e.message==='unauth') return;
+            cerr.textContent='Не получилось вступить в канал. Попробуйте ещё раз через минуту.'; cerr.hidden=false;
+            setTimeout(function(){cerr.hidden=true;},4000);
           });
       }
       function release(wrapper){
