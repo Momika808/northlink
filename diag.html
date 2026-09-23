@@ -379,7 +379,11 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
           }),
           // Вход и чат. После К0 оба имени ведут на фронты, как подписка:
           // если подписка отвечает, а эти нет — дело в маршруте на фронтах.
-          probeJson('https://auth.adminwg.dad/.well-known/openid-configuration', 9000).then(function(r){
+          // Вход ждём 30 с, а не 9: это замер (23.09.2026). У auth. в DNS три
+          // адреса — два фронта Vultr и ретранслятор; где зарубежное режут,
+          // браузер сначала ждёт на недоступных. Порог решения — 30 с
+          // (identity.md §5.3): дольше — для таких сетей «сначала VPN».
+          probeJson('https://auth.adminwg.dad/.well-known/openid-configuration', 30000).then(function(r){
             res.mas = r; lines.push(showJson('mas', 'вход (MAS)', r)); finished('mas'); }),
           probeJson('https://matrix.adminwg.dad/_matrix/client/versions', 9000).then(function(r){
             res.mx = r; lines.push(showJson('mx', 'Matrix', r)); finished('mx'); })

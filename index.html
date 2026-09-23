@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-79ECCfcg1ZEn0bHlczL8Uto2JPcmQWqg4kHSWgpqW9o='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-xKC6XPT1VUSWiVzYsv3BpqDVQnDHsR0syALxQ6aXcFM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Три входа в Европе и вход через Россию. Соединение выглядит как обычный HTTPS. Подписка обновляется сама.">
@@ -426,6 +426,8 @@ footer a:hover{color:var(--text)}
         Заведите учётку и нажмите «Войти». Если вы уже входили в этом браузере,
         «Зарегистрироваться» откроет вход — сначала завершите сессию на
         <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad/account/</a>.</p>
+      <p class="note" id="get-ru">Страница или вход не открываются без VPN? Та же страница через наш
+        сервер в Москве: <a href="https://ru.adminwg.dad/">ru.adminwg.dad</a>.</p>
 
       <!-- После «Выйти»: жетоны отозваны, но браузерная сессия на сервере
            входа осталась — на общем компьютере её надо завершить там. -->
@@ -615,10 +617,20 @@ footer a:hover{color:var(--text)}
         forget=document.getElementById('get-forget'),
         KEY='northlink.issued',
         MX_KEY='northlink.matrix',
-        HS='https://matrix.adminwg.dad',
-        API_SESSION='https://cdn.adminwg.dad/api/session',
+        // Копия страницы на ru.adminwg.dad (23.09.2026) — для сетей, где режут
+        // зарубежные адреса: в DNS у этого имени только ретранслятор в Москве.
+        // На копии чат, выдача ключа и жетоны идут на тот же адрес, а у
+        // matrix./cdn./auth. в DNS ещё и фронты Vultr, до которых браузер там
+        // не достучится. На auth. остаются только экраны входа MAS: их адреса
+        // MAS строит от своего имени, перенести нельзя.
+        RU='https://ru.adminwg.dad',
+        ON_RU=location.origin===RU,
+        HS=ON_RU ? RU : 'https://matrix.adminwg.dad',
+        API_SESSION=(ON_RU ? RU : 'https://cdn.adminwg.dad')+'/api/session',
+        TRY_RU=ON_RU ? '' : ' Или откройте страницу через Москву: ru.adminwg.dad.',
         link='';
     if(!loginBtn) return;
+    if(ON_RU){ var ruNote=document.getElementById('get-ru'); if(ruNote) ruNote.hidden=true; }
 
     // localStorage привязан к origin, устройству и браузеру. На сервер
     // ничего не уходит, чужой прочитать не может. Под northlink.oidc —
@@ -638,7 +650,7 @@ footer a:hover{color:var(--text)}
     var oidc=(function(){
       var ISSUER='https://auth.adminwg.dad',
           CLIENT_ID='01M2MYTNBN9SXN2469ZEYBJAXQ',
-          REDIRECT='https://momika808.github.io/northlink/',
+          REDIRECT=ON_RU ? RU+'/' : 'https://momika808.github.io/northlink/',
           O_KEY='northlink.oidc',        // localStorage: жетоны
           DEV_KEY='northlink.device',    // localStorage: device_id — одно устройство навсегда
           RELOGIN_KEY='northlink.relogin', // localStorage: после «Выйти» вход с prompt=login
@@ -683,11 +695,15 @@ footer a:hover{color:var(--text)}
           [d.authorization_endpoint, d.token_endpoint, d.revocation_endpoint].every(function(u){
             return typeof u==='string' && u.indexOf(ISSUER+'/')===0; });
       }
+      // На копии запросы к MAS со страницы идут через ru.adminwg.dad: маршрут
+      // на ядре ведёт эти пути туда же, в MAS. Проверка sane() — по
+      // настоящему ISSUER, подмена адреса — только при отправке.
+      function via(u){ return ON_RU && u.indexOf(ISSUER+'/')===0 ? RU+u.slice(ISSUER.length) : u; }
       function discovery(){
         var c=sload(DISC_KEY);
         if(sane(c)) return Promise.resolve(c);
         if(discP) return discP;
-        discP=fetch(ISSUER+'/.well-known/openid-configuration').then(function(r){
+        discP=fetch(via(ISSUER+'/.well-known/openid-configuration')).then(function(r){
           if(!r.ok) throw 0; return r.json();
         }).then(function(d){
           if(!sane(d)) throw 0;
@@ -749,7 +765,7 @@ footer a:hover{color:var(--text)}
         }
         if(!flow || !flow.state || p.get('state')!==flow.state) return Promise.reject(new Error('state'));
         return discovery().then(function(d){
-          return post(d.token_endpoint,{grant_type:'authorization_code', code:p.get('code'),
+          return post(via(d.token_endpoint),{grant_type:'authorization_code', code:p.get('code'),
             redirect_uri:REDIRECT, client_id:CLIENT_ID, code_verifier:flow.verifier});
         }).then(function(j){
           if(!j.access_token || !j.refresh_token) throw new Error('token');
@@ -770,7 +786,7 @@ footer a:hover{color:var(--text)}
           var cur=get(); if(!cur) return Promise.reject(new Error('unauth'));
           if(stale ? cur.access_token!==stale : cur.expires_at-Date.now()>EARLY){ arm(); return Promise.resolve(cur.access_token); }
           return discovery().then(function(d){
-            return post(d.token_endpoint,{grant_type:'refresh_token', refresh_token:cur.refresh_token, client_id:CLIENT_ID});
+            return post(via(d.token_endpoint),{grant_type:'refresh_token', refresh_token:cur.refresh_token, client_id:CLIENT_ID});
           }).then(function(j){
             if(!j.access_token) throw new Error('token');
             var next={access_token:j.access_token, refresh_token:j.refresh_token||cur.refresh_token,
@@ -815,7 +831,7 @@ footer a:hover{color:var(--text)}
         try{ localStorage.setItem(RELOGIN_KEY,'1'); }catch(e){}
         if(!cur) return Promise.resolve();
         return discovery().then(function(d){
-          function revoke(t, hint){ return post(d.revocation_endpoint,{token:t, token_type_hint:hint, client_id:CLIENT_ID}).catch(function(){}); }
+          function revoke(t, hint){ return post(via(d.revocation_endpoint),{token:t, token_type_hint:hint, client_id:CLIENT_ID}).catch(function(){}); }
           return Promise.all([revoke(cur.refresh_token,'refresh_token'), revoke(cur.access_token,'access_token')]);
         }).catch(function(){});
       }
@@ -888,7 +904,7 @@ footer a:hover{color:var(--text)}
     }
     function loginErrorText(e){
       var m=e && e.message || '';
-      if(m==='discovery') return 'Сервер входа недоступен. Попробуйте с VPN или позже.';
+      if(m==='discovery') return 'Сервер входа недоступен. Попробуйте с VPN или позже.'+TRY_RU;
       if(m==='access_denied') return 'Вход отменён.';
       if(m==='state') return 'Ответ сервера входа не совпал с запросом этой вкладки. Нажмите «Войти» ещё раз.';
       if(m==='invalid_grant') return 'Код входа устарел. Нажмите «Войти» ещё раз.';
@@ -966,8 +982,8 @@ footer a:hover{color:var(--text)}
       }).catch(function(e){
         var m=e && e.message || '';
         if(m==='unauth'){ oidc.forget(); drop(KEY); showLoggedOut(); fail('Сессия закончилась. Войдите снова.'); return false; }
-        if(m==='net'){ fail('Сервер входа недоступен, жетон не обновить. Попробуйте с VPN или позже.'); return false; }
-        if(m==='discovery'){ fail('Сервер входа недоступен. Попробуйте с VPN или позже.'); return false; }
+        if(m==='net'){ fail('Сервер входа недоступен, жетон не обновить. Попробуйте с VPN или позже.'+TRY_RU); return false; }
+        if(m==='discovery'){ fail('Сервер входа недоступен. Попробуйте с VPN или позже.'+TRY_RU); return false; }
         // 403 subscribe — вход через Telegram без подписки на канал: ссылка
         // на канал. Остальные 403 (key_revoked, trial_closed) — текст сервера.
         if(m==='http_403' && e.data && e.data.error==='subscribe'){ failSubscribe(e.text, e.data.channel); return false; }

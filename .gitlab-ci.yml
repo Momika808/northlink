@@ -1,0 +1,43 @@
+# Сборка образа копии страницы для ru.adminwg.dad. Идёт в зеркале
+# gitlab vpn/landing; на GitHub этот файл ничего не делает. Выкатывает не
+# этот конвейер, а Flux по репозиторию cluster/vie: apps/northlink-sayt
+# следит за тегом latest и сам коммитит дайджест. Сборка печатает его
+# строкой «ДАЙДЖЕСТ». Образец — psy/stranica-demo.
+#
+# Метки раннера нет намеренно: задания берёт раннер vie-kube в кластере,
+# образ собирает общий buildkitd через сокет (cluster/vie, docs/runbooks/раннер.md).
+
+stages: [build]
+
+variables:
+  IMAGE: $CI_REGISTRY_IMAGE
+
+сборка:
+  stage: build
+  image:
+    name: moby/buildkit:latest
+    entrypoint: [""]
+  variables:
+    BUILDKIT_HOST: unix:///run/buildkit/buildkitd.sock
+  before_script:
+    # Учётные данные задания живут только в его окружении. В образе buildkit
+    # нет curl и jq, файл собирается printf'ом; значения в журнал не попадают.
+    - |
+      mkdir -p ~/.docker
+      printf '{"auths":{"%s":{"auth":"%s"}}}' "$CI_REGISTRY" \
+        "$(printf '%s:%s' "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD" | base64 | tr -d '\n')" > ~/.docker/config.json
+  script:
+    - |
+      buildctl build \
+        --frontend dockerfile.v0 \
+        --local context=. --local dockerfile=. \
+        --output "type=image,\"name=$IMAGE:$CI_COMMIT_SHORT_SHA,$IMAGE:latest\",push=true" \
+        --export-cache type=registry,ref=$IMAGE:cache,mode=max \
+        --import-cache type=registry,ref=$IMAGE:cache \
+        --metadata-file /tmp/meta.json
+    - |
+      DIGEST=$(sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/meta.json)
+      [ -n "$DIGEST" ] || { echo "buildkit не вернул дайджест"; exit 1; }
+      echo "ДАЙДЖЕСТ $IMAGE@$DIGEST"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
