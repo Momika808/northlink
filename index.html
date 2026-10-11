@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-YAUsQGyENcjeOOW0dafkhgcjy9l8SRd/0Dr5ZGeIGfQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-v/UK8a8wLp73CW63yldcHHIhM9vu1Hdjm8m50bneF3A='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — личный VPN-контур">
 <meta property="og:description" content="Три входа в Европе и вход через Россию. Соединение выглядит как обычный HTTPS. Подписка обновляется сама.">
@@ -222,6 +222,10 @@ h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
 .msg.me{align-self:flex-end;border-radius:14px 14px 5px 14px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .msg.me[data-pending]{opacity:.6}
 .msg a{color:var(--accent-2)}
+.msg b{font-weight:650}
+.msg code{background:color-mix(in srgb,var(--text) 10%,transparent);border-radius:5px;padding:.05em .3em}
+.msg pre{margin:.35rem 0;padding:.5rem .65rem;border-radius:9px;background:color-mix(in srgb,var(--text) 8%,transparent);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg pre code{background:none;padding:0}
 .msg img{display:block;max-width:220px;width:100%;border-radius:10px;margin-top:.15rem}
 /* Сообщение с кнопками: пузырь и под ним клавиатура во всю его ширину —
    как inline-клавиатура в Telegram. Ряды, стили primary/success/danger,
@@ -542,7 +546,7 @@ footer a:hover{color:var(--text)}
 
 <footer>
   <div class="wrap">
-    <span>Northlink — личный контур. Серверы, настройка и правила описаны кодом: OpenTofu, Ansible, CI.</span>
+    <span><a href="oferta.html">Условия пользования</a> · <a href="privacy.html">Политика конфиденциальности</a></span>
     <span class="mono">Франкфурт · Варшава · Амстердам</span>
   </div>
 </footer>
@@ -1061,6 +1065,45 @@ footer a:hover{color:var(--text)}
         return esc(text).replace(/https?:\/\/[^\s<]+/g,function(u){
           return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; });
       }
+      /* Разметка бота — как в Telegram: жирный, код, блок со ссылкой. Бот
+         кладёт её в formatted_body (org.matrix.custom.html). Здесь она
+         собирается заново узлами по белому списку тегов, без атрибутов,
+         кроме href http(s); незнакомое остаётся текстом. Без разметки —
+         прежний rich(body). */
+      var TAGS={B:'b',STRONG:'b',I:'i',EM:'i',CODE:'code',PRE:'pre',BR:'br',A:'a'};
+      function linkify(text,dst){
+        var re=/https?:\/\/[^\s<]+/g, last=0, m;
+        while((m=re.exec(text))){
+          if(m.index>last) dst.appendChild(document.createTextNode(text.slice(last,m.index)));
+          var a=document.createElement('a'); a.href=m[0]; a.target='_blank'; a.rel='noopener';
+          a.textContent=m[0]; dst.appendChild(a); last=m.index+m[0].length;
+        }
+        if(last<text.length) dst.appendChild(document.createTextNode(text.slice(last)));
+      }
+      function copyNodes(src,dst){
+        Array.prototype.forEach.call(src.childNodes,function(n){
+          if(n.nodeType===3){
+            if(dst.tagName==='A') dst.appendChild(document.createTextNode(n.nodeValue));
+            else linkify(n.nodeValue,dst);
+            return;
+          }
+          if(n.nodeType!==1||/^(SCRIPT|STYLE|TEMPLATE)$/.test(n.tagName)) return;
+          var t=TAGS[n.tagName], h=t==='a'?(n.getAttribute('href')||''):'';
+          if(!t||(t==='a'&&!/^https?:\/\//i.test(h))){ copyNodes(n,dst); return; }
+          var el=document.createElement(t);
+          if(t==='a'){ el.href=h; el.target='_blank'; el.rel='noopener'; }
+          copyNodes(n,el); dst.appendChild(el);
+        });
+      }
+      function fill(el,c){
+        if(c.format==='org.matrix.custom.html'&&typeof c.formatted_body==='string'){
+          try{
+            var doc=new DOMParser().parseFromString(c.formatted_body,'text/html');
+            el.textContent=''; copyNodes(doc.body,el); return;
+          }catch(e){}
+        }
+        el.innerHTML=rich(c.body||'');
+      }
       function scroll(){ log.scrollTop=log.scrollHeight; }
       function toast(text){
         var el=document.createElement('div'); el.className='chat-toast'; el.setAttribute('role','status');
@@ -1195,7 +1238,7 @@ footer a:hover{color:var(--text)}
           var rows=mine?[]:rowsOf(c);
           el=document.createElement('div');
           el.className='msg'+(mine?' me':'');
-          el.innerHTML=rich(c.body||'');
+          fill(el,c);
           if(!rows.length){ log.appendChild(el); return el; }
           var w=document.createElement('div'); w.className='mw'; w.setAttribute('data-eid',ev.event_id||'');
           w.appendChild(el); w.appendChild(keyboardFor(w, rows)); log.appendChild(w);
@@ -1224,7 +1267,7 @@ footer a:hover{color:var(--text)}
         var c=ev.content||{}, rel=c['m.relates_to']||{}, nc=c['m.new_content']||{}, w=byId[rel.event_id];
         if(!w){ bubble({sender:ev.sender, event_id:ev.event_id, content:nc}); return; }
         var msg=w.querySelector('.msg'), old=w.querySelector('.ikb'), hadFocus=old&&old.contains(document.activeElement);
-        msg.innerHTML=rich(nc.body||'');
+        fill(msg,nc);
         if(old) old.remove();
         var rows=rowsOf(nc);
         if(rows.length) w.appendChild(keyboardFor(w, rows));
