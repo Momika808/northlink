@@ -7,13 +7,23 @@
 # Метки раннера нет намеренно: задания берёт раннер vie-kube в кластере,
 # образ собирает общий buildkitd через сокет (cluster/vie, docs/runbooks/раннер.md).
 
-stages: [build]
+stages: [check, build]
+
+проверка:
+  stage: check
+  image: node:22-alpine
+  script:
+    - node --test tests/payment-check.test.cjs
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
 
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
 
 сборка:
   stage: build
+  needs: [проверка]
   image:
     name: moby/buildkit:latest
     entrypoint: [""]
