@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-rJqCPif9zSIXXZrrDtrmIcRfPVnv/78qJndIp9AOFDc='; style-src 'unsafe-inline'; connect-src 'self' https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
+<title>Northlink — проверка оплаты</title>
+<style>
+:root{--bg:#060910;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.10);--text:#e8eef7;--muted:#8d9bb0;
+  --ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:22px 16px 60px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:.4rem}
+.lead{color:var(--muted);font-size:.97rem;margin-bottom:1.3rem}
+
+.prog{margin-bottom:14px}
+.prog .bar{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:var(--ok);
+  transition:width .35s ease;border-radius:99px}
+.prog .txt{display:flex;justify-content:space-between;gap:10px;margin-top:7px;
+  font-size:.86rem;color:var(--muted)}
+.prog .txt b{color:var(--text);font-weight:600}
+
+.card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.row .name{flex:1;min-width:0}
+.row .name b{display:block;font-weight:600;font-size:.96rem}
+.row .name span{display:block;color:var(--muted);font-size:.84rem}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.35}
+.dot.run{animation:p 1s infinite;background:var(--warn);opacity:1}
+.dot.ok{background:var(--ok);opacity:1}
+.dot.bad{background:var(--bad);opacity:1}
+.dot.warn{background:var(--warn);opacity:1}
+@keyframes p{50%{opacity:.2}}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.83rem;color:var(--muted);
+  white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis;flex:none}
+
+.verdict{margin-top:18px;padding:15px;border-radius:16px;border:1px solid var(--border);
+  background:var(--surface);font-size:.94rem}
+.verdict b{color:var(--ok)}
+.verdict.bad b{color:var(--bad)}
+
+details.log{margin-top:16px;border:1px solid var(--border);border-radius:14px;
+  background:var(--surface);overflow:hidden}
+details.log summary{padding:12px 15px;cursor:pointer;font-size:.92rem;font-weight:600;
+  list-style:none;display:flex;align-items:center;justify-content:space-between}
+details.log summary::-webkit-details-marker{display:none}
+details.log summary::after{content:"▾";color:var(--muted);font-size:.9rem}
+details.log[open] summary::after{content:"▴"}
+details.log pre{margin:0;padding:0 15px 14px;font-family:ui-monospace,Menlo,monospace;
+  font-size:.76rem;line-height:1.55;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+
+textarea{width:100%;margin-top:14px;min-height:135px;background:#0a0f19;color:var(--text);
+  border:1px solid var(--border);border-radius:14px;padding:12px;
+  font-family:ui-monospace,Menlo,monospace;font-size:.78rem;resize:vertical}
+.btns{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap}
+button,a.btn{flex:1;min-width:150px;padding:13px 16px;border-radius:13px;border:0;cursor:pointer;
+  font:inherit;font-weight:600;font-size:.95rem;text-align:center;text-decoration:none;
+  background:var(--ok);color:#04150e}
+button[disabled]{opacity:.4;cursor:default}
+a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);color:var(--text)}
+a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.note{margin-top:18px;color:var(--muted);font-size:.84rem}
+.note a{color:var(--ok)}
+</style>
+</head>
+<body><main class="wrap">
+<h1>Проверка оплаты</h1>
+<p class="lead">Если не появилась ссылка на оплату или не работает СБП, запустите проверку в той же сети и браузере.</p>
+<p class="note">Проверим связь с нашим сервером и доступность СБП в кассе. Счёт не создаётся, деньги не списываются. Аккаунт и внутренние ошибки страницы банка здесь не проверяются.</p>
+<div class="btns"><button id="run">Проверить оплату</button></div>
+<p id="status" class="note" role="status" aria-live="polite">Проверка начнётся после нажатия.</p>
+<label for="output">Результат проверки</label>
+<textarea id="output" readonly rows="13" placeholder="Здесь появится результат и номер отчёта"></textarea>
+<div class="btns"><button id="copy" class="sec2" disabled>Скопировать отчёт</button></div>
+<p class="note">По нажатию сервер сохранит номер отчёта, время и результат проверки. Страница не читает почту, токены входа или платёжные ссылки. Передайте номер отчёта поддержке, чтобы мы нашли запись в журнале.</p>
+<p class="note">Для проверки своего аккаунта откройте личный чат с ботом и отправьте <code>/paycheck</code>.</p>
+<p class="note"><a href="diag.html">Проверка связи</a> · <a href="index.html">На главную</a></p>
+</main>
+<script>
+(function () {
+  'use strict';
+  var run = document.getElementById('run'), output = document.getElementById('output');
+  var copy = document.getElementById('copy'), status = document.getElementById('status');
+  var endpoint = location.origin === 'https://ru.adminwg.dad'
+    ? '/api/diag' : 'https://ru.adminwg.dad/api/diag';
+  function show(lines) {
+    output.value = lines.join('\n');
+    copy.disabled = false;
+  }
+  run.addEventListener('click', async function () {
+    if (run.disabled) return;
+    run.disabled = true;
+    copy.disabled = true;
+    output.value = '';
+    status.textContent = 'Проверяем связь с сервером и настройки оплаты…';
+    var started = performance.now(), ctl = new AbortController();
+    var timer = setTimeout(function () { ctl.abort(); }, 12000);
+    var lines = ['Northlink — проверка оплаты', 'Время: ' + new Date().toISOString()];
+    try {
+      var response = await fetch(endpoint, {
+        method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({kind: 'payment'}), signal: ctl.signal
+      });
+      lines.push('Ответ сервера: HTTP ' + response.status);
+      if (response.status === 429) {
+        lines.push('Слишком много проверок. Повторите через полминуты.');
+      } else if (response.status === 400 || response.status === 404) {
+        lines.push('Проверка оплаты на этом сервере пока недоступна.');
+      } else if (!response.ok) {
+        lines.push('Сервер не выполнил проверку. Передайте этот отчёт поддержке.');
+      } else {
+        var report = await response.json();
+        if (!report || !/^PD-[a-f0-9]{32}$/.test(report.report_id) ||
+            !Array.isArray(report.messages) || report.messages.length > 12 ||
+            !report.messages.every(function (v) { return typeof v === 'string' && v.length <= 500; })) {
+          throw new Error('invalid_report');
+        }
+        lines.push('Номер отчёта: ' + report.report_id);
+        if (report.facts && typeof report.facts.checked_at === 'string' &&
+            /^\d{4}-\d\d-\d\dT[\d:+-]+$/.test(report.facts.checked_at)) {
+          lines.push('Настройки кассы проверены: ' + report.facts.checked_at);
+        }
+        lines.push.apply(lines, report.messages);
+        lines.push('Результат записан в журнал сервера. Передайте номер отчёта поддержке.');
+      }
+    } catch (error) {
+      if (error.message === 'invalid_report' || error instanceof SyntaxError) {
+        lines.push('Сервер вернул непонятный ответ. Проверка не завершена.');
+      } else {
+        lines.push(ctl.signal.aborted ? 'Ответ не получен за 12 секунд.' : 'Браузер не получил ответ сервера.');
+        lines.push('Причина по этому результату не установлена: возможны сбой сети, TLS, CORS или недоступность сервера.');
+      }
+      lines.push('Номер серверного отчёта не получен. Скопируйте этот текст в поддержку.');
+    } finally {
+      clearTimeout(timer);
+      lines.push('Длительность: ' + Math.round(performance.now() - started) + ' мс');
+      show(lines);
+      status.textContent = 'Проверка завершена. Результат ниже.';
+      run.disabled = false;
+    }
+  });
+  copy.addEventListener('click', async function () {
+    try {
+      await navigator.clipboard.writeText(output.value);
+      status.textContent = 'Отчёт скопирован.';
+    } catch (_) {
+      output.focus(); output.select();
+      status.textContent = 'Выделили отчёт — скопируйте его вручную.';
+    }
+  });
+}());
+</script>
+</body></html>
