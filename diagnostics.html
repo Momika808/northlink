@@ -1,0 +1,75 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; connect-src https:; base-uri 'none'; form-action 'none'">
+<title>Northlink — диагностика</title><style>
+:root{--bg:#060910;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.10);--text:#e8eef7;--muted:#8d9bb0;
+  --ok:#34e5a0;--bad:#ff6b6b;--warn:#f5c451}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:22px 16px 60px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:.4rem}
+.lead{color:var(--muted);font-size:.97rem;margin-bottom:1.3rem}
+
+.prog{margin-bottom:14px}
+.prog .bar{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:var(--ok);
+  transition:width .35s ease;border-radius:99px}
+.prog .txt{display:flex;justify-content:space-between;gap:10px;margin-top:7px;
+  font-size:.86rem;color:var(--muted)}
+.prog .txt b{color:var(--text);font-weight:600}
+
+.card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.row .name{flex:1;min-width:0}
+.row .name b{display:block;font-weight:600;font-size:.96rem}
+.row .name span{display:block;color:var(--muted);font-size:.84rem}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted);opacity:.35}
+.dot.run{animation:p 1s infinite;background:var(--warn);opacity:1}
+.dot.ok{background:var(--ok);opacity:1}
+.dot.bad{background:var(--bad);opacity:1}
+.dot.warn{background:var(--warn);opacity:1}
+@keyframes p{50%{opacity:.2}}
+.val{font-family:ui-monospace,Menlo,monospace;font-size:.83rem;color:var(--muted);
+  white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis;flex:none}
+
+.verdict{margin-top:18px;padding:15px;border-radius:16px;border:1px solid var(--border);
+  background:var(--surface);font-size:.94rem}
+.verdict b{color:var(--ok)}
+.verdict.bad b{color:var(--bad)}
+
+details.log{margin-top:16px;border:1px solid var(--border);border-radius:14px;
+  background:var(--surface);overflow:hidden}
+details.log summary{padding:12px 15px;cursor:pointer;font-size:.92rem;font-weight:600;
+  list-style:none;display:flex;align-items:center;justify-content:space-between}
+details.log summary::-webkit-details-marker{display:none}
+details.log summary::after{content:"▾";color:var(--muted);font-size:.9rem}
+details.log[open] summary::after{content:"▴"}
+details.log pre{margin:0;padding:0 15px 14px;font-family:ui-monospace,Menlo,monospace;
+  font-size:.76rem;line-height:1.55;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+
+textarea{width:100%;margin-top:14px;min-height:135px;background:#0a0f19;color:var(--text);
+  border:1px solid var(--border);border-radius:14px;padding:12px;
+  font-family:ui-monospace,Menlo,monospace;font-size:.78rem;resize:vertical}
+.btns{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap}
+button,a.btn{flex:1;min-width:150px;padding:13px 16px;border-radius:13px;border:0;cursor:pointer;
+  font:inherit;font-weight:600;font-size:.95rem;text-align:center;text-decoration:none;
+  background:var(--ok);color:#04150e}
+button[disabled]{opacity:.4;cursor:default}
+a.btn.sec,button.sec2{background:transparent;border:1px solid var(--border);color:var(--text)}
+a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.note{margin-top:18px;color:var(--muted);font-size:.84rem}
+.note a{color:var(--ok)}
+
+select{width:100%;padding:12px;margin:8px 0 16px;background:#0a0f19;color:var(--text);border:1px solid var(--border);border-radius:10px}label{display:block;margin-top:18px}textarea{min-height:300px}</style></head><body><main class="wrap"><h1>Что не работает?</h1>
+<p class="lead">Проверяйте на том устройстве и интернете, где возникла ошибка.</p>
+<div class="btns"><a class="btn" href="ru-check.html">Российские сервисы за границей</a></div>
+<p class="note">Домены из действующих правил VPN. Сравните результат с текущим маршрутом и после выбора выхода через РФ.</p>
+<div class="btns"><a class="btn sec" href="diag.html">Связь, VPN или подписка</a></div>
+<p class="note">Доступность подписки и входных узлов. Для этой проверки выключите сам VPN.</p>
+<div class="btns"><a class="btn sec" href="payment-check.html">Не появилась ссылка оплаты / СБП</a></div>
+<p class="note">Касса и способы оплаты; эта проверка не измеряет работу VPN.</p>
+<p class="note"><a href="index.html">На главную</a></p></main></body></html>
