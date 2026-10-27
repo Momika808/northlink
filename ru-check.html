@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YKawRWfrEfhyaPfKj1jU5RdK1IPEaBusIsaspWmd6zw='; style-src 'unsafe-inline'; connect-src https:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-m5aZy/57ukg6pJAzSl10N/TBhLRGXL/btZKH+n2T9OI='; style-src 'unsafe-inline'; connect-src https:; base-uri 'none'; form-action 'none'">
 <title>Northlink — российские сервисы за границей</title><style>
 :root{--bg:#060910;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
   --border:rgba(255,255,255,.10);--text:#e8eef7;--muted:#8d9bb0;
@@ -91,6 +91,11 @@ select{width:100%;padding:12px;margin:8px 0 16px;background:#0a0f19;color:var(--
       var response=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal});
       if(!response.ok)throw new Error('api_'+response.status);
       return await response.json();
+    }catch(error){
+      if(ctl.signal.aborted)throw new Error('api_timeout');
+      if(/^api_\d{3}$/.test(error.message||''))throw error;
+      if(error.name==='SyntaxError')throw new Error('api_invalid_json');
+      throw new Error('api_network');
     }finally{clearTimeout(timer);}
   }
   async function country(){
@@ -119,6 +124,7 @@ select{width:100%;padding:12px;margin:8px 0 16px;background:#0a0f19;color:var(--
   run.addEventListener('click',async function(){
     if(run.disabled)return;
     run.disabled=true;stop.disabled=false;copy.disabled=true;mode.disabled=true;stopped=false;
+    var stage='Получение списка VPN-исключений',complete=false;
     var selectedMode=mode.value,lines=['Northlink — российские сервисы','Время: '+new Date().toISOString(),
       'Режим выбран пользователем: '+(selectedMode==='ru'?'выход через РФ':'текущий маршрут')],results=[];
     output.value='';status.textContent='Загружаем действующий список исключений VPN…';
@@ -127,7 +133,9 @@ select{width:100%;padding:12px;margin:8px 0 16px;background:#0a0f19;color:var(--
       if(!catalog||!Array.isArray(catalog.targets)||!catalog.targets.length||typeof catalog.version!=='string'||
         !catalog.targets.every(validDomain)||new Set(catalog.targets).size!==catalog.targets.length||
         !Number.isInteger(catalog.limit)||catalog.limit<1||catalog.limit>500)throw new Error('invalid_targets');
+      stage='Определение страны проверочного адреса';
       var targets=catalog.targets.slice(0,catalog.limit),cc=await country(),next=0,completed=0;
+      stage='Сетевые пробы доменов';
       lines.push('Список: VPN-исключения, версия '+catalog.version);
       lines.push('Страна проверочного адреса: '+cc+' (не доказывает маршрут каждого сайта)');
       lines.push('Всего доменов в правилах: '+catalog.targets.length+'. В этой проверке: '+targets.length+'.');
@@ -149,19 +157,35 @@ select{width:100%;padding:12px;margin:8px 0 16px;background:#0a0f19;color:var(--
       }
       lines.push.apply(lines,results.map(function(x){return x.domain+': '+words[x.state]+' ('+x.ms+' мс)';}));
       previous={};results.forEach(function(r){previous[r.domain]=r.state;});
+      stage='Сохранение отчёта на сервере';
       status.textContent='Сохраняем результаты в журнале…';
       var report=await api({kind:'network',version:catalog.version,mode:selectedMode,country:cc,results:results});
       if(!report||!/^ND-[a-f0-9]{32}$/.test(report.report_id))throw new Error('invalid_report');
+      complete=true;
       lines.unshift('Номер отчёта: '+report.report_id);
       lines.push('Результаты сохранены в журнале. Передайте номер поддержке.');
     }catch(error){
-      lines.push(error.message==='api_409'?'Список правил обновился во время проверки. Запустите ещё раз.':
-        error.message==='api_429'?'Слишком много проверок. Повторите через полминуты.':
-        'Не удалось завершить проверку или получить номер отчёта. Скопируйте этот текст в поддержку.');
+      lines.push('Этап сбоя: '+stage);
+      lines.push('Адрес API: '+(endpoint.charAt(0)==='/'?location.origin+endpoint:endpoint));
+      var reasons={
+        api_timeout:'API не ответил за 10 секунд.',
+        api_network:'Браузер не получил ответ API. Причина может быть в DNS, TLS, CORS или обрыве соединения; браузер её не уточняет.',
+        api_invalid_json:'API ответил, но ответ не удалось прочитать как JSON.',
+        api_409:'Список правил обновился во время проверки. Запустите ещё раз.',
+        api_429:'Слишком много проверок. Повторите через полминуты.',
+        invalid_targets:'API вернул список правил неподходящего формата.',
+        invalid_report:'API ответил без корректного номера отчёта.',
+        no_results:'Проверка остановлена до завершения первой сетевой пробы.'
+      };
+      var reason=reasons[error.message];
+      if(!reason&&/^api_\d{3}$/.test(error.message||''))reason='API вернул HTTP '+error.message.slice(4)+'.';
+      lines.push(reason||'Внутренняя ошибка страницы.');
+      lines.push('Завершённых сетевых проб: '+results.length+'.');
+      lines.push('Номер серверного отчёта не получен. Скопируйте этот текст в поддержку.');
     }finally{
       lines.push('Сетевой ответ не подтверждает вход, операции или отсутствие геоблокировки: браузер не показывает HTTP-код чужого сайта. Отсутствие ответа само по себе не устанавливает причину.');
       output.value=lines.join('\n');run.disabled=false;stop.disabled=true;copy.disabled=false;mode.disabled=false;
-      status.textContent='Проверка завершена. Результат ниже.';
+      status.textContent=complete?'Проверка завершена. Результат ниже.':'Проверка не завершена. Причина и собранные данные ниже.';
     }
   });
   copy.addEventListener('click',async function(){

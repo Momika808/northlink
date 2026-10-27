@@ -12,6 +12,12 @@ function setup(options={}){
   if(url==='/api/diag'){
    assert.equal(opts.method,'POST');assert.equal(opts.credentials,'omit');
    const b=JSON.parse(opts.body);
+   if(options.apiFailureAt===b.kind){
+    if(options.networkError)throw new TypeError('PRIVATE_TOKEN');
+    if(options.hangApi)return await new Promise((_,reject)=>opts.signal.addEventListener('abort',()=>reject(new Error('aborted'))));
+    if(options.invalidJson)return {ok:true,json:async()=>{throw new SyntaxError('PRIVATE_BODY');}};
+    return {ok:false,status:options.apiStatus||503};
+   }
    if(b.kind==='targets')return {ok:true,json:async()=>options.catalog||{targets:domains,version:'0123456789abcdef',limit:500}};
    post=b;return {ok:true,json:async()=>({report_id:id})};
   }
@@ -68,4 +74,35 @@ test('stop cancels active probes and preserves a partial report',async()=>{
 test('timed-out probes do not claim service availability',async()=>{
  const s=setup({hang:true,fastTimeout:true});await s.els.run.listeners.click();
  assert.ok(s.post.results.every(r=>r.state==='timeout'));assert.ok(!s.els.output.value.includes('сетевой ответ получен'));
+});
+
+for(const status of [400,404,429,500,503]){
+ test('HTTP '+status+' exposes the failed API stage',async()=>{
+  const s=setup({apiFailureAt:'targets',apiStatus:status});await s.els.run.listeners.click();
+  assert.ok(s.els.output.value.includes('Этап сбоя: Получение списка VPN-исключений'));
+  assert.ok(s.els.output.value.includes(status===429?'Слишком много проверок':'HTTP '+status));
+  assert.ok(s.els.output.value.includes('Завершённых сетевых проб: 0'));
+  assert.ok(s.els.status.textContent.includes('не завершена'));
+ });
+}
+test('network failure is distinct from HTTP errors and hides raw exception text',async()=>{
+ const s=setup({apiFailureAt:'targets',networkError:true});await s.els.run.listeners.click();
+ assert.ok(s.els.output.value.includes('Браузер не получил ответ API'));
+ assert.ok(!s.els.output.value.includes('PRIVATE_TOKEN'));
+});
+test('API timeout is explicitly reported',async()=>{
+ const s=setup({apiFailureAt:'targets',hangApi:true,fastTimeout:true});await s.els.run.listeners.click();
+ assert.ok(s.els.output.value.includes('API не ответил за 10 секунд'));
+});
+test('invalid JSON is an explicit API response failure',async()=>{
+ const s=setup({apiFailureAt:'targets',invalidJson:true});await s.els.run.listeners.click();
+ assert.ok(s.els.output.value.includes('не удалось прочитать как JSON'));
+ assert.ok(!s.els.output.value.includes('PRIVATE_BODY'));
+});
+test('failed report saving retains all completed probes',async()=>{
+ const s=setup({apiFailureAt:'network',apiStatus:503});await s.els.run.listeners.click();
+ assert.ok(s.els.output.value.includes('Этап сбоя: Сохранение отчёта на сервере'));
+ assert.ok(s.els.output.value.includes('service8.ru: сетевой ответ получен'));
+ assert.ok(s.els.output.value.includes('Завершённых сетевых проб: 9'));
+ assert.ok(!s.els.output.value.includes('Номер отчёта: ND-'));
 });
