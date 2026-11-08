@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Northlink — личный VPN-контур</title>
-<meta name="description" content="Личный VPN-контур: три входа в Европе и вход через Россию, соединение выглядит как обычный HTTPS, подписка обновляется сама. Ключ выдаёт бот — на сайте или в Telegram.">
+<title>Northlink — интернет как раньше</title>
+<meta name="description" content="VPN Northlink: неделя бесплатно, дальше 200 ₽ за 30 дней. Один ключ на телефон, ноутбук и телевизор.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#060910">
@@ -13,10 +13,10 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pPsJ7MF7wau+ARnl4y+Ll2DTB7MLPqVfeXydOiYCNr0=' 'sha256-v/UK8a8wLp73CW63yldcHHIhM9vu1Hdjm8m50bneF3A='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wC8HxNZ6829PBxXZtCouVCVyNddWZjragGAx8qZZraQ=' 'sha256-3e982bucPYdVFrM9G6d9Y6+hNP9hlP/r8JdxwulOyEk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Northlink — личный VPN-контур">
-<meta property="og:description" content="Три входа в Европе и вход через Россию. Соединение выглядит как обычный HTTPS. Подписка обновляется сама.">
+<meta property="og:title" content="Northlink — интернет как раньше">
+<meta property="og:description" content="Неделя бесплатно, дальше 200 ₽ за 30 дней. Один ключ на телефон, ноутбук и телевизор.">
 <meta property="og:locale" content="ru_RU">
 <!-- Иконка файлами, а не только data:SVG: Safari SVG-иконки в data: не
      показывает и рисует букву из заголовка. Файлы лежат рядом со страницей,
@@ -24,360 +24,309 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='15' fill='%23060910'/><path d='M20 45V19l24 26V19' stroke='%2334e5a0' stroke-width='6.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
-<script>/* Тема до отрисовки, иначе моргнёт. Выбор человека сильнее
-   системной настройки; раньше системную не читали вовсе, и светлая
-   тема была недоступна никому, кто не нажал переключатель. */
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='15' fill='%23060910'/><path d='M20 45V19l24 26V19' stroke='%2319ff7c' stroke-width='6.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script>/* Тема до отрисовки, иначе моргнёт. С 11.2026 по умолчанию тёмная —
+   «техно-мрачный» вид (решение владельца); светлая — если человек
+   выбрал её переключателем, выбор хранится в localStorage. */
 document.documentElement.className+=' js';
 (function(){var r=document.documentElement,t=null;
  try{t=localStorage.getItem('theme');}catch(e){}
  if(t!=='light'&&t!=='dark'){
-   t=(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+   t='dark';
  }
  r.dataset.theme=t;
  var m=document.querySelector('meta[name="theme-color"]');
  if(m)m.setAttribute('content',t==='dark'?'#060910':'#f5f8fc');
 })();</script>
 <style>
-/* ─────────── токены ─────────── */
+/* Northlink 11.2026: домашняя страница 2000-х, нарисованная как схема. Шрифтов и картинок со стороны нет; движение — CSS, останавливается кнопкой «стоп» и при «уменьшить движение». */
 :root{
-  --bg:#f5f8fc; --bg-soft:#ffffff;
-  --surface:rgba(9,18,32,.035); --surface-2:rgba(9,18,32,.06);
-  --border:rgba(9,18,32,.10); --border-strong:rgba(9,18,32,.18);
-  --text:#0a1420; --muted:#57687d;
-  /* 08945f давал 3,88:1 на белом тексте кнопки при норме 4,5. Здесь 5,81. */
-  --accent:#0a744b; --accent-2:#0b7cb5; --accent-3:#6250e0;
-  --on-accent:#ffffff;
-  --glow-1:rgba(52,229,160,.30); --glow-2:rgba(88,199,243,.26); --glow-3:rgba(155,140,255,.24);
-  --shadow-sm:0 1px 2px rgba(10,20,32,.06);
-  --shadow:0 1px 2px rgba(10,20,32,.05), 0 18px 40px -18px rgba(10,20,32,.22);
-  --code-bg:rgba(9,18,32,.055);
-  --grid:rgba(9,18,32,.055);
-  --danger:#c62f2f;
+  --page:#c3c5c8;
+  --paper:#f2f1ec; --paper-2:#e2e1da;
+  --ink:#141414; --muted:#454543;
+  --hi:#ffffff; --lo:#8e9094; --edge:#141414;
+  --bar:#1d1f22; --bar-ink:#f2f1ec;
+  --link:#1a3fb4; --visited:#6a2b8e; --focus:#1a3fb4;
+  --btn-a:#fbfbf8; --btn-b:#d6d5cf;
+  --crt:#0b0d0e; --crt-2:#10191a; --crt-ink:#19ff7c; --crt-dim:#28c976; --crt-line:#1c5a3a;
+  --danger:#a3261b; --crt-danger:#ff9a8a;
 }
 [data-theme="dark"]{
-  --bg:#060910; --bg-soft:#0a0f19;
-  --surface:rgba(255,255,255,.035); --surface-2:rgba(255,255,255,.065);
-  --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.18);
-  --text:#e8eef7; --muted:#8d9bb0;
-  --accent:#34e5a0; --accent-2:#58c7f3; --accent-3:#9b8cff;
-  --on-accent:#04140d;
-  --glow-1:rgba(52,229,160,.20); --glow-2:rgba(88,199,243,.15); --glow-3:rgba(155,140,255,.16);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.5);
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 28px 60px -28px rgba(0,0,0,.85);
-  --code-bg:rgba(255,255,255,.055);
-  --grid:rgba(255,255,255,.045);
-  --danger:#ff7b72;
+  --page:#0f1113; --paper:#161a1d; --paper-2:#1f2428;
+  --ink:#dfe1e1; --muted:#a0a5a7;
+  --hi:#2d333a; --lo:#050607; --edge:#1c2126;
+  --bar:#17181b; --bar-ink:#19ff7c;
+  --link:#aea2ff; --visited:#d0b6ff; --focus:#19ff7c;
+  --btn-a:#2a2f35; --btn-b:#1b1f23;
+  --danger:#ff7c82;
 }
-
+[data-theme="dark"] .box-h{text-shadow:0 0 6px rgba(25,255,124,.45)}
+[data-theme="dark"] .navbtn,[data-theme="dark"] .copy-btn,[data-theme="dark"] .toggle{border-color:#050607}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{-webkit-text-size-adjust:100%}
 body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
-  font-size:17px;line-height:1.62;letter-spacing:-.005em;
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-  overflow-x:hidden;
+  margin:0;color:var(--ink);background-color:var(--page);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cpath d='M9 6v6M6 9h6' stroke='%23a7aaae'/%3E%3C/svg%3E");
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:15px;line-height:1.6;overflow-x:hidden;
 }
-h1,h2,h3{line-height:1.14;letter-spacing:-.03em;margin:0;font-weight:640}
-p{margin:0}
-a{color:inherit}
-code,kbd,.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:.94em}
-
-.wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto}
-@media (max-width:640px){.wrap{width:min(1120px,100% - 1.75rem)}}
-
-.skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--accent);color:var(--on-accent);padding:.7rem 1.1rem;border-radius:0 0 10px 0;font-weight:600}
+[data-theme="dark"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cpath d='M9 6v6M6 9h6' stroke='%231e2127'/%3E%3C/svg%3E")}
+h1,h2,h3,p{margin:0}
+a{color:var(--link)}
+a:visited{color:var(--visited)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--bar);color:var(--bar-ink);padding:.6rem 1rem}
 .skip:focus{left:0}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
 
-/* ─────────── фон: северное сияние ─────────── */
-.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
-.aurora b{position:absolute;display:block;border-radius:50%;filter:blur(90px);opacity:.9}
-.aurora b:nth-child(1){width:58vw;height:58vw;left:-14vw;top:-22vw;background:radial-gradient(circle,var(--glow-1),transparent 68%);animation:drift1 34s ease-in-out infinite alternate}
-.aurora b:nth-child(2){width:52vw;height:52vw;right:-16vw;top:-10vw;background:radial-gradient(circle,var(--glow-2),transparent 68%);animation:drift2 42s ease-in-out infinite alternate}
-.aurora b:nth-child(3){width:46vw;height:46vw;left:26vw;top:14vw;background:radial-gradient(circle,var(--glow-3),transparent 68%);animation:drift3 50s ease-in-out infinite alternate}
-@keyframes drift1{to{transform:translate3d(9vw,7vw,0) scale(1.16)}}
-@keyframes drift2{to{transform:translate3d(-11vw,9vw,0) scale(1.1)}}
-@keyframes drift3{to{transform:translate3d(6vw,-8vw,0) scale(.9)}}
-@media (prefers-reduced-motion:reduce){.aurora b{animation:none}}
-.grid-bg{
-  position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-  background-size:64px 64px;
-  -webkit-mask-image:radial-gradient(ellipse 90% 55% at 50% 0%,#000 0%,transparent 72%);
-  mask-image:radial-gradient(ellipse 90% 55% at 50% 0%,#000 0%,transparent 72%);
-}
-
-/* ─────────── шапка ─────────── */
-.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid transparent;transition:border-color .25s,background .25s}
-.nav.stuck{border-bottom-color:var(--border);background:color-mix(in srgb,var(--bg) 82%,transparent)}
-.nav .wrap{display:flex;align-items:center;gap:1.5rem;height:66px}
-.brand{display:flex;align-items:center;gap:.6rem;font-weight:680;letter-spacing:-.02em;text-decoration:none;font-size:1.06rem;padding-block:.6rem}
-.brand svg{display:block;flex:none}
-.nav-links{display:flex;gap:1.6rem;margin-left:auto;font-size:.95rem}
-.nav-links a{color:var(--muted);text-decoration:none;transition:color .18s}
-.nav-links a:hover{color:var(--text)}
-.nav-links a.nav-check{color:var(--accent)}
-.nav-links a.nav-check:hover{color:var(--accent);opacity:.8}
-@media (max-width:780px){.nav-links{display:none}}
-.toggle{
-  margin-left:.5rem;display:grid;place-items:center;width:44px;height:44px;flex:none;
-  border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);
-  cursor:pointer;transition:color .18s,border-color .18s,background .18s
-}
-@media (max-width:780px){.toggle{margin-left:auto}}
-.toggle:hover{color:var(--text);border-color:var(--border-strong)}
+.nav{background:var(--bar);color:var(--bar-ink);border-bottom:1px solid var(--edge)}
+.nav .wrap{width:min(1080px,100% - 24px);margin-inline:auto;display:flex;align-items:center;gap:.75rem;min-height:44px}
+.brand{display:flex;align-items:center;gap:.5rem;color:inherit;text-decoration:none;font-weight:600;font-size:.95rem}
+.brand:visited{color:inherit}
+.brand svg{flex:none}
+.toggle{margin-left:auto;display:grid;place-items:center;width:44px;height:36px;border:1px solid var(--edge);
+  background:linear-gradient(var(--btn-a),var(--btn-b));color:var(--ink);cursor:pointer;
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--lo)}
+.toggle:active{box-shadow:inset -1px -1px 0 var(--hi),inset 1px 1px 0 var(--lo)}
 .toggle .moon{display:none}
 [data-theme="dark"] .toggle .moon{display:block}
 [data-theme="dark"] .toggle .sun{display:none}
 
-/* ─────────── общее для секций ─────────── */
-section{padding:clamp(2.25rem,9vw,7.5rem) 0}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:.55rem;
-  font-size:.875rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:.4rem .85rem
-}
-.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
-h2{font-size:clamp(1.75rem,3.6vw,2.6rem);margin:1.1rem 0 .9rem;max-width:20ch}
-.lead{color:var(--muted);font-size:clamp(1.02rem,1.6vw,1.14rem);max-width:62ch}
-.sec-head{margin-bottom:clamp(2.2rem,4vw,3.2rem)}
+.site{width:min(1080px,100% - 24px);margin:12px auto 0}
+.box{background:var(--paper);border:1px solid var(--edge);box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--lo)}
+.box + .box{margin-top:10px}
+.box-h{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:0;
+  background:var(--bar);color:var(--bar-ink);font-size:.85rem;font-weight:700;letter-spacing:.02em;padding:.3rem .6rem}
+.box-h::before,.box-h::after{content:"✦";font-weight:400;opacity:.7}
+.box-b{padding:.8rem .9rem}
+.box-b > * + *{margin-top:.6rem}
+.box-b.menu > * + *{margin-top:0}
 
-/* ─────────── герой ─────────── */
-.hero{padding-top:clamp(2rem,6vw,4.5rem);padding-bottom:clamp(2rem,5vw,3.5rem)}
-.hero .wrap{max-width:720px;margin-inline:auto}
-.hero .pitch{max-width:none}
-.hero h1{
-  font-size:clamp(3rem,9vw,5.2rem);font-weight:700;letter-spacing:-.045em;margin:1.4rem 0 0;
-  background:linear-gradient(115deg,var(--text) 26%,var(--accent) 62%,var(--accent-2) 92%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.hero .tagline{margin-top:.35rem;font-size:clamp(1.05rem,2.4vw,1.4rem);font-weight:560;color:var(--muted);letter-spacing:-.01em}
-.hero .pitch{margin-top:1.6rem;font-size:clamp(1.05rem,1.9vw,1.24rem);max-width:56ch;color:var(--text);opacity:.86}
-.cta{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2.2rem}
-.btn{
-  display:inline-flex;align-items:center;gap:.5rem;padding:.82rem 1.4rem;border-radius:13px;
-  font-weight:620;font-size:1rem;text-decoration:none;border:1px solid transparent;cursor:pointer;
-  transition:transform .16s ease,box-shadow .2s,background .2s,border-color .2s
-}
-.btn:active{transform:translateY(1px)}
-.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 10px 30px -12px color-mix(in srgb,var(--accent) 70%,transparent)}
-.btn-primary:hover{box-shadow:0 14px 38px -12px color-mix(in srgb,var(--accent) 80%,transparent);transform:translateY(-1px)}
-.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text)}
-.btn-ghost:hover{border-color:var(--border-strong);background:var(--surface-2)}
+.banner{border:1px solid var(--edge);background:var(--paper);overflow:hidden}
+.banner img{display:block;width:100%;height:auto}
+.banner{background:#111417}
+.mast{background:#111417;color:#e7e6e0;border:1px solid var(--edge);border-top:0;padding:.55rem .9rem .7rem;display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem 1rem}
+.mast h1{display:flex;align-items:center;gap:.9rem;font-weight:700;letter-spacing:-.03em;color:#f2f1ec;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1}
+.mast h1 svg{flex:none;width:clamp(40px,7vw,56px);height:auto}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wm{display:inline-flex;align-items:baseline;line-height:1}
+.wm-n{width:.69em;height:.74em;flex:none;margin-right:-.04em}
+.wm-rest{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;letter-spacing:-.02em;color:#f2f1ec;text-shadow:.06em .06em 0 #0b6b38}
+.wm-s{font-size:1.9rem}
+.wm-s .wm-n{margin-right:0}
+.mast h1.wm{font-size:clamp(2.3rem,6.4vw,3.8rem)}
+.mast{position:relative}
+.type{display:inline-block;vertical-align:bottom;overflow:hidden;white-space:nowrap;width:19ch;animation:nl-type 1.4s steps(19) .5s both}
+@keyframes nl-type{from{width:0}}
+.cur2{animation:nl-blink 1s steps(1) infinite}
+.bn{position:relative}
+.fx{position:absolute;inset:0;pointer-events:none}
+.fx i{position:absolute;display:block}
+.fx-svg{position:absolute;inset:0;width:100%;height:100%}
+.fx-svg path,.fx-svg circle{fill:none;stroke:#c9d1d9;stroke-width:.6}
+.xh path{transform-box:fill-box;transform-origin:center;animation:nl-rot var(--s) linear var(--d) infinite}
+@keyframes nl-rot{to{transform:rotate(360deg)}}
+.osc{stroke:#19ff7c!important;stroke-width:1!important;animation:nl-osc 1.2s linear infinite}
+@keyframes nl-osc{to{transform:translateX(-24px)}}
+.zz{stroke-dasharray:72;animation:nl-zz 2.4s ease-in-out infinite}
+@keyframes nl-zz{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}
+.mq{stroke-dasharray:2 3;animation:nl-mq 1.6s linear var(--d) infinite}
+@keyframes nl-mq{to{stroke-dashoffset:calc(10px * var(--dir))}}
+.hx{font:7px ui-monospace,Menlo,Consolas,monospace;fill:#939da6;animation:nl-hx 6s steps(1) infinite;animation-delay:calc(var(--i) * .3s)}
+@keyframes nl-hx{0%{opacity:0}5%{opacity:1}100%{opacity:1}}
+.hx-cur{fill:#19ff7c;animation:nl-blink 1s steps(1) infinite}
+.eq{transform-box:fill-box;transform-origin:left center;animation:nl-eq var(--t) ease-in-out var(--d) infinite alternate}
+@keyframes nl-eq{from{transform:scaleX(.25)}to{transform:scaleX(1)}}
+.pk{top:var(--y);left:22.5%;width:.42%;aspect-ratio:1;background:var(--c);animation:nl-pk 1.8s linear var(--d) infinite}
+@keyframes nl-pk{from{left:22.5%;opacity:0}15%{opacity:1}to{left:36.4%;opacity:1}}
+.pg{top:41.1%;left:62.6%;width:.5%;aspect-ratio:1;background:#19ff7c;border:1px solid #111417;box-shadow:0 0 6px #19ff7c;animation:nl-pg 2.1s linear var(--d) infinite}
+@keyframes nl-pg{from{left:62.6%}to{left:71.2%}}
+.led{top:var(--y);left:59.25%;width:.5%;aspect-ratio:1;border-radius:50%;background:#19ff7c;box-shadow:0 0 6px #19ff7c;animation:nl-led 1.4s steps(1) var(--d) infinite}
+@keyframes nl-led{50%{opacity:.15}}
+.fx-cb{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.fx-btn{position:absolute;right:.6rem;bottom:.55rem;display:grid;place-items:center;min-width:44px;min-height:30px;padding:0 .5rem;cursor:pointer;
+  font:700 .75rem ui-monospace,Menlo,monospace;color:#19ff7c;border:1px solid #0b6b38;background:#060910}
+.fx-btn::before{content:"❚❚ стоп"}
+.fx-cb:checked ~ .mast .fx-btn::before{content:"▶ пуск"}
+.fx-cb:focus-visible ~ .mast .fx-btn{outline:2px solid #19ff7c;outline-offset:2px}
+.fx-cb:checked ~ .banner .fx i,.fx-cb:checked ~ .banner .fx-svg *,.fx-cb:checked ~ .mast .cur2{animation-play-state:paused}
+.mast p{font-family:ui-monospace,Menlo,monospace;color:var(--crt-ink);font-size:.95rem}
 
+.cols{display:grid;grid-template-columns:200px minmax(0,1fr) 220px;gap:10px;margin-top:10px;align-items:start}
+.cols > *{min-width:0}
 
-/* ─────────── подписка ─────────── */
-.label{display:block;font-size:.875rem;font-weight:620;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.copy-row{display:flex;gap:.6rem;margin-top:.8rem;align-items:stretch;flex-wrap:wrap}
-.copy-row code{
-  flex:1 1 320px;min-width:0;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
-  padding:.8rem 1rem;font-size:.95rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center
-}
-.copy-btn{flex:none;padding:.8rem 1.15rem;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .2s,color .2s}
-.copy-btn:hover{border-color:var(--border-strong)}
-.copy-btn[data-done]{color:var(--accent);border-color:var(--accent)}
-.get-row{display:flex;gap:.6rem;margin-top:1.1rem;flex-wrap:wrap}
-.get-row input{
-  flex:1 1 15rem;min-width:0;padding:.85rem 1rem;border-radius:12px;
-  border:1px solid var(--border);background:var(--surface);color:var(--text);
-  font:inherit;font-size:1.02rem;letter-spacing:.02em}
-.get-row input:focus{outline:none;border-color:var(--accent)}
-.get-row button{flex:none}
-.get-out{margin-top:1rem;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:1.1rem}
-.get-out[hidden]{display:none}
-#get-again{margin-top:1rem}
-.get-err{margin-top:.9rem;color:#c0392b;font-size:.97rem}
-:root:not([data-theme=light]) .get-err{color:#ff8a7a}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .get-err{color:#ff8a7a}}
-:root[data-theme=dark] .get-err{color:#ff8a7a}
-.note{margin-top:.9rem;font-size:.92rem;color:var(--muted)}
-.note a{color:var(--accent)}
+.menu{display:grid;gap:6px}
+.menu > *{margin-top:0}
+.navbtn{display:flex;align-items:center;justify-content:center;min-height:34px;padding:.3rem .5rem;text-align:center;
+  font-size:.86rem;color:var(--ink);text-decoration:none;border:1px solid var(--edge);
+  background:linear-gradient(var(--btn-a),var(--btn-b));box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--lo)}
+.navbtn:visited{color:var(--ink)}
+.navbtn:hover{background:var(--paper-2)}
+.navbtn:active{box-shadow:inset -1px -1px 0 var(--hi),inset 1px 1px 0 var(--lo)}
 
-/* ─────────── чат с ботом ─────────── */
-/* До первого нажатия — тот же корпус чата с одним сообщением и кнопками:
-   человек видит, что его ждёт, и нажимает прямо там, где будет разговор. */
-.chat-intro{margin-top:1.6rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden}
-.chat-intro[hidden]{display:none}
-.chat-log-intro{height:auto;min-height:0;flex:none}
-.hero-note{margin-top:1rem;font-size:.92rem;color:var(--muted)}
-.hero-note a{color:var(--accent)}
+.crt{position:relative;background:var(--crt);color:var(--crt-ink);border:1px solid var(--edge);text-shadow:0 0 4px rgba(25,255,124,.35)}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0 2px,rgba(0,0,0,.2) 2px 3px)}
+.crt a,.crt a:visited{color:#d9ffe6}
+.crt-list{list-style:none;margin:0;padding:.7rem .8rem;font-size:.86rem;line-height:1.5}
+.crt-list li::before{content:"> ";color:var(--crt-dim)}
+.crt-list .fn{color:var(--crt-dim);font-size:.8rem}
+.crt-list .fn::before{content:""}
 
-/* Высота — почти весь экран: чат и есть страница. На десктопе от 560 px до
-   900, на телефоне 78 % высоты окна — под шапкой остаётся видна первая
-   строка героя. */
-.chat{margin-top:1.2rem;border:1px solid var(--border);border-radius:16px;background:var(--bg-soft);overflow:hidden;display:flex;flex-direction:column;height:clamp(560px,calc(100vh - 150px),900px)}
-@media (max-width:640px){.chat{height:78vh;height:78dvh}}
-.chat[hidden]{display:none}
-.chat-head{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.95rem}
-.chat-head b{font-weight:640;white-space:nowrap}
-.chat-head .chat-status{white-space:nowrap}
-.chat-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
-.chat-dot[data-on]{background:var(--accent)}
-.chat-status{margin-left:auto;font-size:.85rem;color:var(--muted)}
-.chat-log{flex:1 1 auto;min-height:160px;overflow-y:auto;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.5rem;scroll-behavior:smooth}
-.msg{max-width:86%;padding:.6rem .85rem;border-radius:14px 14px 14px 5px;background:var(--surface-2);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.96rem;line-height:1.45}
-.msg.me{align-self:flex-end;border-radius:14px 14px 5px 14px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.hello{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:start}
+.hello svg{width:64px;height:64px;color:var(--ink)}
+.hello p + p{margin-top:.5rem}
+.hook{font-weight:800;letter-spacing:-.04em;font-size:clamp(1.3rem,2.6vw,1.75rem);line-height:1.2}
+
+.upd{list-style:none;margin:0;padding:0;font-size:.9rem}
+.upd li{padding:.45rem 0;border-bottom:1px dotted var(--lo)}
+.upd li:first-child{padding-top:0}
+.upd li:last-child{border-bottom:0}
+.upd time{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--muted)}
+
+.b88s{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.b88{display:flex;align-items:center;justify-content:center;width:88px;height:31px;border:1px solid #000;
+  font-size:10px;font-weight:700;line-height:1.05;text-align:center;letter-spacing:.02em;overflow:hidden}
+.b88-a{background:#060910;color:#19ff7c}
+.b88-b{background:linear-gradient(#ffffff,#b9bcc0);color:#141414}
+.b88-c{background:#1a3fb4;color:#ffffff}
+.b88-d{background:#f2f1ec;color:#141414;box-shadow:inset 0 0 0 2px #1a3fb4}
+.b88-e{background:linear-gradient(90deg,#ff3b3b,#ffb13b,#f5f53b,#3bff7a,#3bc4ff,#6b5bff,#ff3bd8);color:#000;text-shadow:0 0 2px #fff,0 0 2px #fff}
+.b88-f{background:repeating-linear-gradient(45deg,#141414 0 6px,#2b2b2b 6px 12px);color:#f2f1ec}
+
+.chat-intro,.chat{margin-top:10px}
+.chat-intro[hidden],.chat[hidden],.get-out[hidden],.chat-err[hidden],.rk[hidden],.kb-toggle[hidden]{display:none}
+.chat{display:flex;flex-direction:column;height:clamp(520px,calc(100vh - 140px),820px)}
+.chat-head{position:relative;z-index:1;display:flex;align-items:center;gap:.55rem;padding:.35rem .7rem;
+  background:var(--crt-ink);color:var(--crt);font-size:.9rem;font-weight:700}
+.chat-head b{white-space:nowrap}
+.cur{display:inline-block;width:.55em;height:1em;background:currentColor;vertical-align:-2px;animation:nl-blink 1s steps(1) 4}
+@keyframes nl-blink{50%{opacity:0}}
+.chat-dot{width:9px;height:9px;background:var(--crt);opacity:.35;flex:none}
+.chat-dot[data-on]{opacity:1}
+.chat-status{margin-left:auto;font-weight:400;font-size:.8rem;white-space:nowrap}
+.chat-log{position:relative;z-index:1;flex:1 1 auto;min-height:150px;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.5rem}
+.chat-log-intro{flex:none;min-height:0}
+.msg{max-width:88%;padding:.5rem .7rem;border:1px solid var(--crt-line);background:var(--crt-2);
+  white-space:pre-wrap;overflow-wrap:anywhere;font-size:.92rem;line-height:1.45}
+.msg.me{align-self:flex-end;background:#163228;border-color:var(--crt-dim)}
 .msg.me[data-pending]{opacity:.6}
-.msg a{color:var(--accent-2)}
-.msg b{font-weight:650}
-.msg code{background:color-mix(in srgb,var(--text) 10%,transparent);border-radius:5px;padding:.05em .3em}
-.msg pre{margin:.35rem 0;padding:.5rem .65rem;border-radius:9px;background:color-mix(in srgb,var(--text) 8%,transparent);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg b{font-weight:700}
+.msg code{background:rgba(168,240,192,.12);padding:0 .25em}
+.msg pre{margin:.3rem 0;padding:.45rem .6rem;background:rgba(168,240,192,.1);white-space:pre-wrap;overflow-wrap:anywhere}
 .msg pre code{background:none;padding:0}
-.msg img{display:block;max-width:220px;width:100%;border-radius:10px;margin-top:.15rem}
-/* Сообщение с кнопками: пузырь и под ним клавиатура во всю его ширину —
-   как inline-клавиатура в Telegram. Ряды, стили primary/success/danger,
-   url со стрелкой, ожидание ответа — спиннер. */
-.mw{display:flex;flex-direction:column;gap:4px;width:fit-content;max-width:86%}
+.msg img{display:block;max-width:220px;width:100%;margin-top:.2rem;border:1px solid var(--crt-line)}
+.mw{display:flex;flex-direction:column;gap:4px;width:fit-content;max-width:88%}
 .mw .msg{align-self:stretch;max-width:none}
 .ikb{display:flex;flex-direction:column;gap:4px}
 .ikb-row{display:flex;gap:4px}
-.ikb-btn{flex:1 1 0;min-width:0;min-height:38px;padding:0 .75rem;
-  display:inline-flex;align-items:center;justify-content:center;position:relative;
-  border:0;border-radius:12px;font:inherit;font-size:.94rem;font-weight:500;line-height:1.2;
-  color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
-  cursor:pointer;text-decoration:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-  transition:background .15s,transform .08s}
-.ikb-btn:hover{background:color-mix(in srgb,var(--text) 13%,transparent)}
-.ikb-btn:active{transform:scale(.98)}
-.ikb-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}
+.ikb-btn{flex:1 1 0;min-width:0;min-height:38px;padding:0 .7rem;position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--crt-ink);background:transparent;color:var(--crt-ink);
+  font:inherit;font-size:.9rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  cursor:pointer;text-decoration:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ikb-btn:visited{color:var(--crt-ink)}
+.ikb-btn:hover{background:rgba(25,255,124,.14)}
+.ikb-btn:focus-visible{outline:2px solid #d9ffe6;outline-offset:2px}
 .ikb-btn[aria-disabled=true]{opacity:.5;cursor:default;pointer-events:none}
-.ikb-btn[data-style=primary]{color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)}
-.ikb-btn[data-style=primary]:hover{background:color-mix(in srgb,var(--accent-2) 22%,transparent)}
-.ikb-btn[data-style=success]{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
-.ikb-btn[data-style=success]:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
-.ikb-btn[data-style=danger]{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
-.ikb-btn[data-style=danger]:hover{background:color-mix(in srgb,var(--danger) 22%,transparent)}
-.ikb-url{padding-right:1.4rem}
-.ikb-url::after{content:"↗";position:absolute;top:3px;right:7px;font-size:.7rem;line-height:1;opacity:.65}
+.ikb-btn[data-style=success]{background:var(--crt-ink);color:var(--crt);font-weight:700}
+.ikb-btn[data-style=success]:hover{background:#7dffb5}
+.ikb-btn[data-style=primary]{border-style:double;border-width:3px}
+.ikb-btn[data-style=danger]{border-color:var(--crt-danger);color:var(--crt-danger)}
+.ikb-url{padding-right:1.3rem}
+.ikb-url::after{content:"↗";position:absolute;top:3px;right:6px;font-size:.7rem;line-height:1}
 .ikb-btn[aria-busy=true]{color:transparent}
-.ikb-btn[aria-busy=true]::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px;
-  border:2px solid color-mix(in srgb,var(--text) 35%,transparent);border-top-color:var(--text);border-radius:50%;animation:ikb-spin .7s linear infinite}
-@keyframes ikb-spin{to{transform:rotate(360deg)}}
-.ikb-copy[data-done]{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.ikb-btn[aria-busy=true]::after{content:"…";position:absolute;inset:0;display:grid;place-items:center;color:var(--crt-ink)}
+.ikb-btn[data-style=success][aria-busy=true]::after{color:var(--crt)}
+.ikb-copy[data-done]{background:var(--crt-ink);color:var(--crt)}
 @media(pointer:coarse){.ikb-btn{min-height:44px}}
-@media(max-width:480px){.ikb-btn{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;padding-top:.35rem;padding-bottom:.35rem}}
-@media(prefers-reduced-motion:reduce){.ikb-btn{transition:none}.ikb-btn:active{transform:none}
-  .ikb-btn[aria-busy=true]::after{animation:none;border:0;content:"…";color:var(--text);width:auto;height:auto;margin:0;transform:translate(-50%,-50%)}}
-/* Постоянная клавиатура над полем ввода — как reply keyboard в Telegram. */
-.rk{display:flex;flex-direction:column;gap:6px;padding:8px;border-top:1px solid var(--border);background:var(--surface)}
-.rk[hidden]{display:none}
-.rk-row{display:flex;gap:6px}
-.rk-btn{flex:1 1 0;min-width:0;min-height:44px;padding:.45rem .6rem;border:0;border-radius:10px;
-  background:var(--bg-soft);color:var(--text);box-shadow:var(--shadow-sm);font:inherit;font-size:1rem;font-weight:500;line-height:1.25;
-  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-wrap:anywhere;transition:background .15s}
-.rk-btn:hover{background:var(--surface-2)}
-.rk-btn:active{background:color-mix(in srgb,var(--text) 10%,transparent)}
+@media(max-width:480px){.ikb-btn{white-space:normal;padding-top:.3rem;padding-bottom:.3rem}}
+.rk{position:relative;z-index:1;display:flex;flex-direction:column;gap:5px;padding:7px;border-top:1px solid var(--crt-line);background:var(--crt-2)}
+.rk-row{display:flex;gap:5px}
+.rk-btn{flex:1 1 0;min-width:0;min-height:44px;padding:.4rem .5rem;border:1px solid var(--crt-line);background:var(--crt);
+  color:var(--crt-ink);font:inherit;font-size:.9rem;line-height:1.25;cursor:pointer;overflow-wrap:anywhere;touch-action:manipulation}
+.rk-btn:hover,.rk-btn:active{background:#163228}
+.chat-typing{position:relative;z-index:1;font-size:.8rem;color:var(--crt-dim);padding:0 .8rem .4rem;min-height:1.3rem}
+.chat-err{position:relative;z-index:1;padding:.4rem .8rem .7rem;font-size:.88rem;color:var(--crt-danger)}
+.chat-row{position:relative;z-index:1;display:flex;gap:.5rem;padding:.6rem;border-top:1px solid var(--crt-line)}
 .chat-field{flex:1 1 10rem;min-width:0;position:relative;display:flex}
-.chat-field input{width:100%}
-.chat-field.has-kb input{padding-right:2.7rem}
-/* Значок без подложки, как в Telegram: только глиф. Серый; открытая
-   клавиатура — в цвете акцента; при наведении просто ярче. */
-.kb-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);opacity:.8;display:flex;align-items:center;justify-content:center;line-height:0;cursor:pointer;padding:0;margin:0;transition:color .15s,opacity .15s;-webkit-appearance:none;appearance:none}
-.kb-toggle[hidden]{display:none}
-.kb-toggle:hover{opacity:1;color:var(--text)}
-.kb-toggle[aria-expanded=true]{color:var(--accent);opacity:.9}
-.kb-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-/* Правило .chat-row button задаёт padding 0 1rem и min-height; у значка
-   оно должно проигрывать — иначе глиф сжимается до точки. */
-.chat-row .kb-toggle{padding:0;min-height:0;height:36px}
-.kb-toggle svg{width:18px;height:18px;flex:none;display:block}
-.chat-toast{position:sticky;bottom:0;align-self:center;background:var(--text);color:var(--bg);border-radius:10px;padding:.45rem .8rem;font-size:.85rem;pointer-events:none}
-.chat-typing{font-size:.85rem;color:var(--muted);padding:0 1rem .5rem;min-height:1.3rem}
-.chat-row{display:flex;gap:.6rem;padding:.75rem;border-top:1px solid var(--border)}
-.chat-row input{
-  min-width:0;padding:.75rem .95rem;border-radius:12px;
-  border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:1rem}
-.chat-row input:focus{outline:none;border-color:var(--accent)}
-.chat-row button{flex:none;padding:.75rem 1.1rem}
-/* Телефон: чат зажат карточкой, полю ввода не хватало места, а подписи
-   «Сайт мимо VPN» и «Другое приложение» ломались на две строки. Чат
-   расширяется за поля карточки, «Отправить» становится значком, подписи
-   клавиатуры мельче и плотнее — как у Telegram на узком экране. */
+.chat-field input{width:100%;min-width:0;padding:.65rem .8rem;border:1px solid var(--crt-line);background:#0a0e0d;
+  color:var(--crt-ink);caret-color:var(--crt-ink);font:inherit;font-size:1rem}
+.chat-field input::placeholder{color:var(--crt-dim)}
+.chat-field input:focus{outline:none;border-color:var(--crt-ink)}
+.chat-field.has-kb input{padding-right:2.6rem}
+.kb-toggle{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;
+  color:var(--crt-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.kb-toggle[aria-expanded=true]{color:var(--crt-ink)}
+.kb-toggle svg{width:18px;height:18px}
+.btn{display:inline-flex;align-items:center;gap:.45rem;font:inherit;cursor:pointer}
+.btn-send{flex:none;padding:.6rem 1rem;border:1px solid var(--crt-ink);background:var(--crt-ink);color:var(--crt);font-weight:700}
 .btn-send svg{display:none;width:20px;height:20px}
-@media(max-width:640px){.chat,.chat-intro{margin-inline:-.875rem;border-radius:0;border-left:0;border-right:0}}
-@media(max-width:480px){
-  .rk{padding:6px}
-  .rk-row{gap:5px}
-  .rk-btn{font-size:.85rem;padding:.45rem .3rem;letter-spacing:-.01em}
-  .chat-row{gap:.4rem;padding:.55rem}
-  .chat-row input{padding:.7rem .8rem;font-size:.95rem}
-  .chat-field.has-kb input{padding-right:2.5rem}
-  .btn-send{padding:.7rem .85rem}
+.chat-toast{position:sticky;bottom:0;align-self:center;background:var(--crt-ink);color:var(--crt);padding:.35rem .7rem;font-size:.82rem;pointer-events:none}
+
+.note{margin-top:.7rem;font-size:.9rem;color:var(--muted)}
+.get-err{margin-top:.7rem;color:var(--danger);font-size:.95rem}
+.get-out{margin-top:10px;padding:.8rem .9rem}
+.label{display:block;font-size:.85rem;font-weight:700}
+.copy-row{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+.copy-row code{flex:1 1 300px;min-width:0;padding:.6rem .8rem;border:1px solid var(--edge);background:var(--paper-2);overflow-x:auto;white-space:nowrap}
+.copy-btn{flex:none;min-height:38px;padding:.5rem 1rem;border:1px solid var(--edge);background:linear-gradient(var(--btn-a),var(--btn-b));
+  color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer;box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--lo)}
+.copy-btn[data-done]{font-weight:700}
+
+.term{list-style:none;counter-reset:s;margin:0;padding:.4rem .8rem}
+.term li{counter-increment:s;display:grid;grid-template-columns:2.4em 1fr;padding:.45rem 0;border-bottom:1px dashed var(--crt-line);position:relative;z-index:1}
+.term li:last-child{border-bottom:0}
+.term li::before{content:"[" counter(s) "]";color:var(--crt-dim);font-weight:700}
+.term b{color:#eafff2}
+.term i{grid-column:2;font-style:normal;color:var(--crt-dim);font-size:.85em}
+.btn-row{display:flex;gap:6px}
+.btn-row .navbtn{flex:1}
+.facts{position:relative;z-index:1;width:100%;border-collapse:collapse;font-size:.92rem}
+.facts th,.facts td{text-align:left;vertical-align:top;padding:.55rem .7rem;border-top:1px dashed var(--crt-line)}
+.facts tr:first-child th,.facts tr:first-child td{border-top:0}
+.facts th{width:9rem;font-weight:700;color:var(--crt-ink)}
+.facts td{color:#d8efe2;text-shadow:none}
+
+footer{width:min(1080px,100% - 24px);margin:10px auto 24px;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem;align-items:center;justify-content:space-between;
+  font-size:.85rem;color:var(--muted);background:var(--paper);border:1px solid var(--edge);padding:.35rem .8rem}
+footer a{display:inline-block;padding:.25rem 0}
+
+@media (max-width:900px){
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .side-l .crt{display:none}
+}
+@media (max-width:640px){
+  .banner .bn{width:170%;margin-left:-2%}
+  .mast{padding-right:5.5rem}
+  .hello{grid-template-columns:1fr}
+  .hello svg{display:none}
+  .chat{height:78vh;height:78dvh}
+  .facts th{width:auto;display:block;border-top:1px dashed var(--crt-line);padding-bottom:0}
+  .facts td{display:block;border-top:0;padding-top:.15rem}
+  .facts tr:first-child th{border-top:0}
+}
+@media (max-width:480px){
+  .rk-btn{font-size:.82rem;padding:.4rem .3rem}
+  .chat-row{gap:.4rem;padding:.5rem}
+  .btn-send{padding:.6rem .8rem}
   .btn-send span{display:none}
   .btn-send svg{display:block}
 }
-.chat-err{padding:.5rem 1rem .8rem;font-size:.9rem;color:#c0392b}
-.chat-err[hidden]{display:none}
-:root:not([data-theme=light]) .chat-err{color:#ff8a7a}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .chat-err{color:#ff8a7a}}
-:root[data-theme=dark] .chat-err{color:#ff8a7a}
-
-/* ─────────── список «честно» ─────────── */
-#trust .wrap{max-width:720px;margin-inline:auto}
-.plain{display:grid;gap:0;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--surface)}
-.plain > div{padding:1.35rem 1.6rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:26px 1fr;gap:1rem;align-items:start}
-.plain > div:last-child{border-bottom:0}
-.plain .mark{color:var(--accent);margin-top:.28rem}
-.plain b{font-weight:640}
-.plain p{color:var(--muted);font-size:.95rem;margin-top:.15rem}
-
-/* ─────────── не подключается ─────────── */
-/* Карточка в герое, под чатом. Для человека, у которого туннель не работает
-   прямо сейчас: сайт из российских сетей открывается (7 из 7 замеренных
-   18.09.2026), Telegram — нет, так что это единственный канал до него.
-   Стиль — та же карточка, что у списка «честно». */
-.help{margin-top:1.6rem;text-align:left}
-.help .plain > div{align-items:start}
-.help h2{font-size:1.08rem;margin:0;max-width:none}
-.help p{color:var(--muted);font-size:.95rem;margin-top:.3rem}
-.help ol{margin:.55rem 0 0 1.15rem;padding:0;color:var(--muted);font-size:.95rem;display:grid;gap:.4rem}
-.help li::marker{color:var(--accent);font-weight:640}
-.help b{font-weight:640;color:var(--text)}
-
-/* ─────────── подвал ─────────── */
-footer{border-top:1px solid var(--border);padding:2.8rem 0;color:var(--muted);font-size:.92rem}
-footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;justify-content:space-between}
-footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)}
-footer a:hover{color:var(--text)}
-.reveal{opacity:0;transform:translateY(18px)}
-.reveal.in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
-@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
-
-/* Телефон: страница была 14,4 экрана. Отступы и межстрочный интервал
-   подбирались под десктоп, а на 375 px все clamp() заперты на минимуме —
-   текучесть включается только с 711 px. Здесь возвращаем плотность.
-   Блок стоит В КОНЦЕ стилей нарочно: раньше он шёл до правил .card и
-   .sub-box, и те, идя позже при той же специфичности, его перекрывали —
-   плотность на телефоне не включалась вовсе (найдено 13.09.2026). */
-@media (max-width:640px){
-  body{line-height:1.5}
-  /* три города в одну строку: 31 символ против 26 прежних (18.09.2026) */
-  .hero .eyebrow{font-size:.78rem;letter-spacing:.06em;padding:.35rem .7rem}
-  .plain > div{padding:.95rem 1.1rem}
-  .sec-head{margin-bottom:1.4rem}
+@media (prefers-reduced-motion:reduce){
+  .chat-head .cur,.type,.cur2,.fx i,.fx-svg *{animation:none!important}
+  .pk,.pg,.fx-btn{display:none}
 }
 </style>
 </head>
 <body>
 <a class="skip" href="#get">Перейти к чату</a>
-<div class="aurora" aria-hidden="true"><b></b><b></b><b></b></div>
-<div class="grid-bg" aria-hidden="true"></div>
 
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="#top">
-      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="currentColor" opacity=".08"/><path d="M20 45V19l24 26V19" stroke="var(--accent)" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Northlink
+      <span class="wm wm-s"><span class="vh">Northlink</span><svg class="wm-n" viewBox="16.6 15.6 30.8 32.8" aria-hidden="true"><path d="M20 45V19l24 26V19" stroke="#19ff7c" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     </a>
-    <nav class="nav-links">
-      <a href="https://t.me/northlink_bot" rel="noopener">Бот в Telegram</a>
-      <a href="diag.html" class="nav-check">Проверка связи</a>
-      <a href="diagnostics.html" class="nav-check">Диагностика</a>
-    </nav>
     <button class="toggle" id="theme" type="button" aria-label="Переключить тему">
       <svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>
       <svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.3A8.5 8.5 0 1 1 9.7 3.5a6.8 6.8 0 0 0 10.8 10.8z"/></svg>
@@ -385,59 +334,100 @@ footer a:hover{color:var(--text)}
   </div>
 </header>
 
-<main id="top">
+<main class="site" id="top">
+  <input type="checkbox" id="fx" class="fx-cb">
 
-  <!-- ══════ первый экран: вход и чат с ботом ══════ -->
-  <section class="hero" id="get">
-    <div class="wrap">
-      <span class="eyebrow"><span class="dot"></span>Франкфурт · Варшава · Амстердам</span>
-      <h1>Northlink</h1>
-      <p class="tagline">Личный VPN для своих.</p>
-      <p class="pitch">Три входа в Европе и вход через Россию, соединение выглядит как обычный HTTPS. Ключ выдаёт бот — здесь после входа или в Telegram.</p>
+  <!-- Баннер: чертёж тонкими линиями — крылатый монитор, поток данных, труба,
+       серверы, глобус с северной звездой. Отдельный файл (gen_banner.py),
+       чтобы страница не перешла 100 КБ. Картинка для глаз: всё, что на ней
+       написано, есть и текстом ниже. -->
+  <div class="banner"><div class="bn"><img src="banner.svg" alt="" width="1200" height="360">
+    <div class="fx" aria-hidden="true">
+      <svg class="fx-svg" viewBox="0 0 1200 360" aria-hidden="true"><defs><clipPath id="fx-osc"><rect x="474" y="16" width="52" height="28"/></clipPath></defs><g class="xh" style="--d:0.0s;--s:4.0s"><circle cx="396" cy="30" r="9"/><path d="M384 30h24M396 18v24"/></g><g class="xh" style="--d:-1.3s;--s:5.5s"><circle cx="424" cy="30" r="9"/><path d="M412 30h24M424 18v24"/></g><g class="xh" style="--d:-2.6s;--s:7.0s"><circle cx="452" cy="30" r="9"/><path d="M440 30h24M452 18v24"/></g><g clip-path="url(#fx-osc)"><path class="osc" d="M452 30q6-12 12 0t12 0 12 0 12 0 12 0 12 0 12 0 12 0"/></g><path class="zz" d="M528 30l5-8 6 16 6-16 6 16 6-16 5 8"/><path class="mq" style="--d:0.0s;--dir:-1" d="M396 46H580"/><path class="mq" style="--d:-0.4s;--dir:1" d="M396 49H550"/><path class="mq" style="--d:-0.8s;--dir:-1" d="M396 52H520"/><path class="mq" style="--d:-1.2000000000000002s;--dir:1" d="M396 55H490"/><path class="mq" style="--d:-1.6s;--dir:-1" d="M396 58H460"/><text class="hx" style="--i:0" x="1072" y="44">4e 6f 72 74</text><text class="hx" style="--i:1" x="1072" y="53">68 6c 69 6e</text><text class="hx" style="--i:2" x="1072" y="62">6b 20 2f 2f</text><text class="hx" style="--i:3" x="1072" y="71">20 69 6e 74</text><text class="hx" style="--i:4" x="1072" y="80">65 72 6e 65</text><text class="hx" style="--i:5" x="1072" y="89">74 20 6b 61</text><text class="hx" style="--i:6" x="1072" y="98">6b 20 72 61</text><text class="hx" style="--i:7" x="1072" y="107">6e 73 68 65</text><text class="hx" style="--i:8" x="1072" y="116">20 2f 2f 20</text><text class="hx" style="--i:9" x="1072" y="125">32 30 32 36</text><rect class="hx-cur" x="1072" y="132" width="5" height="7"/><path class="eq" style="--d:0.00s;--t:0.90s" d="M1072 150h46"/><path class="eq" style="--d:1.23s;--t:1.15s" d="M1072 155h30"/><path class="eq" style="--d:0.86s;--t:1.40s" d="M1072 160h62"/><path class="eq" style="--d:0.49s;--t:1.65s" d="M1072 165h22"/><path class="eq" style="--d:0.12s;--t:1.90s" d="M1072 170h38"/><path class="eq" style="--d:1.35s;--t:0.90s" d="M1072 175h54"/><path class="eq" style="--d:0.98s;--t:1.15s" d="M1072 180h30"/><path class="eq" style="--d:0.61s;--t:1.40s" d="M1072 185h46"/><path class="eq" style="--d:0.24s;--t:1.65s" d="M1072 190h62"/><path class="eq" style="--d:1.47s;--t:1.90s" d="M1072 195h22"/><path class="eq" style="--d:1.10s;--t:0.90s" d="M1072 200h38"/><path class="eq" style="--d:0.73s;--t:1.15s" d="M1072 205h30"/><path class="eq" style="--d:0.36s;--t:1.40s" d="M1072 210h54"/><path class="eq" style="--d:1.59s;--t:1.65s" d="M1072 215h46"/><path class="eq" style="--d:1.22s;--t:1.90s" d="M1072 220h62"/><path class="eq" style="--d:0.85s;--t:0.90s" d="M1072 225h38"/></svg>
+      <i class="pk" style="--y:37.4%;--c:#8b5cff;--d:0s"></i><i class="pk" style="--y:40.6%;--c:#2ad8ff;--d:-.6s"></i><i class="pk" style="--y:43.9%;--c:#19ff7c;--d:-1.2s"></i>
+      <i class="pg" style="--d:0s"></i><i class="pg" style="--d:-.7s"></i><i class="pg" style="--d:-1.4s"></i>
+      <i class="led" style="--y:19.4%;--d:0s"></i><i class="led" style="--y:34.4%;--d:-.4s"></i><i class="led" style="--y:41.9%;--d:-1s"></i><i class="led" style="--y:56.9%;--d:-.7s"></i><i class="led" style="--y:64.4%;--d:-1.3s"></i>
+    </div></div></div>
+  <div class="mast">
+    <h1 class="wm"><span class="vh">Northlink</span><svg class="wm-n" viewBox="16.6 15.6 30.8 32.8" aria-hidden="true"><path d="M20 45V19l24 26V19" stroke="#19ff7c" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="wm-rest" aria-hidden="true">orthlink</span></h1>
+    <p><span class="type">интернет как раньше</span><span class="cur2" aria-hidden="true">_</span></p>
+    <label class="fx-btn" for="fx"><span class="vh">Остановить анимацию</span></label>
+  </div>
 
-      <!-- Не вошёл: три кнопки. Вход — учётка Matrix на нашем сервере,
+  <div class="cols">
+
+    <!-- ══════ левая колонка: меню и контур ══════ -->
+    <aside class="side-l" aria-label="Меню">
+      <section class="box">
+        <h2 class="box-h">меню</h2>
+        <nav class="box-b menu">
+          <a class="navbtn" href="#get">чат с ботом</a>
+          <a class="navbtn" href="#help">не подключается?</a>
+          <a class="navbtn" href="diag.html">проверка связи</a>
+          <a class="navbtn" href="diagnostics.html">диагностика</a>
+          <a class="navbtn" href="#trust">цена и правила</a>
+          <a class="navbtn" href="https://t.me/northlink_bot" rel="noopener">бот в Telegram</a>
+        </nav>
+      </section>
+      <section class="box crt">
+        <h2 class="box-h">внутри</h2>
+        <ul class="crt-list">
+          <li>сервер выбирается сам*</li>
+          <li>банки и госуслуги работают с VPN*</li>
+          <li>рекламы нет</li>
+          <li>логов нет</li>
+          <li class="fn">* в Clash-приложениях</li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- ══════ середина: вход и чат с ботом ══════ -->
+    <div class="mid" id="get">
+      <section class="box">
+        <h2 class="box-h">привет</h2>
+        <div class="box-b hello">
+          <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="8" width="52" height="38"/><rect x="11" y="13" width="42" height="28"/><path d="M24 46v8M40 46v8M16 56h32M16 24h10M16 30h18M16 36h8"/><path d="M38 22l6 6-6 6" stroke-width="2"/></svg>
+          <div>
+            <p class="hook">Один ключ — все устройства.</p>
+            <p>Одна ссылка в приложении работает на телефоне, ноутбуке и телевизоре.</p>
+            <p><b>Неделя бесплатно.</b> Подпишитесь на канал <a href="https://t.me/northlink_hq" rel="noopener">@northlink_hq</a> и откройте Telegram-бота <a href="https://t.me/northlink_bot" rel="noopener">@northlink_bot</a>: он сразу пришлёт ключ. Дальше 200&nbsp;₽ за 30&nbsp;дней.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Не вошёл: кнопки входа. Вход — учётка Matrix на нашем сервере,
            Telegram не нужен. Все ведут на сервер входа auth.adminwg.dad;
            «Зарегистрироваться» открывает там форму регистрации.
            «Войти через Telegram» — тот же поток OIDC: Telegram подключён к
            MAS как upstream-провайдер, кнопка «Telegram» — на странице входа
-           MAS. Прямого старта через провайдера с сохранением downstream
-           grant у MAS нет: /upstream/authorize/<id> ждёт id гранта, который
-           MAS выдаёт только после /authorize. Потому — обычный authorize и
-           подсказка под кнопкой. -->
-      <div class="chat-intro" id="get-form">
+           MAS. -->
+      <div class="chat-intro crt" id="get-form">
         <div class="chat-head">
           <span class="chat-dot" data-on aria-hidden="true"></span>
-          <b>Northlink</b> · чат с ботом
+          <b>~northlink · чат с ботом</b><span class="cur" aria-hidden="true"></span>
         </div>
         <div class="chat-log chat-log-intro">
           <div class="mw">
-            <div class="msg">Чат и ключ открываются после входа. Войдите учётной записью Matrix на нашем сервере или заведите её — имя и пароль, без Telegram. Вход через Telegram — учётка заведётся сама, ключ тот же, что в боте. Ключ привязан к учётке: войдите с другого устройства — получите тот же.</div>
+            <div class="msg">Новый? Неделя бесплатно ждёт в Telegram-боте. Ключ уже есть в боте? Войдите через Telegram: здесь будет тот же ключ и чат. Есть учётная запись с паролем? Войдите по имени и паролю. Оплата пока только в Telegram-боте.</div>
             <div class="ikb" role="group" aria-label="Вход">
-              <div class="ikb-row"><button class="ikb-btn" data-style="success" id="get-login" type="button">Войти</button></div>
-              <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-register" type="button">Зарегистрироваться</button></div>
+              <div class="ikb-row"><a class="ikb-btn ikb-url" data-style="success" href="https://t.me/northlink_bot" rel="noopener" target="_blank" aria-label="Неделя бесплатно в Telegram-боте (в новой вкладке)">Неделя бесплатно в Telegram-боте</a></div>
               <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-tg" type="button">Войти через Telegram</button></div>
-              <div class="ikb-row"><a class="ikb-btn ikb-url" href="https://t.me/northlink_bot" rel="noopener" target="_blank" aria-label="Открыть бота в Telegram, откроется в новой вкладке">Открыть бота в Telegram</a></div>
+              <div class="ikb-row"><button class="ikb-btn" data-style="primary" id="get-login" type="button">Войти по паролю</button></div>
+              <div class="ikb-row"><button class="ikb-btn" id="get-register" type="button">Зарегистрироваться</button></div>
             </div>
           </div>
         </div>
       </div>
       <p class="get-err" id="get-err" hidden></p>
-      <p class="note" id="get-alt">Вход через Telegram: на странице входа нажмите «Telegram».
-        Если вы уже входили на auth.adminwg.dad, сначала завершите сессию там
-        (<a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">/account/</a> → Sessions),
-        иначе откроется вход текущей учёткой.
-        Кнопка регистрации не сработала? Форма напрямую:
-        <a href="https://auth.adminwg.dad/register" rel="noopener">auth.adminwg.dad/register</a>.
-        Заведите учётку и нажмите «Войти». Если вы уже входили в этом браузере,
-        «Зарегистрироваться» откроет вход — сначала завершите сессию на
-        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad/account/</a>.</p>
-      <p class="note" id="get-ru">Без VPN страница не открывается или вход зависает? Та же страница
-        через наш сервер в Москве: <a href="https://ru.adminwg.dad/">https://ru.adminwg.dad</a>.</p>
+      <p class="note" id="get-alt">Не получается войти? Выйдите из учётной записи на
+        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad</a> (это наш сервер входа) и войдите снова.
+        Форма регистрации открывается <a href="https://auth.adminwg.dad/register" rel="noopener">по этой ссылке</a>.</p>
+      <p class="note" id="get-ru">Без VPN не открывается? Зеркало: <a href="https://ru.adminwg.dad/">ru.adminwg.dad</a>.</p>
 
       <!-- После «Выйти»: жетоны отозваны, но браузерная сессия на сервере
            входа осталась — на общем компьютере её надо завершить там. -->
-      <p class="note" id="get-bye" hidden>Вы вышли. На общем компьютере ещё
-        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">завершите сессию на auth.adminwg.dad</a>.</p>
+      <p class="note" id="get-bye" hidden>Вы вышли. Если компьютер общий, выйдите и на
+        <a href="https://auth.adminwg.dad/account/" rel="noopener" target="_blank">auth.adminwg.dad</a>.</p>
 
       <!-- Вошёл: имя учётки и выход. -->
       <p class="note" id="get-who" hidden>Вы вошли как <b id="get-user"></b>.
@@ -445,33 +435,33 @@ footer a:hover{color:var(--text)}
 
       <!-- Старый чат по личной сессии (учётки @nl-…): ссылка лежит только
            в этом браузере. Уйдёт, когда все перейдут на вход. -->
-      <p class="note" id="get-again" hidden>Ссылку вам уже выдавали
-        <b><span id="get-when"></span></b>. Она сохранена в этом браузере —
-        на другом устройстве её не будет. Чтобы получить ключ по учётке
-        с паролем, сначала задайте пароль командой /login в чате.
-        <a href="#" id="get-forget">Забыть её здесь</a>.</p>
+      <p class="note" id="get-again" hidden>Ключ вам уже выдали
+        <b><span id="get-when"></span></b>. Он сохранён только в этом браузере:
+        скопируйте его, он работает на всех ваших устройствах. Чтобы входить
+        по имени и паролю, задайте пароль командой /login в чате.
+        <a href="#" id="get-forget">Удалить ключ из этого браузера</a>.</p>
 
-      <div class="get-out" id="get-out" hidden>
-        <span class="label">Ваша ссылка</span>
+      <div class="get-out box" id="get-out" hidden>
+        <span class="label">Ваш ключ (ссылка подписки)</span>
         <div class="copy-row">
           <code id="get-url"></code>
           <button class="copy-btn" type="button" id="get-copy">Скопировать</button>
         </div>
-        <p class="note">Вставьте её в приложение как подписку.
-          <span id="get-exp-wrap" hidden>Ключ действует до <b id="get-exp"></b>. Чтобы он стал годовым, вступите в канал — кнопка в чате.</span>
-          <span id="get-exp-none" hidden>Ключ годовой: вступление в канал засчитано.</span></p>
-        <p class="note" id="get-noroom" hidden>Чат не открылся: сервер Matrix не ответил. Ключ выдан; чат появится при следующем входе.</p>
+        <p class="note">Добавьте его в Clash-приложение как подписку.
+          <span id="get-exp-wrap" hidden>Доступ до <b id="get-exp"></b> Продлить можно в Telegram-боте: 200&nbsp;₽ за 30&nbsp;дней или 2&nbsp;000&nbsp;₽ за год.</span>
+          <span id="get-exp-none" hidden>Срок доступа показывает Telegram-бот.</span></p>
+        <p class="note" id="get-noroom" hidden>Чат не открылся: сервер чата не ответил. Ключ выдан, чат появится при следующем входе.</p>
         <p class="note" id="get-claim-wrap" hidden>
-          <b>Ключ работает 7 дней.</b> Чтобы он стал годовым, откройте
-          <a id="get-claim" href="#" rel="noopener">эту ссылку в боте</a> и подпишитесь на канал.
-          Адрес подписки при этом не меняется — в приложении править нечего.
+          Чтобы продлевать доступ, привяжите ключ к Telegram:
+          <a id="get-claim" href="#" rel="noopener">откройте бота по этой ссылке</a>.
+          Ссылка в приложении останется прежней.
         </p>
       </div>
 
-      <div class="chat" id="chat" hidden>
+      <div class="chat crt" id="chat" hidden>
         <div class="chat-head">
           <span class="chat-dot" id="chat-dot" aria-hidden="true"></span>
-          <b>Northlink</b> · чат с ботом
+          <b>~northlink · чат с ботом</b>
           <span class="chat-status" id="chat-status"></span>
         </div>
         <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Сообщения"></div>
@@ -482,10 +472,9 @@ footer a:hover{color:var(--text)}
           <div class="chat-field">
             <input id="chat-text" type="text" autocomplete="off" placeholder="Напишите боту…"
                    aria-label="Сообщение боту" maxlength="2000">
-            <!-- Значок клавиатуры внутри поля, у правого края — как в Telegram. -->
             <button type="button" class="kb-toggle" id="chat-kb-toggle" aria-expanded="true"
                     aria-controls="chat-kb" aria-label="Скрыть кнопки" hidden>
-              <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="3" width="7" height="6" rx="1.5"/><rect x="2" y="11" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/></svg>
+              <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><rect x="2" y="3" width="7" height="6"/><rect x="11" y="3" width="7" height="6"/><rect x="2" y="11" width="7" height="6"/><rect x="11" y="11" width="7" height="6"/></svg>
             </button>
           </div>
           <button class="btn btn-primary btn-send" type="submit" id="chat-send" aria-label="Отправить">
@@ -495,61 +484,71 @@ footer a:hover{color:var(--text)}
         </form>
       </div>
 
-      <!-- не подключается: шаги для человека на сломанной сети -->
-      <div class="help" id="help">
-        <div class="plain">
-          <div>
-            <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9.5a14 14 0 0 1 19 0M6 13.2a9 9 0 0 1 12 0M9.5 16.8a4 4 0 0 1 5 0"/><path d="M12 20.5h.01"/><path d="M3 3l18 18"/></svg></span>
-            <div>
-              <h2>Не подключается?</h2>
-              <p>В некоторых сетях оператор обрывает соединение с узлами в Европе. В этих сетях вход через Россию работает.</p>
-              <ol>
-                <li><b>Обновите подписку (профиль)</b> в приложении. Без этого узлов «Россия → …» в списке нет.</li>
-                <li><b>Выберите «Россия → Франкфурт»</b> или «Россия → Варшава». Приложения с Clash в названии выбирают узел сами.</li>
-                <li><b>Не помогло</b> — нажмите «Не работает» в чате с ботом на том же интернете. Бот измерит связь и передаст результат владельцу.</li>
-              </ol>
-            </div>
-          </div>
+      <!-- Не подключается: шаги для человека на сломанной сети. Тот же текст —
+           в боте («Вопросы» → «Перестало подключаться», spravka.py, broken). -->
+      <section class="box" id="help" style="margin-top:10px">
+        <h2 class="box-h">не подключается?</h2>
+        <div class="box-b">
+          <ol class="term crt">
+            <li><span><b>обновите подписку</b> в приложении</span></li>
+            <li><span><b>выберите другой сервер</b></span><i># Clash-приложения выбирают сами</i></li>
+            <li><span><b>не помогло?</b> нажмите «Не работает» в боте</span></li>
+          </ol>
+          <div class="btn-row"><a class="navbtn" href="diag.html">проверка связи</a><a class="navbtn" href="diagnostics.html">диагностика</a></div>
+          <p class="note">Обе проверки работают без входа.</p>
         </div>
-      </div>
-      <p class="note hero-note">Без входа: <a href="diag.html">проверка связи</a> померит вашу сеть и покажет отчёт. Российские сервисы за границей или оплата — <a href="diagnostics.html">диагностика</a>. Сервер входа не открывается — включите VPN, если он у вас уже есть.</p>
-    </div>
-  </section>
+      </section>
 
-  <!-- ══════ честно ══════ -->
-  <section id="trust">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">Честно</span>
-        <h2>О чём стоит знать заранее</h2>
-      </div>
-      <div class="plain">
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Это не коммерческий сервис</b><p>Личный контур, которым делятся с близкими. Тарифов, гарантий и круглосуточной поддержки нет: чинит один человек, когда доходят руки.</p></div>
+      <!-- Что важно знать: таблица вместо галочек. Тексты — как в боте
+           («Вопросы» → «Что важно знать заранее», spravka.py, honest). -->
+      <section class="box" id="trust">
+        <h2 class="box-h">цена и правила</h2>
+        <div class="box-b">
+          <div class="crt"><table class="facts">
+            <tr><th scope="row">цена</th><td>Первая неделя бесплатно. Дальше 200&nbsp;₽ за 30&nbsp;дней или 2&nbsp;000&nbsp;₽ за год. Оплата в Telegram-боте, нужна подписка на канал.</td></tr>
+            <tr><th scope="row">кто делает</th><td>Один человек, без колл-центра. О сбоях он пишет в канале @northlink_hq.</td></tr>
+            <tr><th scope="row">логи</th><td>Не ведём. Но анонимным вас не сделает ни наш VPN, ни любой другой.</td></tr>
+            <tr><th scope="row">торренты</th><td>Нельзя: за раздачу хостинг отключает сервер, и связь пропадает у всех.</td></tr>
+            <tr><th scope="row">белые списки</th><td>При белых списках VPN работает не у всех операторов и только в Clash-приложении.</td></tr>
+          </table></div>
         </div>
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Логи не ведутся, но это не анонимность</b><p>Серверы арендованы на живого человека и подчиняются законам своих стран. От слежки провайдера и блокировок защищает, от целенаправленного интереса государства — нет, как и любой VPN.</p></div>
-        </div>
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>Торренты через узлы не качают</b><p>За раздачу с европейского адреса хостинг сносит узел. Один человек с торрентом оставляет без связи всех.</p></div>
-        </div>
-        <div>
-          <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>
-          <div><b>При белых списках работает не везде</b><p>Когда оператор оставляет только госуслуги, банки и VK, Clash-приложение само переключается на другой сервер. У части операторов это помогает, у части нет. Нужны Clash-приложение и обновлённая подписка. Не помогло — подключитесь к Wi-Fi: белые списки действуют только на мобильную сеть.</p></div>
-        </div>
-      </div>
+      </section>
     </div>
-  </section>
+
+    <!-- ══════ правая колонка: обновления и кнопки 88×31 ══════ -->
+    <aside class="side-r" aria-label="Обновления">
+      <section class="box">
+        <h2 class="box-h">обновления</h2>
+        <div class="box-b">
+          <ul class="upd">
+            <li><time datetime="2026-11-08">08.11</time>На мобильном интернете Clash-приложения <a href="https://t.me/northlink_hq/11" rel="noopener">сами выбирают рабочий сервер</a>.</li>
+            <li><time datetime="2026-11-09">09.11</time>Новым — неделя бесплатно в Telegram-боте.</li>
+            <li><time datetime="2026-11-08">08.11</time>Подписку можно оплатить в Telegram-боте.</li>
+            <li><time datetime="2026-09-23">23.09</time>Зеркало сайта: <a href="https://ru.adminwg.dad/">ru.adminwg.dad</a>.</li>
+          </ul>
+          <p class="note">Все новости — в канале <a href="https://t.me/northlink_hq" rel="noopener">@northlink_hq</a>.</p>
+        </div>
+      </section>
+      <section class="box">
+        <h2 class="box-h">значки</h2>
+        <div class="box-b">
+          <ul class="b88s">
+            <li class="b88 b88-a">СВОИ СЕРВЕРЫ</li>
+            <li class="b88 b88-b">БЕЗ ЛОГОВ</li>
+            <li class="b88 b88-c">БЕЗ РЕКЛАМЫ</li>
+            <li class="b88 b88-d">НЕДЕЛЯ БЕСПЛАТНО</li>
+            <li class="b88 b88-e">ТЕЛЕФОН · ПК · ТВ</li>
+            <li class="b88 b88-f">БЕЗ КОЛЛ-ЦЕНТРА</li>
+          </ul>
+        </div>
+      </section>
+    </aside>
+  </div>
 </main>
 
 <footer>
-  <div class="wrap">
-    <span><a href="oferta.html">Условия пользования</a> · <a href="privacy.html">Политика конфиденциальности</a></span>
-    <span class="mono">Франкфурт · Варшава · Амстердам</span>
-  </div>
+  <span><a href="oferta.html">Условия пользования</a> · <a href="privacy.html">Политика конфиденциальности</a></span>
+  <span class="mono">Northlink · 2026 · лучше всего смотрится через VPN</span>
 </footer>
 
 <script>
@@ -895,7 +894,7 @@ footer a:hover{color:var(--text)}
         if(/^@[A-Za-z0-9_]{5,}$/.test(channel)){ url='https://t.me/'+channel.slice(1); name=channel; }
         else if(/^https:\/\/t\.me\/[A-Za-z0-9_+\/-]+$/.test(channel)){ url=channel; name='@'+channel.slice(13).replace(/\/.*$/,''); }
       }
-      fail(text || 'Ключ выдаётся подписчикам канала. Подпишитесь и войдите ещё раз.');
+      fail(text || 'Новым ключ выдаёт Telegram-бот: неделя бесплатно, дальше по оплате. Нужна подписка на канал.');
       var a=document.createElement('a');
       a.href=url; a.rel='noopener'; a.target='_blank';
       a.textContent=name || 'Открыть канал';
@@ -992,10 +991,10 @@ footer a:hover{color:var(--text)}
         // 403 subscribe — вход через Telegram без подписки на канал: ссылка
         // на канал. Остальные 403 (key_revoked, trial_closed) — текст сервера.
         if(m==='http_403' && e.data && e.data.error==='subscribe'){ failSubscribe(e.text, e.data.channel); return false; }
-        if(m==='http_403'){ fail(e.text || 'Сервер отказал: этой учётке ключ не выдаётся.'); return false; }
+        if(m==='http_403'){ fail(e.text || 'Для этой учётной записи ключ не выдан. Получите его в Telegram-боте: неделя бесплатно.'); return false; }
         // 409 two_keys — у Telegram-личности и учётки Matrix уже разные ключи,
         // бот их не сводит сам: текст сервера, разбор — через бота.
-        if(m==='http_409'){ fail(e.text || 'У этой учётки и вашего Telegram уже разные ключи. Напишите боту — разберёмся.', true); return false; }
+        if(m==='http_409'){ fail(e.text || 'У этой учётной записи и вашего Telegram разные ключи. Напишите боту, разберёмся.', true); return false; }
         if(m==='http_429'){ fail('Слишком много запросов к серверу. Подождите минуту и обновите страницу.'); return false; }
         if(m==='http_404'){ fail(e.text || 'Ключ сейчас не выдаётся. Попробуйте позже.'); return false; }
         if(m==='http_503'){ fail(e.text || 'Сервер занят. Попробуйте через минуту.'); return false; }
