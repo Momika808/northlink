@@ -13,7 +13,7 @@
      (иначе страница молчит, консоль — «Refused to execute inline script»).
      Стили встроены (unsafe-inline), картинки чата — blob: из media,
      иконка — data:. В сеть страница ходит только к трём своим именам. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wC8HxNZ6829PBxXZtCouVCVyNddWZjragGAx8qZZraQ=' 'sha256-3e982bucPYdVFrM9G6d9Y6+hNP9hlP/r8JdxwulOyEk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wC8HxNZ6829PBxXZtCouVCVyNddWZjragGAx8qZZraQ=' 'sha256-2MyfqUa/GIOUpLRuqSQ8RkdbIArLbjEfkEN0BSJQ9pA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://matrix.adminwg.dad https://ru.adminwg.dad; connect-src https://cdn.adminwg.dad https://matrix.adminwg.dad https://auth.adminwg.dad https://ru.adminwg.dad; base-uri 'none'; form-action 'none'">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Northlink — интернет как раньше">
 <meta property="og:description" content="Неделя бесплатно, дальше 200 ₽ за 30 дней. Один ключ на телефон, ноутбук и телевизор.">
@@ -674,6 +674,7 @@ footer a{display:inline-block;padding:.25rem 0}
         forget=document.getElementById('get-forget'),
         KEY='northlink.issued',
         MX_KEY='northlink.matrix',
+        REFERRAL_KEY='northlink.referral',
         // Копия страницы на ru.adminwg.dad (23.09.2026) — для сетей, где режут
         // зарубежные адреса: в DNS у этого имени только ретранслятор в Москве.
         // На копии чат, выдача ключа и жетоны идут на тот же адрес, а у
@@ -702,6 +703,29 @@ footer a{display:inline-block;padding:.25rem 0}
     function ssave(k,d){ try{ sessionStorage.setItem(k, JSON.stringify(d)); }catch(e){} }
     function sload(k){ try{ var v=sessionStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
     function sdrop(k){ try{ sessionStorage.removeItem(k); }catch(e){} }
+
+    function referralFromLink(){
+      var match=/^#ref=([A-Za-z0-9_-]{24})$/.exec(location.hash);
+      if(!match) return;
+      ssave(REFERRAL_KEY, match[1]);
+      if(sload(REFERRAL_KEY)===match[1]){
+        history.replaceState(null, '', location.pathname+location.search+'#get');
+      }
+      document.getElementById('get').scrollIntoView();
+    }
+    referralFromLink();
+    window.addEventListener('hashchange', referralFromLink);
+
+    function sessionRequest(headers, referral){
+      var request={method:'POST', headers:headers};
+      if(validReferral(referral)){
+        headers['Content-Type']='application/json'; request.body=JSON.stringify({referral:referral});
+      }
+      return request;
+    }
+
+    function validReferral(referral){ return typeof referral==='string' && /^[A-Za-z0-9_-]{24}$/.test(referral); }
+    function telegramLink(referral){ return 'https://t.me/northlink_bot'+(validReferral(referral) ? '?start=r_'+referral : ''); }
 
     /* ── OIDC: PKCE, обмен кода, обновление, отзыв ── */
     var oidc=(function(){
@@ -927,12 +951,12 @@ footer a{display:inline-block;padding:.25rem 0}
         again.hidden=false;
       } else { again.hidden=true; }
     }
-    function fail(text, bot){
+    function fail(text, bot, referral){
       err.textContent=text; err.hidden=false;
       // Ссылку собираем узлами, а не innerHTML: текст может прийти с сервера.
       if(bot){
         var a=document.createElement('a');
-        a.href='https://t.me/northlink_bot'; a.rel='noopener'; a.target='_blank';
+        a.href=telegramLink(referral); a.rel='noopener'; a.target='_blank';
         a.textContent='Открыть бота в Telegram';
         err.appendChild(document.createTextNode(' Ключ выдаёт бот: '));
         err.appendChild(a);
@@ -984,6 +1008,7 @@ footer a{display:inline-block;padding:.25rem 0}
       oidc.login(null).catch(function(e){ busy(false); fail(loginErrorText(e)); });
     });
     logoutEl.addEventListener('click',function(e){
+      sdrop(REFERRAL_KEY);
       e.preventDefault();
       chat.stop(); drop(KEY); hide(out); hide(who); link='';
       oidc.logout().then(function(){ showLoggedOut(); bye.hidden=false; });
@@ -1010,7 +1035,7 @@ footer a{display:inline-block;padding:.25rem 0}
       var s=oidc.get(); if(!s) return Promise.resolve(false);
       showLoggedIn(s.user_id); err.hidden=true;
       var cached=load(KEY); if(cached && cached.url) показать(cached, false);
-      var user_id=s.user_id;
+      var user_id=s.user_id, referral=sload(REFERRAL_KEY);
       return bearer().then(function(h){
         return fetch(HS+'/_matrix/client/v3/account/whoami',{headers:h});
       }).then(function(r){
@@ -1021,7 +1046,7 @@ footer a{display:inline-block;padding:.25rem 0}
         user_id=w.user_id; userEl.textContent=user_id;
         return oidc.setUser(user_id);
       }).then(bearer).then(function(h){
-        return fetch(API_SESSION,{method:'POST', headers:h});
+        return fetch(API_SESSION,sessionRequest(h, referral));
       }).then(function(r){
         if(r.status===401) throw new Error('unauth');
         return r.json().catch(function(){ return {}; }).then(function(d){
@@ -1030,6 +1055,7 @@ footer a{display:inline-block;padding:.25rem 0}
         });
       }).then(function(d){
         if(!d.url) throw new Error('bad');
+        if(sload(REFERRAL_KEY)===referral) sdrop(REFERRAL_KEY);
         var issued={url:d.url, expires_at:d.expires_at||null, at:new Date().toISOString()};
         save(KEY, issued); показать(issued, false);
         // room_id пустой — Matrix отказал боту; ключ есть, чат — в другой раз.
@@ -1044,6 +1070,9 @@ footer a{display:inline-block;padding:.25rem 0}
         // 403 subscribe — вход через Telegram без подписки на канал: ссылка
         // на канал. Остальные 403 (key_revoked, trial_closed) — текст сервера.
         if(m==='http_403' && e.data && e.data.error==='subscribe'){ failSubscribe(e.text, e.data.channel); return false; }
+        if(m==='http_403' && e.data && e.data.error==='paid_only' && validReferral(referral)){
+          fail(e.text, true, referral); return false;
+        }
         if(m==='http_403'){ fail(e.text || 'Для этой учётной записи ключ не выдан. Получите его в Telegram-боте: неделя бесплатно.'); return false; }
         // 409 two_keys — у Telegram-личности и учётки Matrix уже разные ключи,
         // бот их не сводит сам: текст сервера, разбор — через бота.
